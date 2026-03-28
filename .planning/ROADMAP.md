@@ -94,7 +94,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A request with a missing or invalid Clerk JWT is rejected with a 401 before any database operation runs
   4. A request from a user with no active Clerk organisation is rejected with a 403 before any database operation runs
   5. All NEON tables exist with org_id columns and Row Level Security policies enforced
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Worker API with Clerk auth middleware, NEON schema with RLS, and tests
+- [ ] 01-02-PLAN.md — React SPA with Clerk auth, PharmIQ-branded app shell
+- [ ] 01-03-PLAN.md — Integration wiring and end-to-end auth verification
 **UI hint**: yes
 
 ### Phase 2: Logic Audit
@@ -165,7 +169,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/3 | Planning complete | - |
 | 2. Logic Audit | 0/TBD | Not started | - |
 | 3. File Upload Pipeline | 0/TBD | Not started | - |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
