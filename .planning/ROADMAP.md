@@ -96,7 +96,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. All NEON tables exist with org_id columns and Row Level Security policies enforced
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — Worker API with Clerk auth middleware, NEON schema with RLS, and tests
+- [x] 01-01-PLAN.md — Worker API with Clerk auth middleware, NEON schema with RLS, and tests
 - [ ] 01-02-PLAN.md — React SPA with Clerk auth, PharmIQ-branded app shell
 - [ ] 01-03-PLAN.md — Integration wiring and end-to-end auth verification
 **UI hint**: yes
@@ -169,7 +169,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Planning complete | - |
+| 1. Foundation | 1/3 | In Progress|  |
 | 2. Logic Audit | 0/TBD | Not started | - |
 | 3. File Upload Pipeline | 0/TBD | Not started | - |
 | 4. Matching Algorithm | 0/TBD | Not started | - |

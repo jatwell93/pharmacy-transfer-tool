@@ -9,8 +9,8 @@
 ### Authentication & Tenancy
 
 - [ ] **AUTH-01**: User can create an account and sign in via Clerk (email + social)
-- [ ] **AUTH-02**: Each pharmacy group has isolated data — all queries are scoped to org_id extracted from the verified Clerk JWT (never from request body)
-- [ ] **AUTH-03**: User without an active Clerk organisation is blocked at middleware before any data operation
+- [x] **AUTH-02**: Each pharmacy group has isolated data — all queries are scoped to org_id extracted from the verified Clerk JWT (never from request body)
+- [x] **AUTH-03**: User without an active Clerk organisation is blocked at middleware before any data operation
 
 ### File Upload
 
@@ -86,8 +86,8 @@
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | AUTH-01 | Phase 1 — Foundation | Pending |
-| AUTH-02 | Phase 1 — Foundation | Pending |
-| AUTH-03 | Phase 1 — Foundation | Pending |
+| AUTH-02 | Phase 1 — Foundation | Complete |
+| AUTH-03 | Phase 1 — Foundation | Complete |
 | AUDIT-01 | Phase 2 — Logic Audit | Pending |
 | AUDIT-02 | Phase 2 — Logic Audit | Pending |
 | UPLOAD-01 | Phase 3 — File Upload Pipeline | Pending |
