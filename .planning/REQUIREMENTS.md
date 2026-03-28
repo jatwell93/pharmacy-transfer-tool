@@ -83,16 +83,35 @@
 
 > Filled by roadmapper — maps each REQ-ID to a phase.
 
-| REQ-ID | Phase | Notes |
-|--------|-------|-------|
-| AUTH-01–03 | TBD | |
-| UPLOAD-01–06 | TBD | |
-| MATCH-01–07 | TBD | |
-| RESULTS-01–02 | TBD | |
-| BILLING-01–04 | TBD | |
-| BRAND-01–02 | TBD | |
-| AUDIT-01–02 | TBD | |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| AUTH-01 | Phase 1 — Foundation | Pending |
+| AUTH-02 | Phase 1 — Foundation | Pending |
+| AUTH-03 | Phase 1 — Foundation | Pending |
+| AUDIT-01 | Phase 2 — Logic Audit | Pending |
+| AUDIT-02 | Phase 2 — Logic Audit | Pending |
+| UPLOAD-01 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-02 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-03 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-04 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-05 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-06 | Phase 3 — File Upload Pipeline | Pending |
+| MATCH-01 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-02 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-03 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-04 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-05 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-06 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-07 | Phase 4 — Matching Algorithm | Pending |
+| RESULTS-01 | Phase 4 — Matching Algorithm | Pending |
+| BILLING-01 | Phase 5 — Freemium and Billing | Pending |
+| BILLING-02 | Phase 5 — Freemium and Billing | Pending |
+| BILLING-03 | Phase 5 — Freemium and Billing | Pending |
+| BILLING-04 | Phase 5 — Freemium and Billing | Pending |
+| BRAND-01 | Phase 6 — Brand, UI and Export | Pending |
+| BRAND-02 | Phase 6 — Brand, UI and Export | Pending |
+| RESULTS-02 | Phase 6 — Brand, UI and Export | Pending |
 
 ---
 
-*Generated: 2026-03-28 | 23 v1 requirements across 7 categories*
+*Generated: 2026-03-28 | 26 v1 requirements across 7 categories*
