@@ -75,7 +75,7 @@ Cloudflare Dashboard → Workers & Pages → Plans → Upgrade to Paid ($5/month
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Infrastructure, Clerk auth, NEON schema, and authenticated API skeleton — everything else depends on this
+- [x] **Phase 1: Foundation** - Infrastructure, Clerk auth, NEON schema, and authenticated API skeleton — everything else depends on this (completed 2026-03-28)
 - [ ] **Phase 2: Logic Audit** - Audit and document the existing Django matching algorithm before porting to TypeScript
 - [ ] **Phase 3: File Upload Pipeline** - Multi-store FRED CSV/XLSX upload, parsing, persistence, and per-store status UI
 - [ ] **Phase 4: Matching Algorithm** - Port the audited algorithm, add months-cover cap, and display results in a virtualized table
@@ -98,7 +98,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — Worker API with Clerk auth middleware, NEON schema with RLS, and tests
 - [x] 01-02-PLAN.md — React SPA with Clerk auth, PharmIQ-branded app shell
-- [ ] 01-03-PLAN.md — Integration wiring and end-to-end auth verification
+- [x] 01-03-PLAN.md — Integration wiring and end-to-end auth verification
 **UI hint**: yes
 
 ### Phase 2: Logic Audit
@@ -169,7 +169,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/3 | In Progress|  |
+| 1. Foundation | 3/3 | Complete   | 2026-03-28 |
 | 2. Logic Audit | 0/TBD | Not started | - |
 | 3. File Upload Pipeline | 0/TBD | Not started | - |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
