@@ -7,7 +7,11 @@ import type { Env, Variables } from './types';
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // Apply CORS middleware for all routes
-app.use('*', cors({ origin: (origin, c) => c.env.ALLOWED_ORIGIN }));
+app.use('*', cors({
+  origin: (origin, c) => c.env.ALLOWED_ORIGIN,
+  allowHeaders: ['Authorization', 'Content-Type'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 // Apply two-stage auth middleware to all /api/* routes:
 // Stage 1 (clerkAuth): verifies Clerk JWT with authorizedParties — returns 401 if invalid/missing
