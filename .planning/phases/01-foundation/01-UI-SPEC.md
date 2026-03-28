@@ -33,14 +33,14 @@ This contract does NOT cover file upload UI, match result tables, billing prompt
 | Preset | not applicable | No shadcn in Phase 1; brand tokens are hand-declared CSS custom properties |
 | Component library | none | Phase 1 is a scaffold; bespoke components only |
 | Icon library | Lucide React (`lucide-react`) | Consistent stroke-width icons; tree-shakeable; compatible with Vite + React |
-| Heading font | Space Grotesk (400, 500, 600, 700) | CONTEXT.md D-08; brand-guidelines.md §3.3 |
-| Body font | Inter (400, 500, 600) | CONTEXT.md D-08; brand-guidelines.md §3.3 |
+| Heading font | Space Grotesk (400, 600) | CONTEXT.md D-08; brand-guidelines.md §3.3 |
+| Body font | Inter (400, 600) | CONTEXT.md D-08; brand-guidelines.md §3.3 |
 
 **Font load (Google Fonts — add to `apps/web/index.html`):**
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 ```
 
 ---
@@ -73,9 +73,9 @@ Phase 1 uses 4 type roles. All data values (if any appear in future phases) must
 | Role | Size | Weight | Line Height | Font | Usage |
 |------|------|--------|-------------|------|-------|
 | Body | 16px | 400 | 1.6 | Inter | General text, placeholder copy, sidebar item labels |
-| Label | 13px | 500 | 1.4 | Inter | Nav item text, sidebar footer links, form field labels |
+| Label | 13px | 400 | 1.4 | Inter | Nav item text, sidebar footer links, form field labels |
 | Heading | 24px | 600 | 1.3 | Space Grotesk | Sign-in page heading, dashboard section heading |
-| Display | 32px | 700 | 1.2 | Space Grotesk | PharmIQ wordmark in header (if text-based fallback needed) |
+| Display | 32px | 600 | 1.2 | Space Grotesk | PharmIQ wordmark in header (if text-based fallback needed) |
 
 Letter spacing:
 - Heading and Display: `-0.01em`
@@ -143,7 +143,7 @@ Accent (`#0F766E`) is reserved for:
 - Height: 56px
 - Background: `#0F766E` (teal)
 - Content: PharmIQ wordmark (white) on left, user avatar/name from Clerk `<UserButton />` on right
-- Logo text: "PharmIQ" in Space Grotesk 700, white, with "IQ" optionally distinguished. Use text fallback if SVG logo is not available in Phase 1.
+- Logo text: "PharmIQ" in Space Grotesk 600, white, with "IQ" optionally distinguished. Use text fallback if SVG logo is not available in Phase 1.
 - No tagline in the header chrome (brand-guidelines.md §1.6: "In-app dashboard — omit in navigation chrome")
 
 ### Sidebar
@@ -155,7 +155,7 @@ Accent (`#0F766E`) is reserved for:
 - Active item indicator: 3px teal left border + teal text color on the active item (the `/` route has no active nav item in Phase 1 — all items are disabled)
 - Nav item height: 44px minimum (touch target requirement)
 - Nav item padding: 8px 16px (sm md)
-- Nav item text: 13px Inter 500 (`--color-text-secondary` when disabled)
+- Nav item text: 13px Inter 400 (`--color-text-secondary` when disabled)
 - Nav icons: Lucide React, 16px, stroke-width 1.5, same color as text
 
 **Sidebar footer:**
@@ -176,7 +176,7 @@ Accent (`#0F766E`) is reserved for:
 - Card max-width: 400px, padding: 32px, border-radius: 8px, border: `1px solid #E2E8F0`
 - Clerk `<SignIn />` component with `appearance` prop applying PharmIQ teal as the primary colour
 - Heading above card: "Sign in to PharmIQ" — Space Grotesk 600 24px `--color-text-primary`
-- Sub-heading: "Dead-Stock Optimizer" — Inter 400 14px `--color-text-secondary`
+- Sub-heading: "Dead-Stock Optimizer" — Inter 400 16px `--color-text-secondary`
 
 **Clerk appearance configuration (minimal — full brand theming is Phase 6):**
 ```typescript
