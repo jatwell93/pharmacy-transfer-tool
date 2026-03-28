@@ -97,7 +97,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 Plans:
 - [x] 01-01-PLAN.md — Worker API with Clerk auth middleware, NEON schema with RLS, and tests
-- [ ] 01-02-PLAN.md — React SPA with Clerk auth, PharmIQ-branded app shell
+- [x] 01-02-PLAN.md — React SPA with Clerk auth, PharmIQ-branded app shell
 - [ ] 01-03-PLAN.md — Integration wiring and end-to-end auth verification
 **UI hint**: yes
 
