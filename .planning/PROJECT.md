@@ -27,11 +27,11 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - [ ] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything
 - [ ] **Freemium model**: 1 match run per month on free tier; unlimited on paid
 - [ ] **Dynamic store list**: derived from uploaded data, not hard-coded in source
-- [ ] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance
+- [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
 - [ ] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases
 - [ ] **Multi-store upload UX**: clear workflow for uploading N stores before running match
 - [ ] **Results export**: CSV and Excel in addition to PDF
-- [ ] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage)
+- [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
 
 ### Out of Scope
 
