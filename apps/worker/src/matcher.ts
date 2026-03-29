@@ -111,5 +111,109 @@ export function matchTransfers(
   rouData: RouItem[],
   opts: MatchOptions,
 ): MatchTransfersResult {
-  throw new Error("Not implemented — see ALGORITHM-SPEC.md");
+  const warnings: DataQualityWarning[] = [];
+  const results: MatchResult[] = [];
+
+  // Step 1: Validate and filter dead stock items
+  const validDeadStock: DeadStockItem[] = [];
+  for (const item of deadStock) {
+    if (!item.sku || item.sku.trim() === "") continue;
+
+    if (Number.isNaN(item.soh) || item.soh <= 0) {
+      if (Number.isNaN(item.soh)) {
+        warnings.push({ sku: item.sku, field: "soh", reason: "soh is missing or non-numeric" });
+      }
+      continue;
+    }
+
+    let cost = item.cost;
+    if (Number.isNaN(cost)) {
+      warnings.push({ sku: item.sku, field: "cost", reason: "cost is missing or non-numeric" });
+      cost = 0;
+    }
+
+    validDeadStock.push({ ...item, cost });
+  }
+
+  // Step 2: Filter rouData — exclude origin store (case-insensitive) and invalid rou
+  const originLower = opts.originStore.toLowerCase();
+  const validRouData: RouItem[] = [];
+  for (const rouItem of rouData) {
+    if (rouItem.store.toLowerCase() === originLower) continue;
+
+    if (Number.isNaN(rouItem.rou) || rouItem.rou <= 0) {
+      if (Number.isNaN(rouItem.rou)) {
+        warnings.push({ sku: rouItem.sku, field: "rou", reason: "rou is missing or non-numeric" });
+      }
+      continue;
+    }
+
+    validRouData.push(rouItem);
+  }
+
+  // Step 3: Build SKU index (case-insensitive) — O(1) lookup per dead-stock item
+  const skuIndex = new Map<string, RouItem[]>();
+  for (const rouItem of validRouData) {
+    const key = rouItem.sku.toLowerCase();
+    const existing = skuIndex.get(key);
+    if (existing) {
+      existing.push(rouItem);
+    } else {
+      skuIndex.set(key, [rouItem]);
+    }
+  }
+
+  // Step 4: Match each valid dead stock item against destination stores
+  for (const item of validDeadStock) {
+    const potentialMatches = skuIndex.get(item.sku.toLowerCase());
+    if (!potentialMatches || potentialMatches.length === 0) continue;
+
+    const minRequiredRou = item.soh / SELL_THROUGH_LIMIT_MONTHS;
+
+    const destinationMatches: DestinationMatch[] = [];
+
+    for (const dest of potentialMatches) {
+      // Sell-through filter (Section 1): destROU >= originSOH / 12
+      if (dest.rou < minRequiredRou) continue;
+
+      // Months-cover cap (Section 2): exclude if destination already at/over cap
+      const destSoh = dest.soh ?? 0;
+      const maxTransferQty = Math.max(0, opts.monthsCoverTarget * dest.rou - destSoh);
+      if (maxTransferQty === 0) continue;
+
+      const qtyToTransfer = Math.min(item.soh, maxTransferQty);
+      const sellThrough = item.soh / dest.rou;
+
+      destinationMatches.push({
+        store: dest.store,
+        rou: dest.rou,
+        isRanged: dest.isRanged,
+        sellThrough,
+        monthsCover: opts.monthsCoverTarget,
+        qtyToTransfer,
+        destSoh,
+      });
+    }
+
+    if (destinationMatches.length === 0) continue;
+
+    // Sort: ranged-first, then ROU descending; tiebreaker store name (Section 3)
+    destinationMatches.sort((a, b) => {
+      if (a.isRanged !== b.isRanged) return a.isRanged ? -1 : 1;
+      if (b.rou !== a.rou) return b.rou - a.rou;
+      return a.store.localeCompare(b.store);
+    });
+
+    results.push({
+      sku: item.sku,
+      description: item.description,
+      soh: item.soh,
+      cost: item.cost,
+      sourceStore: opts.originStore,
+      bestMatch: destinationMatches[0],
+      allMatches: destinationMatches,
+    });
+  }
+
+  return { results, warnings };
 }
