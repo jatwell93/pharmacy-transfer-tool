@@ -70,10 +70,10 @@ Letter-spacing: `-0.01em` on all headings (matches existing Dashboard.tsx patter
 |------|-------|-----|-------|
 | Dominant (60%) | `--color-surface` / `--color-surface-gray` | `#FFFFFF` / `#F8FAFC` | Page background (`#FFFFFF`), sidebar background (`#F8FAFC`) |
 | Secondary (30%) | `--color-surface-gray` + borders | `#F8FAFC` + `#E2E8F0` | Store cards background, modal surface, card borders |
-| Accent (10%) | `--color-teal` | `#0F766E` | Add Store button (primary CTA only), Upload button in modal (active state), header bar |
+| Accent (10%) | `--color-teal` | `#0F766E` | Add Store button (primary CTA only), Upload Files button in modal (active state), header bar |
 | Destructive | `--color-critical` | `#EF4444` | Replace-confirmation warning text and border only |
 
-**Accent `#0F766E` is reserved for:** the "Add Store" primary CTA button, the "Upload" submit button inside the modal (when at least one file is selected), and active nav item hover state. Accent is NOT used on status badges, timestamps, card borders, or secondary actions.
+**Accent `#0F766E` is reserved for:** the "Add Store" primary CTA button, the "Upload Files" submit button inside the modal (when at least one file is selected), and active nav item hover state. Accent is NOT used on status badges, timestamps, card borders, or secondary actions.
 
 **Semantic colors (informational — not accent):**
 
@@ -137,7 +137,7 @@ Two states only — no intermediate states:
 - Overlay: `fixed inset-0 bg-[#0F172A]/60 flex items-center justify-center z-50` — clicking overlay dismisses modal
 - Dialog: `bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 flex flex-col gap-6` — role="dialog", aria-modal="true", aria-labelledby pointing to modal title
 - Focus trap: first focusable element on open is the Store Name field (new-store mode) or the ROU file input (existing-store mode)
-- Title: `text-[20px] font-semibold text-[#0F172A] tracking-[-0.01em]` in Space Grotesk — "Add Store" (new) or "Upload Files — {Store Name}" (existing)
+- Title: `text-2xl font-semibold text-[#0F172A] tracking-[-0.01em]` in Space Grotesk — "Add Store" (new) or "Upload Files — {Store Name}" (existing)
 - Close button: `absolute top-4 right-4` — `<X size={16} />` from lucide-react, `min-h-[44px] min-w-[44px]` touch target, `aria-label="Close"`
 - Store Name field: text input, required in new-store mode, read-only in existing-store mode — `text-base text-[#0F172A]`
 - Store Number field: text input, optional — `text-base text-[#0F172A] placeholder-[#94A3B8]`
@@ -145,15 +145,15 @@ Two states only — no intermediate states:
 - Dead-stock file picker: `<input type="file" accept=".csv,.xlsx">` with visible label "Dead-Stock Report" + help tooltip icon
 - Help tooltip (ⓘ): `<Info size={14} />` from lucide-react, tooltip on hover/focus — see Copywriting Contract for tooltip content
 - Inline error zone: below each file picker — `text-[13px] text-[#EF4444]` — hidden unless error present
-- Replace-confirmation warning: shown when existing-store mode and at least one previously-uploaded file is being overwritten — amber/red banner above Upload button (see Copywriting Contract)
-- Upload button: `bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] w-full` — disabled (with `opacity-40 cursor-not-allowed`) when no files are selected; enabled when at least one file is selected
-- Cancel button: text button `text-[13px] text-[#475569] min-h-[44px] px-4 hover:text-[#0F172A]`
-- Buttons: cancel left, upload right — `flex justify-end gap-3`
+- Replace-confirmation warning: shown when existing-store mode and at least one previously-uploaded file is being overwritten — amber/red banner above Upload Files button (see Copywriting Contract)
+- Upload Files button: `bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] w-full` — disabled (with `opacity-40 cursor-not-allowed`) when no files are selected; enabled when at least one file is selected
+- Close button (footer): text button `text-[13px] text-[#475569] min-h-[44px] px-4 hover:text-[#0F172A]` — label "Close" — dismisses modal if no upload is in progress
+- Buttons: close left, upload right — `flex justify-end gap-3`
 
 ### UploadModal — Loading State
 
 While upload is in progress:
-- Upload button shows spinner icon `<Loader2 size={16} className="animate-spin" />` + "Uploading..." label — button is disabled
+- Upload Files button shows spinner icon `<Loader2 size={16} className="animate-spin" />` + "Uploading..." label — button is disabled
 - File pickers and text fields are disabled (pointer-events-none + opacity-60)
 - Modal is not closable (close button disabled, overlay click blocked)
 
@@ -168,9 +168,9 @@ While upload is in progress:
 | AddStoreButton | focus-visible | `outline-2 outline-[#0F766E] outline-offset-2` |
 | StoreCard "Upload files" | hover | underline |
 | StoreCard "Upload files" | focus-visible | `outline-2 outline-[#0F766E] outline-offset-2` |
-| UploadModal Upload button | disabled (no file) | `opacity-40 cursor-not-allowed` |
-| UploadModal Upload button | enabled | `bg-[#0F766E] hover:bg-[#0D5D5A]` |
-| UploadModal Upload button | loading | spinner + "Uploading..." + disabled |
+| UploadModal Upload Files button | disabled (no file) | `opacity-40 cursor-not-allowed` |
+| UploadModal Upload Files button | enabled | `bg-[#0F766E] hover:bg-[#0D5D5A]` |
+| UploadModal Upload Files button | loading | spinner + "Uploading..." + disabled |
 | File picker | dragover | not implemented — native browser `<input type="file">` only |
 | Modal overlay | click | dismiss modal (if not uploading) |
 | Escape key | — | dismiss modal (if not uploading) |
@@ -185,9 +185,9 @@ While upload is in progress:
 | Primary CTA (Add Store button) | "Add Store" | CONTEXT.md D-05 |
 | Modal title — new store | "Add Store" | CONTEXT.md D-06 |
 | Modal title — existing store | "Upload Files — {Store Name}" | CONTEXT.md D-06 |
-| Upload button | "Upload" | CONTEXT.md D-06 |
-| Upload button loading | "Uploading..." | default |
-| Cancel button | "Cancel" | default |
+| Upload Files button | "Upload Files" | CONTEXT.md D-06 |
+| Upload Files button loading | "Uploading..." | default |
+| Close button (footer) | "Close" | ui-checker revision |
 | Empty state heading | "No stores yet" | CONTEXT.md D-07 |
 | Empty state body | "Add your first store to get started." | CONTEXT.md D-07 |
 | Empty state CTA | "Add Store" | CONTEXT.md D-07 |
@@ -208,7 +208,9 @@ While upload is in progress:
 | Replace-confirmation (both files) | "This will replace {Store Name}'s ROU and dead-stock data. Continue?" | CONTEXT.md D-02 |
 | Help tooltip — ROU/dead-stock file pickers | "Before exporting from FRED: filter by relevant departments/categories, filter for ROU > 0.01, filter for active items only, filter out $0 cost lines. Review in a spreadsheet (Excel, Google Sheets, or LibreOffice Calc) and delete unnecessary rows before upload." | CONTEXT.md D-14 |
 
-**Replace-confirmation implementation:** Display as an inline warning banner inside the modal (amber left border `border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3`), not as a separate confirm dialog. The Upload button remains the confirmation action — the warning makes intent explicit without requiring a second click.
+**Replace-confirmation implementation:** Display as an inline warning banner inside the modal (amber left border `border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3`), not as a separate confirm dialog. The Upload Files button remains the confirmation action — the warning makes intent explicit without requiring a second click.
+
+**Empty state CTA implementation:** The "Add Store" CTA in the empty state uses the `AddStoreButton` component exactly as specified above (same `bg-[#0F766E]` styling, same `<Plus size={16} />` icon, same label "Add Store"), rendered `mx-auto` centered within the empty state container.
 
 ---
 
@@ -261,6 +263,10 @@ No third-party component registries are used in this phase. All components are b
 | Help tooltip on file pickers | CONTEXT.md D-14 |
 | Incomplete store indicator (one file missing) | CONTEXT.md specifics |
 | Store number display format | CONTEXT.md specifics |
+| Upload Files button label (verb + noun) | ui-checker revision |
+| Close button label replacing "Cancel" | ui-checker revision |
+| Modal title text-2xl (24px, not 20px) | ui-checker revision |
+| Empty state CTA reuses AddStoreButton exactly | ui-checker revision |
 
 ---
 
