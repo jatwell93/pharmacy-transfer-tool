@@ -7,6 +7,8 @@ import type { Env } from '../types';
 // Without authorizedParties, @clerk/backend will reject tokens with "Invalid azp" error in production.
 export const clerkAuth = createMiddleware<{ Bindings: Env }>(async (c, next) => {
   return clerkMiddleware({
+    secretKey: c.env.CLERK_SECRET_KEY,
+    publishableKey: c.env.CLERK_PUBLISHABLE_KEY,
     authorizedParties: [c.env.ALLOWED_ORIGIN],
   })(c, next);
 });
