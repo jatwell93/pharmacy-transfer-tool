@@ -32,7 +32,8 @@ export default function AppShell({ children }: AppShellProps) {
             <NavItem
               icon={<Upload size={16} strokeWidth={1.5} aria-hidden="true" />}
               label="Upload"
-              disabled={true}
+              disabled={false}
+              href="/upload"
             />
             <NavItem
               icon={<GitCompare size={16} strokeWidth={1.5} aria-hidden="true" />}
