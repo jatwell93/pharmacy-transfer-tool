@@ -10,17 +10,18 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "hono": "^4.12.9",
-    "@hono/clerk-auth": "^3.1.0",
     "@clerk/backend": "^3.2.3",
-    "@neondatabase/serverless": "^1.0.2"
+    "@hono/clerk-auth": "^3.1.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "hono": "^4.12.9",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "wrangler": "^4.63.0",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.2",
     "@cloudflare/vitest-pool-workers": "^0.13.5",
     "@cloudflare/workers-types": "^4.0.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2",
+    "wrangler": "^4.63.0"
   }
 }
