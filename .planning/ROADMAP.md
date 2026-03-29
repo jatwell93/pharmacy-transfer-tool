@@ -126,7 +126,7 @@ Plans:
   6. XLSX files are parsed via SheetJS; files over 5 MB are rejected with a clear error message before upload
 **Plans**: 3 plans
 Plans:
-- [ ] 03-01-PLAN.md — SheetJS install, CSV/XLSX parser functions, FRED header aliasing, and unit tests
+- [x] 03-01-PLAN.md — SheetJS install, CSV/XLSX parser functions, FRED header aliasing, and unit tests
 - [ ] 03-02-PLAN.md — POST /upload and GET /stores Worker routes with NEON bulk insert
 - [ ] 03-03-PLAN.md — Upload page UI with store card grid, modal dialog, and routing
 **UI hint**: yes

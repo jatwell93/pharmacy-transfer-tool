@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-29T06:46:13.414Z"
+status: executing
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-29T21:12:11.555Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 02 — logic-audit
+**Current focus:** Phase 03 — file-upload-pipeline
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 03 (file-upload-pipeline) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-03-29
 
 Progress: [░░░░░░░░░░] 0%
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P03 | 525004 | 1 tasks | 4 files |
 | Phase 02-logic-audit P01 | 160 | 2 tasks | 2 files |
 | Phase 02-logic-audit P02 | 135 | 2 tasks | 2 files |
+| Phase 03-file-upload-pipeline P01 | 182 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 02-logic-audit]: DataQualityWarning mechanism chosen for NaN handling — allows caller to display quality info without aborting match run
 - [Phase 02-logic-audit]: Sell-through filter uses inclusive boundary (>= not >) — destination at exact soh/12 boundary is included, matching Django behavior
 - [Phase 02-logic-audit]: destSOH defaults to 0 via nullish coalescing when RouItem.soh absent — conservative cap fills to cover target when no destination SOH data
+- [Phase 03-file-upload-pipeline]: SheetJS installed from CDN tarball (xlsx-0.20.3) for XLSX parsing in Workers environment
+- [Phase 03-file-upload-pipeline]: NaN chosen over 0 for non-numeric rou/soh values to preserve data quality signal for matcher
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T06:46:13.399Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-file-upload-pipeline/03-CONTEXT.md
+Last session: 2026-03-29T21:12:11.551Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None

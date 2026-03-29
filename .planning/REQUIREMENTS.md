@@ -14,12 +14,12 @@
 
 ### File Upload
 
-- [ ] **UPLOAD-01**: User can upload a FRED Office ROU report (CSV or XLSX: Item Code, Item Description, ROU, SOH) for a named store
-- [ ] **UPLOAD-02**: User can upload a FRED Office dead stock report (CSV or XLSX: Item Code, Item Description, SOH) for a named store
+- [x] **UPLOAD-01**: User can upload a FRED Office ROU report (CSV or XLSX: Item Code, Item Description, ROU, SOH) for a named store
+- [x] **UPLOAD-02**: User can upload a FRED Office dead stock report (CSV or XLSX: Item Code, Item Description, SOH) for a named store
 - [ ] **UPLOAD-03**: Uploaded store data persists in NEON Postgres; user does not need to re-upload all stores to run a new match
 - [ ] **UPLOAD-04**: User can see when each store's data was last uploaded and replace it individually
-- [ ] **UPLOAD-05**: Parser handles FRED-specific CSV quirks — UTF-8 BOM stripping, CRLF line endings, blank title rows before the header row
-- [ ] **UPLOAD-06**: Parser handles XLSX files via SheetJS (CDN tarball); enforces 5 MB per-file size cap
+- [x] **UPLOAD-05**: Parser handles FRED-specific CSV quirks — UTF-8 BOM stripping, CRLF line endings, blank title rows before the header row
+- [x] **UPLOAD-06**: Parser handles XLSX files via SheetJS (CDN tarball); enforces 5 MB per-file size cap
 
 ### Matching Algorithm
 
@@ -90,12 +90,12 @@
 | AUTH-03 | Phase 1 — Foundation | Complete |
 | AUDIT-01 | Phase 2 — Logic Audit | Complete |
 | AUDIT-02 | Phase 2 — Logic Audit | Complete |
-| UPLOAD-01 | Phase 3 — File Upload Pipeline | Pending |
-| UPLOAD-02 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-01 | Phase 3 — File Upload Pipeline | Complete |
+| UPLOAD-02 | Phase 3 — File Upload Pipeline | Complete |
 | UPLOAD-03 | Phase 3 — File Upload Pipeline | Pending |
 | UPLOAD-04 | Phase 3 — File Upload Pipeline | Pending |
-| UPLOAD-05 | Phase 3 — File Upload Pipeline | Pending |
-| UPLOAD-06 | Phase 3 — File Upload Pipeline | Pending |
+| UPLOAD-05 | Phase 3 — File Upload Pipeline | Complete |
+| UPLOAD-06 | Phase 3 — File Upload Pipeline | Complete |
 | MATCH-01 | Phase 4 — Matching Algorithm | Pending |
 | MATCH-02 | Phase 4 — Matching Algorithm | Pending |
 | MATCH-03 | Phase 4 — Matching Algorithm | Pending |
