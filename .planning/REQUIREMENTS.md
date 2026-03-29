@@ -51,7 +51,7 @@
 ### Logic Audit
 
 - [x] **AUDIT-01**: Existing Django matching logic is audited for correctness before port — document the algorithm with test cases covering: sell-through filter, months-cover cap, ranged sort, BOM parsing, NaN edge cases
-- [ ] **AUDIT-02**: Ported TypeScript matching function has unit test coverage for all documented algorithm cases
+- [x] **AUDIT-02**: Ported TypeScript matching function has unit test coverage for all documented algorithm cases
 
 ---
 
@@ -89,7 +89,7 @@
 | AUTH-02 | Phase 1 — Foundation | Complete |
 | AUTH-03 | Phase 1 — Foundation | Complete |
 | AUDIT-01 | Phase 2 — Logic Audit | Complete |
-| AUDIT-02 | Phase 2 — Logic Audit | Pending |
+| AUDIT-02 | Phase 2 — Logic Audit | Complete |
 | UPLOAD-01 | Phase 3 — File Upload Pipeline | Pending |
 | UPLOAD-02 | Phase 3 — File Upload Pipeline | Pending |
 | UPLOAD-03 | Phase 3 — File Upload Pipeline | Pending |

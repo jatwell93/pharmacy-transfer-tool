@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 02-logic-audit/02-01-PLAN.md
-last_updated: "2026-03-29T06:15:53.833Z"
+status: verifying
+stopped_at: Completed 02-logic-audit/02-02-PLAN.md
+last_updated: "2026-03-29T06:20:23.218Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 Phase: 02 (logic-audit) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-03-29
 
 Progress: [░░░░░░░░░░] 0%
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation P01 | 25 | 2 tasks | 14 files |
 | Phase 01-foundation P03 | 525004 | 1 tasks | 4 files |
 | Phase 02-logic-audit P01 | 160 | 2 tasks | 2 files |
+| Phase 02-logic-audit P02 | 135 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: clerkMiddleware requires explicit secretKey and publishableKey from c.env in Cloudflare Workers — process.env is unavailable, SDK cannot auto-discover credentials
 - [Phase 02-logic-audit]: RouItem.soh added as optional field to support months-cover cap formula, resolving D-03 interface gap from RESEARCH.md Open Question 1
 - [Phase 02-logic-audit]: DataQualityWarning mechanism chosen for NaN handling — allows caller to display quality info without aborting match run
+- [Phase 02-logic-audit]: Sell-through filter uses inclusive boundary (>= not >) — destination at exact soh/12 boundary is included, matching Django behavior
+- [Phase 02-logic-audit]: destSOH defaults to 0 via nullish coalescing when RouItem.soh absent — conservative cap fills to cover target when no destination SOH data
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T06:15:53.827Z
-Stopped at: Completed 02-logic-audit/02-01-PLAN.md
+Last session: 2026-03-29T06:20:23.213Z
+Stopped at: Completed 02-logic-audit/02-02-PLAN.md
 Resume file: None
