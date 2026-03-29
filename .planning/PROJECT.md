@@ -28,7 +28,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - [ ] **Freemium model**: 1 match run per month on free tier; unlimited on paid
 - [ ] **Dynamic store list**: derived from uploaded data, not hard-coded in source
 - [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
-- [ ] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases
+- [x] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases — Validated in Phase 02: logic-audit
 - [ ] **Multi-store upload UX**: clear workflow for uploading N stores before running match
 - [ ] **Results export**: CSV and Excel in addition to PDF
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
@@ -79,7 +79,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-03-28 after initialization*
+*Last updated: 2026-03-29 after Phase 02: logic-audit complete*
 
 ## Evolution
 
