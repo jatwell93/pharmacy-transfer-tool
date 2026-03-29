@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-29T21:12:11.555Z"
+stopped_at: Completed 03-03-PLAN.md — paused at Task 3 human-verify checkpoint
+last_updated: "2026-03-29T21:29:33.034Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 8
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 Phase: 03 (file-upload-pipeline) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-03-29
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-logic-audit P01 | 160 | 2 tasks | 2 files |
 | Phase 02-logic-audit P02 | 135 | 2 tasks | 2 files |
 | Phase 03-file-upload-pipeline P01 | 182 | 2 tasks | 4 files |
+| Phase 03-file-upload-pipeline P03 | 227 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase 02-logic-audit]: destSOH defaults to 0 via nullish coalescing when RouItem.soh absent — conservative cap fills to cover target when no destination SOH data
 - [Phase 03-file-upload-pipeline]: SheetJS installed from CDN tarball (xlsx-0.20.3) for XLSX parsing in Workers environment
 - [Phase 03-file-upload-pipeline]: NaN chosen over 0 for non-numeric rou/soh values to preserve data quality signal for matcher
+- [Phase 03-file-upload-pipeline]: NavItem updated to use react-router Link for SPA navigation (replaces a tag for enabled items)
+- [Phase 03-file-upload-pipeline]: UploadModal does not set Content-Type header on FormData POST — browser auto-sets multipart boundary
+- [Phase 03-file-upload-pipeline]: Replace-confirmation uses inline amber banner not a separate dialog — Upload Files button is the confirmation action
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T21:12:11.551Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-03-29T21:29:33.023Z
+Stopped at: Completed 03-03-PLAN.md — paused at Task 3 human-verify checkpoint
 Resume file: None
