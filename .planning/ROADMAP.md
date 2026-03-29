@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
 | 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
-| 3. File Upload Pipeline | 0/3 | Planned | - |
+| 3. File Upload Pipeline | 1/3 | In Progress|  |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
 | 6. Brand, UI and Export | 0/TBD | Not started | - |
