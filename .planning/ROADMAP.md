@@ -108,7 +108,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A written algorithm spec exists covering sell-through filter, months-cover cap formula, ranged sort order, is_ranged parsing, and NaN/missing-value edge cases — each with a worked example
   2. The ported TypeScript matching function has passing unit tests for every documented algorithm case, including edge cases that the Django version handled incorrectly
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 02-01-PLAN.md — Algorithm spec document and TypeScript type contracts
+- [ ] 02-02-PLAN.md — TDD implementation of matchTransfers with full test coverage
 
 ### Phase 3: File Upload Pipeline
 **Goal**: A pharmacy manager can upload ROU and dead-stock FRED exports for each store in their group, see the upload status of each store, and replace individual stores without re-uploading the entire group
@@ -170,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
-| 2. Logic Audit | 0/TBD | Not started | - |
+| 2. Logic Audit | 0/2 | Not started | - |
 | 3. File Upload Pipeline | 0/TBD | Not started | - |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
