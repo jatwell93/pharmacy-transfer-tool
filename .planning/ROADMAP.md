@@ -110,7 +110,7 @@ Plans:
   2. The ported TypeScript matching function has passing unit tests for every documented algorithm case, including edge cases that the Django version handled incorrectly
 **Plans**: 2 plans
 Plans:
-- [ ] 02-01-PLAN.md — Algorithm spec document and TypeScript type contracts
+- [x] 02-01-PLAN.md — Algorithm spec document and TypeScript type contracts
 - [ ] 02-02-PLAN.md — TDD implementation of matchTransfers with full test coverage
 
 ### Phase 3: File Upload Pipeline
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
-| 2. Logic Audit | 0/2 | Not started | - |
+| 2. Logic Audit | 1/2 | In Progress|  |
 | 3. File Upload Pipeline | 0/TBD | Not started | - |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
