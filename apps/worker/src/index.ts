@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { clerkAuth, requireOrg } from './middleware/auth';
 import healthRoute from './routes/health';
+import uploadRoute from './routes/upload';
 import type { Env, Variables } from './types';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -20,5 +21,6 @@ app.use('/api/*', clerkAuth, requireOrg);
 
 // Mount routes
 app.route('/api', healthRoute);
+app.route('/api', uploadRoute);
 
 export default app;

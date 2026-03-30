@@ -77,7 +77,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Infrastructure, Clerk auth, NEON schema, and authenticated API skeleton — everything else depends on this (completed 2026-03-28)
 - [x] **Phase 2: Logic Audit** - Audit and document the existing Django matching algorithm before porting to TypeScript (completed 2026-03-29)
-- [x] **Phase 3: File Upload Pipeline** - Multi-store FRED CSV/XLSX upload, parsing, persistence, and per-store status UI (completed 2026-03-29)
+- [ ] **Phase 3: File Upload Pipeline** - Multi-store FRED CSV/XLSX upload, parsing, persistence, and per-store status UI
 - [ ] **Phase 4: Matching Algorithm** - Port the audited algorithm, add months-cover cap, and display results in a virtualized table
 - [ ] **Phase 5: Freemium and Billing** - Atomic usage metering, upgrade prompt, and Stripe subscription integration
 - [ ] **Phase 6: Brand, UI and Export** - PharmIQ design system, dark mode, and client-side PDF export
@@ -127,8 +127,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 03-01-PLAN.md — SheetJS install, CSV/XLSX parser functions, FRED header aliasing, and unit tests
-- [x] 03-02-PLAN.md — POST /upload and GET /stores Worker routes with NEON bulk insert
-- [x] 03-03-PLAN.md — Upload page UI with store card grid, modal dialog, and routing
+- [ ] 03-02-PLAN.md — POST /upload and GET /stores Worker routes with NEON bulk insert
+- [ ] 03-03-PLAN.md — Upload page UI with store card grid, modal dialog, and routing
 **UI hint**: yes
 
 ### Phase 4: Matching Algorithm
@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
 | 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
-| 3. File Upload Pipeline | 3/3 | Complete   | 2026-03-29 |
+| 3. File Upload Pipeline | 1/3 | In Progress|  |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
 | 6. Brand, UI and Export | 0/TBD | Not started | - |
