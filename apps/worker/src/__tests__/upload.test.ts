@@ -114,12 +114,13 @@ describe("POST /api/upload", () => {
     const app = buildApp();
 
     const mockedWithOrgContext = vi.mocked(withOrgContext);
-    // Call sequence: SELECT (get store), INSERT stores (create), DELETE rou_data, INSERT rou_data
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE rou_data, INSERT rou_data
     mockedWithOrgContext
-      .mockResolvedValueOnce([]) // SELECT → no existing store
-      .mockResolvedValueOnce([{ id: "store-uuid-123" }]) // INSERT stores RETURNING id
-      .mockResolvedValueOnce(undefined) // DELETE rou_data
-      .mockResolvedValueOnce(undefined); // INSERT rou_data
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "store-uuid-123" }])   // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE rou_data
+      .mockResolvedValueOnce(undefined);                   // INSERT rou_data
 
     // Minimal valid CSV with required headers
     const csvContent = "Item Code,ROU Value,SOH\nABC123,2.5,10\n";
@@ -142,11 +143,12 @@ describe("POST /api/upload", () => {
     const app = buildApp();
 
     const mockedWithOrgContext = vi.mocked(withOrgContext);
-    // Call sequence: SELECT (found existing store), DELETE dead_stock, INSERT dead_stock
+    // Call sequence: org upsert, SELECT (found existing store), DELETE dead_stock, INSERT dead_stock
     mockedWithOrgContext
-      .mockResolvedValueOnce([{ id: "store-uuid-456" }]) // SELECT → existing store
-      .mockResolvedValueOnce(undefined) // DELETE dead_stock
-      .mockResolvedValueOnce(undefined); // INSERT dead_stock
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([{ id: "store-uuid-456" }])   // SELECT stores → found
+      .mockResolvedValueOnce(undefined)                    // DELETE dead_stock
+      .mockResolvedValueOnce(undefined);                   // INSERT dead_stock
 
     const csvContent = "Item Code,SOH,Ranged\nXYZ789,5,checked\n";
     const dsFile = new File([csvContent], "dead-stock.csv", { type: "text/csv" });
@@ -176,6 +178,7 @@ describe("GET /api/stores", () => {
     const app = buildApp();
 
     const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // GET /stores makes exactly 1 withOrgContext call — the LEFT JOIN query
     mockedWithOrgContext.mockResolvedValueOnce([
       {
         id: "store-uuid-001",
@@ -216,6 +219,7 @@ describe("GET /api/stores", () => {
     const app = buildApp();
 
     const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // GET /stores makes exactly 1 withOrgContext call — returns empty result
     mockedWithOrgContext.mockResolvedValueOnce([]);
 
     const res = await app.request("/api/stores", { method: "GET" }, TEST_ENV);
@@ -229,6 +233,7 @@ describe("GET /api/stores", () => {
     const app = buildApp();
 
     const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // GET /stores makes exactly 1 withOrgContext call — store with null timestamps
     mockedWithOrgContext.mockResolvedValueOnce([
       {
         id: "store-uuid-002",
