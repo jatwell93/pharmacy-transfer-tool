@@ -41,7 +41,7 @@ Then add to your Claude MCP config (`~/.claude/mcp.json` or Claude Desktop setti
   }
 }
 ```
-Get your API token: Cloudflare Dashboard → My Profile ��� API Tokens → Create Token (use "Edit Cloudflare Workers" template).
+Get your API token: Cloudflare Dashboard → My Profile → API Tokens → Create Token (use "Edit Cloudflare Workers" template).
 
 **NEON MCP** — create database branches, run migrations, inspect schemas from Claude:
 ```bash
@@ -124,11 +124,12 @@ Plans:
   4. User can see the date and time each store's data was last uploaded and replace a single store independently
   5. Files with UTF-8 BOM, CRLF line endings, or blank title rows before the header parse correctly without manual preprocessing
   6. XLSX files are parsed via SheetJS; files over 5 MB are rejected with a clear error message before upload
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
 - [x] 03-01-PLAN.md — SheetJS install, CSV/XLSX parser functions, FRED header aliasing, and unit tests
 - [x] 03-02-PLAN.md — POST /upload and GET /stores Worker routes with NEON bulk insert
 - [x] 03-03-PLAN.md — Upload page UI with store card grid, modal dialog, and routing
+- [ ] 03-04-PLAN.md — Fix upload test mock desync (gap closure)
 **UI hint**: yes
 
 ### Phase 4: Matching Algorithm
@@ -178,7 +179,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
 | 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
-| 3. File Upload Pipeline | 3/3 | Complete   | 2026-03-30 |
+| 3. File Upload Pipeline | 3/4 | Gap closure | 2026-03-30 |
 | 4. Matching Algorithm | 0/TBD | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
 | 6. Brand, UI and Export | 0/TBD | Not started | - |
