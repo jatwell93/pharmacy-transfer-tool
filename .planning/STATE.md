@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 03-03-PLAN.md — Phase 3 complete
-last_updated: "2026-03-30T10:22:15.660Z"
+status: executing
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-30T11:15:13.093Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 9
+  completed_plans: 9
   percent: 0
 ---
 
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 Phase: 03 (file-upload-pipeline) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-03-30
 
 Progress: [░░░░░░░░░░] 0%
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-file-upload-pipeline P01 | 182 | 2 tasks | 4 files |
 | Phase 03-file-upload-pipeline P02 | 402 | 2 tasks | 4 files |
 | Phase 03-file-upload-pipeline P03 | 60 | 3 tasks | 11 files |
+| Phase 03-file-upload-pipeline P04 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,7 @@ Recent decisions affecting current work:
 - [Phase 03-file-upload-pipeline]: authorizedParties expanded to include localhost:5173 and localhost:5174 — Vite allocates either port depending on availability
 - [Phase 03-file-upload-pipeline]: Org FK upsert added before store insert in upload route — ensures org row exists in NEON before FK constraint is checked on first upload
 - [Phase 03-file-upload-pipeline]: 03-03 worktree branch merged to main before verification — upload.ts and index.ts route mount were on a diverged worktree branch
+- [Phase 03-file-upload-pipeline]: Mock sequences must be updated whenever route handler adds or reorders withOrgContext calls — comment the call order in each test
 
 ### Pending Todos
 
@@ -100,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T10:22:15.642Z
-Stopped at: Completed 03-03-PLAN.md — Phase 3 complete
+Last session: 2026-03-30T11:15:13.088Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
