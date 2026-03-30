@@ -24,12 +24,12 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 
 - [ ] **Months cover cap**: user sets cover target (e.g. 3 months); max transfer = (cover × ROU) − receiving store's existing SOH; uses net allocation to prevent overstocking
 - [ ] **Rebuilt on Cloudflare/NEON/Clerk stack**: Workers (Node), Pages (React), NEON Postgres, Clerk auth — replaces Django+SQLite
-- [ ] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything
+- [x] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything — Validated in Phase 03: File Upload Pipeline
 - [ ] **Freemium model**: 1 match run per month on free tier; unlimited on paid
 - [ ] **Dynamic store list**: derived from uploaded data, not hard-coded in source
 - [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
 - [x] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases — Validated in Phase 02: logic-audit
-- [ ] **Multi-store upload UX**: clear workflow for uploading N stores before running match
+- [x] **Multi-store upload UX**: clear workflow for uploading N stores before running match — Validated in Phase 03: File Upload Pipeline
 - [ ] **Results export**: CSV and Excel in addition to PDF
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
 
@@ -79,7 +79,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-03-29 after Phase 02: logic-audit complete*
+*Last updated: 2026-03-31 after Phase 03: File Upload Pipeline complete*
 
 ## Evolution
 
