@@ -184,46 +184,51 @@ uploadRoute.post('/upload', async (c) => {
 // --- GET /stores ---
 
 uploadRoute.get('/stores', async (c) => {
-  const orgId = c.get('orgId');
-  const dbUrl = c.env.DATABASE_URL;
+  try {
+    const orgId = c.get('orgId');
+    const dbUrl = c.env.DATABASE_URL;
 
-  const stores = await withOrgContext<
-    Array<{
-      id: string;
-      name: string;
-      store_number: string | null;
-      created_at: string;
-      rou_uploaded_at: string | null;
-      ds_uploaded_at: string | null;
-    }>
-  >(
-    dbUrl,
-    orgId,
-    (tx) => tx`
-      SELECT s.id, s.name, s.store_number,
-             s.created_at,
-             MAX(r.uploaded_at) AS rou_uploaded_at,
-             MAX(d.uploaded_at) AS ds_uploaded_at
-      FROM stores s
-      LEFT JOIN rou_data r ON r.store_id = s.id
-      LEFT JOIN dead_stock d ON d.store_id = s.id
-      WHERE s.org_id = ${orgId}
-      GROUP BY s.id, s.name, s.store_number, s.created_at
-      ORDER BY s.name ASC
-    `,
-  );
+    const stores = await withOrgContext<
+      Array<{
+        id: string;
+        name: string;
+        store_number: string | null;
+        created_at: string;
+        rou_uploaded_at: string | null;
+        ds_uploaded_at: string | null;
+      }>
+    >(
+      dbUrl,
+      orgId,
+      (tx) => tx`
+        SELECT s.id, s.name, s.store_number,
+               s.created_at,
+               MAX(r.uploaded_at) AS rou_uploaded_at,
+               MAX(d.uploaded_at) AS ds_uploaded_at
+        FROM stores s
+        LEFT JOIN rou_data r ON r.store_id = s.id
+        LEFT JOIN dead_stock d ON d.store_id = s.id
+        WHERE s.org_id = ${orgId}
+        GROUP BY s.id, s.name, s.store_number, s.created_at
+        ORDER BY s.name ASC
+      `,
+    );
 
-  // camelCase JSON keys per project conventions
-  return c.json({
-    stores: stores.map((s) => ({
-      id: s.id,
-      name: s.name,
-      storeNumber: s.store_number,
-      createdAt: s.created_at,
-      rouUploadedAt: s.rou_uploaded_at,
-      dsUploadedAt: s.ds_uploaded_at,
-    })),
-  });
+    // camelCase JSON keys per project conventions
+    return c.json({
+      stores: stores.map((s) => ({
+        id: s.id,
+        name: s.name,
+        storeNumber: s.store_number,
+        createdAt: s.created_at,
+        rouUploadedAt: s.rou_uploaded_at,
+        dsUploadedAt: s.ds_uploaded_at,
+      })),
+    });
+  } catch (err) {
+    console.error('[stores] handler error:', err);
+    return c.json({ error: 'Failed to load stores. Please try again.' }, 500);
+  }
 });
 
 export default uploadRoute;
