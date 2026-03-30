@@ -47,8 +47,15 @@ uploadRoute.post('/upload', async (c) => {
       }
     }
 
-    // Upsert store — get-or-create (per D-01)
+    // Ensure org row exists (FK: stores → orgs)
     const dbUrl = c.env.DATABASE_URL;
+    await withOrgContext<void>(
+      dbUrl,
+      orgId,
+      (tx) => tx`INSERT INTO orgs (org_id) VALUES (${orgId}) ON CONFLICT DO NOTHING`,
+    );
+
+    // Upsert store — get-or-create (per D-01)
     const existing = await withOrgContext<{ id: string }[]>(
       dbUrl,
       orgId,
@@ -85,7 +92,10 @@ uploadRoute.post('/upload', async (c) => {
         rows = parseRouFile(buf, rouFile.name);
       } catch (_err) {
         return c.json(
-          { error: 'Upload failed — check that this is a valid FRED Office export and try again.' },
+          {
+            error: 'ROU Report could not be read. Expected columns: Item Code/SKU, Item Description, Stock on Hand/SOH, Rate of Usage/ROU (Ranged optional). Check the file is a valid FRED Office export.',
+            field: 'rouFile',
+          },
           400,
         );
       }
@@ -128,7 +138,10 @@ uploadRoute.post('/upload', async (c) => {
         rows = parseDeadStockFile(buf, dsFile.name);
       } catch (_err) {
         return c.json(
-          { error: 'Upload failed — check that this is a valid FRED Office export and try again.' },
+          {
+            error: 'Dead-Stock Report could not be read. Expected columns: Item Code/SKU, Item Description, Stock on Hand/SOH (Ranged optional). Check the file is a valid FRED Office export.',
+            field: 'dsFile',
+          },
           400,
         );
       }
@@ -162,7 +175,8 @@ uploadRoute.post('/upload', async (c) => {
     }
 
     return c.json({ ok: true, storeId, storeName });
-  } catch (_err) {
+  } catch (err) {
+    console.error('[upload] handler error:', err);
     return c.json({ error: 'Upload failed — database error. Please try again.' }, 500);
   }
 });

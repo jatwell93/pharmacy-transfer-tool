@@ -117,11 +117,11 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
 
   let replaceWarning: string | null = null;
   if (replacingRou && replacingDs) {
-    replaceWarning = `This will replace ${store.name}'s ROU and dead-stock data. Continue?`;
+    replaceWarning = `This will replace ${store.name}'s ROU and dead-stock data. Click Upload to continue or Escape to return.`;
   } else if (replacingRou) {
-    replaceWarning = `This will replace ${store.name}'s ROU data. Continue?`;
+    replaceWarning = `This will replace ${store.name}'s ROU data. Click Upload to continue or Escape to return.`;
   } else if (replacingDs) {
-    replaceWarning = `This will replace ${store.name}'s dead-stock data. Continue?`;
+    replaceWarning = `This will replace ${store.name}'s dead-stock data. Click Upload to continue or Escape to return.`;
   }
 
   // Upload button disabled logic
@@ -151,7 +151,8 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
       }
       if (!res.ok) {
         const data = await res.json();
-        setErrors({ general: data.error || 'Upload failed \u2014 check that this is a valid FRED Office export and try again.' });
+        const field = data.field as keyof FieldErrors | undefined;
+        setErrors(field ? { [field]: data.error } : { general: data.error || 'Upload failed \u2014 check that this is a valid FRED Office export and try again.' });
         return;
       }
       onUploadComplete(); // triggers store list refresh
