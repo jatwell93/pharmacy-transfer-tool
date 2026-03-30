@@ -1,29 +1,17 @@
 ---
 phase: 03-file-upload-pipeline
-verified: 2026-03-30T10:29:08Z
-status: gaps_found
-score: 11/13 must-haves verified
-re_verification: false
-gaps:
-  - truth: "POST /api/upload with a dead-stock CSV file and storeName inserts rows into dead_stock table"
-    status: partial
-    reason: "The upload route was updated post-plan (cc6f3c2) to add an org FK upsert as the first withOrgContext call. The corresponding test mocks only the original N calls (SELECT, DELETE, INSERT), not the new N+1 (org upsert first). The test returns 500 from the outer catch because the mock runs out of values."
-    artifacts:
-      - path: "apps/worker/src/__tests__/upload.test.ts"
-        issue: "Test at line 141 mocks 3 withOrgContext calls but the route now makes 4 (org upsert + SELECT existing + DELETE dead_stock + INSERT dead_stock). Mock exhaustion causes the route's outer catch to return 500."
-    missing:
-      - "Add a 4th mockResolvedValueOnce(undefined) before the SELECT mock in the dead-stock upload test to account for the org upsert call at upload.ts line 52-56"
-  - truth: "GET /api/stores returns all stores for the org with rouUploadedAt and dsUploadedAt timestamps"
-    status: failed
-    reason: "All 3 GET /api/stores tests fail. The route has no try/catch wrapper, so when withOrgContext is mocked but returns an unexpected value (due to vi.clearAllMocks not resetting call counts within a describe block), the route throws an unhandled rejection and returns 500. The 'empty stores' test returns leftover mock data from a prior test call sequence."
-    artifacts:
-      - path: "apps/worker/src/__tests__/upload.test.ts"
-        issue: "GET /stores tests at lines 175-251 all fail: 'returns stores array with camelCase keys' gets 500 (mock runs out), 'returns empty stores array' gets leftover data from prior test, 'returns null timestamps' gets undefined body.stores[0]"
-      - path: "apps/worker/src/routes/upload.ts"
-        issue: "GET /stores handler (line 186) has no try/catch — an exhausted mock throws an unhandled exception causing the worker pool to swallow the error as 500"
-    missing:
-      - "Update all 3 GET /api/stores tests to reset mock state correctly and account for the org upsert call in the POST path leaving mock state effects across tests"
-      - "Consider adding a try/catch to GET /stores to produce a proper 500 JSON response instead of an unhandled exception (defensive, not strictly required for goal)"
+verified: 2026-03-31T09:53:00Z
+status: passed
+score: 13/13 must-haves verified
+re_verification: true
+re_verification_meta:
+  previous_status: gaps_found
+  previous_score: 11/13
+  gaps_closed:
+    - "POST /api/upload with dead-stock CSV now passes — 4th mockResolvedValueOnce(undefined) added for org upsert call"
+    - "GET /api/stores tests now pass — mock sequences corrected and try/catch added to GET /stores handler"
+  gaps_remaining: []
+  regressions: []
 human_verification:
   - test: "Full upload pipeline end-to-end"
     expected: "All 15 steps from 03-03-PLAN.md checkpoint pass including file upload, store card display, replace warnings, file size limits, keyboard navigation"
@@ -33,9 +21,9 @@ human_verification:
 # Phase 03: File Upload Pipeline — Verification Report
 
 **Phase Goal:** Pharmacy managers can upload ROU and dead-stock CSV/XLSX reports for each store through a polished UI. Files are parsed, validated, and persisted to NEON with per-org isolation.
-**Verified:** 2026-03-30T10:29:08Z
-**Status:** gaps_found — 4 upload route tests failing due to mock desync introduced by post-plan org FK upsert (cc6f3c2)
-**Re-verification:** No — initial verification
+**Verified:** 2026-03-31T09:53:00Z
+**Status:** passed — all 62 worker tests pass; all 13 truths verified
+**Re-verification:** Yes — after gap closure (Plan 03-04 fixed test mock desync)
 **Human Checkpoint:** APPROVED (all 15 steps passed during Plan 03 Task 3)
 
 ---
@@ -52,15 +40,15 @@ human_verification:
 | 4  | Files over 5 MB are rejected before parsing                                            | VERIFIED    | MAX_BYTES = 5 * 1024 * 1024 at upload.ts line 17; 413 tests pass (2/2 in test suite)                          |
 | 5  | Unrecognised columns are silently dropped                                              | VERIFIED    | buildColumnMap only maps known HEADER_ALIASES; no other column extraction in parseDeadStockFile                  |
 | 6  | POST /api/upload with ROU CSV inserts rows into rou_data table                         | VERIFIED    | Route at upload.ts lines 88-131: DELETE + UNNEST INSERT; 200 test passes                                       |
-| 7  | POST /api/upload with dead-stock CSV inserts rows into dead_stock table                | PARTIAL     | Route logic is correct (lines 134-175); test fails due to mock desync — 4th withOrgContext call not mocked     |
-| 8  | GET /api/stores returns all stores with rouUploadedAt and dsUploadedAt timestamps      | FAILED      | Route logic correct (lines 186-227, camelCase keys confirmed); all 3 GET tests fail due to mock exhaustion     |
+| 7  | POST /api/upload with dead-stock CSV inserts rows into dead_stock table                | VERIFIED    | Route logic correct (lines 134-175); test updated with 4th org upsert mock; passes 200 as of Plan 03-04        |
+| 8  | GET /api/stores returns all stores with rouUploadedAt and dsUploadedAt timestamps      | VERIFIED    | Route logic correct (lines 187-227, camelCase keys confirmed); all 3 GET tests pass after mock sequence fix    |
 | 9  | File over 5 MB returns 413 before any parsing                                          | VERIFIED    | File.size check before arrayBuffer() call; both 413 tests pass                                                  |
 | 10 | Re-uploading replaces that store's data (DELETE + INSERT)                              | VERIFIED    | DELETE FROM rou_data and DELETE FROM dead_stock present in route; pattern confirmed in code                     |
 | 11 | Store created automatically on first upload                                            | VERIFIED    | get-or-create logic at upload.ts lines 58-85; org upsert at lines 50-56                                        |
 | 12 | User can navigate to /upload and see the upload UI                                     | VERIFIED    | App.tsx path="/upload" route; AppShell disabled={false} href="/upload"; NavItem uses react-router Link          |
 | 13 | Human end-to-end pipeline verified (file -> modal -> API -> NEON -> card refresh)      | VERIFIED    | All 15 checkpoint steps APPROVED by user in Plan 03 Task 3                                                      |
 
-**Score:** 11/13 truths verified (2 partial/failed — both trace to same root cause: test mock desync)
+**Score:** 13/13 truths verified
 
 ---
 
@@ -70,8 +58,8 @@ human_verification:
 |--------------------------------------------------------|-----------|--------|------------|-----------------------------------------------------------------------------|
 | `apps/worker/src/lib/parser.ts`                        | —         | 298    | VERIFIED   | 6 exported functions, RouRow/DeadStockRow interfaces, HEADER_ALIASES, RANGED_TRUTHY, BOM/CRLF/quoted-field handling |
 | `apps/worker/src/__tests__/parser.test.ts`             | 80        | 210    | VERIFIED   | 18 tests across 5 describe blocks; all 18 pass                              |
-| `apps/worker/src/routes/upload.ts`                     | —         | 229    | VERIFIED   | POST /upload + GET /stores; org upsert; 5 MB guard; DELETE+UNNEST INSERT pattern |
-| `apps/worker/src/__tests__/upload.test.ts`             | —         | 252    | PARTIAL    | 9 tests; 5 pass (400x2, 413x2, 200 ROU happy path); 4 fail (mock desync)  |
+| `apps/worker/src/routes/upload.ts`                     | —         | 229    | VERIFIED   | POST /upload + GET /stores; org upsert; 5 MB guard; DELETE+UNNEST INSERT pattern; GET /stores wrapped in try/catch |
+| `apps/worker/src/__tests__/upload.test.ts`             | —         | 252    | VERIFIED   | 9 tests; all 9 pass after Plan 03-04 — org upsert mocks added, GET /stores mock sequences corrected |
 | `apps/worker/src/db/migrations/001-add-store-number.sql` | —       | 2      | VERIFIED   | ALTER TABLE stores ADD COLUMN IF NOT EXISTS store_number TEXT              |
 | `apps/web/src/hooks/useStores.ts`                      | 15        | 37     | VERIFIED   | Exports Store interface + useStores(); fetches /api/stores; exposes refresh |
 | `apps/web/src/components/FileStatusBadge.tsx`          | 10        | 37     | VERIFIED   | Green dot (#10B981) + date or dash + "not uploaded" (#94A3B8)              |
@@ -118,7 +106,7 @@ human_verification:
 | xlsx in worker package.json                        | `grep 'xlsx' apps/worker/package.json`                         | xlsx CDN tarball line 17 | PASS |
 | uploadRoute mounted in index.ts                    | `grep 'uploadRoute' apps/worker/src/index.ts`                  | Lines 5, 24           | PASS    |
 | Migration SQL contains ALTER TABLE                 | `cat 001-add-store-number.sql`                                 | ALTER TABLE stores ADD COLUMN IF NOT EXISTS store_number TEXT | PASS |
-| Worker test suite                                  | `cd apps/worker && npm test -- --run`                          | 4 failed / 58 passed  | FAIL    |
+| Worker test suite                                  | `cd apps/worker && npm test -- --run`                          | 62 passed / 0 failed  | PASS    |
 | Web TypeScript compilation                         | `cd apps/web && npx tsc --noEmit`                              | exits 0               | PASS    |
 | All commits documented in summaries exist in git   | `git log --oneline \| grep <hashes>`                           | All 8 commits found   | PASS    |
 
@@ -141,13 +129,11 @@ All 6 requirement IDs (UPLOAD-01 through UPLOAD-06) are accounted for. No orphan
 
 ## Anti-Patterns Found
 
-| File                                              | Line | Pattern                    | Severity | Impact                                                                            |
-|---------------------------------------------------|------|----------------------------|----------|-----------------------------------------------------------------------------------|
-| `apps/worker/src/__tests__/upload.test.ts`        | 141  | Mock call count mismatch   | Blocker  | Dead-stock upload test fails (500 instead of 200) — org upsert call not accounted for |
-| `apps/worker/src/__tests__/upload.test.ts`        | 175  | Mock state leak across tests | Blocker | GET /stores tests fail due to mock exhaustion and state leak from POST tests     |
-| `apps/worker/src/routes/upload.ts`                | 186  | GET /stores has no try/catch | Warning | Unhandled rejection in GET path produces raw 500 with no JSON body; upload.ts line 178 try/catch only wraps POST |
+| File | Line | Pattern | Severity | Impact |
+|------|------|---------|----------|--------|
+| — | — | None | — | No anti-patterns remain after Plan 03-04 gap closure |
 
-Note: `return null` at UploadModal.tsx line 109 is a standard `if (!isOpen)` gate guard — not a stub.
+Note: The two blocker anti-patterns from the initial verification (mock call count mismatch at line 141; mock state leak at line 175) were resolved by Plan 03-04. The warning (GET /stores no try/catch) was also addressed — try/catch now present at upload.ts line 187.
 
 ---
 
@@ -166,22 +152,23 @@ Human verification was completed and APPROVED by the user during the Plan 03 Tas
 9. Escape key and overlay click dismissal
 10. Full end-to-end: file -> modal -> API -> NEON -> card refresh
 
-This human verification constitutes functional acceptance of the upload pipeline goal. The failing automated tests are test desync issues introduced by the cc6f3c2 post-plan fix, not regressions in the production route logic.
+This human verification constitutes functional acceptance of the upload pipeline goal.
 
 ---
 
-## Gaps Summary
+## Re-Verification Summary
 
-**Root cause:** A single post-plan fix (cc6f3c2) added an org FK upsert as the first `withOrgContext` call in the POST /upload handler. This was necessary for NEON FK constraint satisfaction (org row must exist before store insert). The fix was correctly applied to the production route but the test file was not updated to account for the additional mock call. This caused:
+**Previous status (2026-03-30):** gaps_found — 2 gaps, score 11/13
 
-1. The dead-stock upload happy-path test to fail (mock runs out after 3 calls, outer catch returns 500)
-2. All 3 GET /api/stores tests to fail (mock state not properly isolated due to call-count mismatch)
+**Gaps closed by Plan 03-04:**
 
-**What needs fixing:** Add one `mockResolvedValueOnce(undefined)` call before the existing mock sequence in the dead-stock test, and ensure the GET /api/stores tests have fresh, correctly sized mock sequences. No changes to production code required.
+1. **Dead-stock upload test mock desync (RESOLVED)** — Added `mockResolvedValueOnce(undefined)` for org upsert as the first call in both POST test sequences (lines 119, 148 of upload.test.ts). Dead-stock upload happy-path now returns 200 as expected.
 
-**Impact:** All production route logic is correct and human-verified end-to-end. The gap is test desync only.
+2. **GET /api/stores tests failing (RESOLVED)** — All 3 GET /api/stores tests now pass. Mock sequences corrected to account for org upsert; GET /stores handler wrapped in try/catch at upload.ts line 187 to produce proper JSON error responses.
+
+**Current status (2026-03-31):** passed — 62/62 tests pass, 13/13 truths verified, TypeScript clean, human checkpoint APPROVED.
 
 ---
 
-_Verified: 2026-03-30T10:29:08Z_
+_Verified: 2026-03-31T09:53:00Z_
 _Verifier: Claude (gsd-verifier)_
