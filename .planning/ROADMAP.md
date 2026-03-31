@@ -143,7 +143,10 @@ Plans:
   4. Results are sorted ranged-first, then by ROU descending within each group
   5. is_ranged values of "checked", "yes", "true", "1", "y" (case-insensitive) are all recognised as ranged
   6. Missing or NaN ROU/SOH values produce a visible data quality warning rather than silently defaulting to zero
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — POST /match Worker route with NEON queries and matchTransfers loop
+- [ ] 04-02-PLAN.md — Match page UI with control bar, virtualized table, and warning banners
 **UI hint**: yes
 
 ### Phase 5: Freemium and Billing
@@ -180,6 +183,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation | 3/3 | Complete   | 2026-03-29 |
 | 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
 | 3. File Upload Pipeline | 4/4 | Complete   | 2026-03-30 |
-| 4. Matching Algorithm | 0/TBD | Not started | - |
+| 4. Matching Algorithm | 0/2 | Not started | - |
 | 5. Freemium and Billing | 0/TBD | Not started | - |
 | 6. Brand, UI and Export | 0/TBD | Not started | - |
