@@ -146,7 +146,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 04-01-PLAN.md — POST /match Worker route with NEON queries and matchTransfers loop
-- [ ] 04-02-PLAN.md — Match page UI with control bar, virtualized table, and warning banners
+- [x] 04-02-PLAN.md — Match page UI with control bar, virtualized table, and warning banners
 **UI hint**: yes
 
 ### Phase 5: Freemium and Billing

@@ -33,7 +33,7 @@
 
 ### Results & Export
 
-- [ ] **RESULTS-01**: Match results displayed in a virtualized table: SKU, description, source store, qty to transfer, destination store, destination ROU, months cover, sell-through time
+- [x] **RESULTS-01**: Match results displayed in a virtualized table: SKU, description, source store, qty to transfer, destination store, destination ROU, months cover, sell-through time
 - [ ] **RESULTS-02**: User can export match results as a PDF (client-side via @react-pdf/renderer)
 
 ### Freemium & Billing
@@ -103,7 +103,7 @@
 | MATCH-05 | Phase 4 — Matching Algorithm | Complete |
 | MATCH-06 | Phase 4 — Matching Algorithm | Complete |
 | MATCH-07 | Phase 4 — Matching Algorithm | Complete |
-| RESULTS-01 | Phase 4 — Matching Algorithm | Pending |
+| RESULTS-01 | Phase 4 — Matching Algorithm | Complete |
 | BILLING-01 | Phase 5 — Freemium and Billing | Pending |
 | BILLING-02 | Phase 5 — Freemium and Billing | Pending |
 | BILLING-03 | Phase 5 — Freemium and Billing | Pending |
