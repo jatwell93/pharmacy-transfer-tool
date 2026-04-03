@@ -23,13 +23,13 @@
 
 ### Matching Algorithm
 
-- [ ] **MATCH-01**: System identifies SKUs in a store's dead stock report that appear in other stores' ROU data with ROU > 0
-- [ ] **MATCH-02**: System applies sell-through filter — only matches destination stores where ROU ≥ SOH / 12 (will sell through existing stock within 12 months)
-- [ ] **MATCH-03**: User can set a months-cover target (e.g. 3); maximum transfer quantity = (cover × destination ROU) − destination existing SOH; result is clamped to ≥ 0
-- [ ] **MATCH-04**: When destination store's existing SOH already exceeds months-cover target, that store is excluded from results (0 qty transfer makes no sense)
-- [ ] **MATCH-05**: Results are sorted ranged-first, then by ROU descending within each group
-- [ ] **MATCH-06**: `is_ranged` parsing accepts all truthy variants: `checked`, `yes`, `true`, `1`, `y` (case-insensitive) — not just `"checked"`
-- [ ] **MATCH-07**: NaN and missing ROU/cost values are explicitly handled (pd.isna / null check) rather than silently defaulted to 0
+- [x] **MATCH-01**: System identifies SKUs in a store's dead stock report that appear in other stores' ROU data with ROU > 0
+- [x] **MATCH-02**: System applies sell-through filter — only matches destination stores where ROU ≥ SOH / 12 (will sell through existing stock within 12 months)
+- [x] **MATCH-03**: User can set a months-cover target (e.g. 3); maximum transfer quantity = (cover × destination ROU) − destination existing SOH; result is clamped to ≥ 0
+- [x] **MATCH-04**: When destination store's existing SOH already exceeds months-cover target, that store is excluded from results (0 qty transfer makes no sense)
+- [x] **MATCH-05**: Results are sorted ranged-first, then by ROU descending within each group
+- [x] **MATCH-06**: `is_ranged` parsing accepts all truthy variants: `checked`, `yes`, `true`, `1`, `y` (case-insensitive) — not just `"checked"`
+- [x] **MATCH-07**: NaN and missing ROU/cost values are explicitly handled (pd.isna / null check) rather than silently defaulted to 0
 
 ### Results & Export
 
@@ -96,13 +96,13 @@
 | UPLOAD-04 | Phase 3 — File Upload Pipeline | Complete |
 | UPLOAD-05 | Phase 3 — File Upload Pipeline | Complete |
 | UPLOAD-06 | Phase 3 — File Upload Pipeline | Complete |
-| MATCH-01 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-02 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-03 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-04 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-05 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-06 | Phase 4 — Matching Algorithm | Pending |
-| MATCH-07 | Phase 4 — Matching Algorithm | Pending |
+| MATCH-01 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-02 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-03 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-04 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-05 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-06 | Phase 4 — Matching Algorithm | Complete |
+| MATCH-07 | Phase 4 — Matching Algorithm | Complete |
 | RESULTS-01 | Phase 4 — Matching Algorithm | Pending |
 | BILLING-01 | Phase 5 — Freemium and Billing | Pending |
 | BILLING-02 | Phase 5 — Freemium and Billing | Pending |
