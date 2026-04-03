@@ -4,6 +4,7 @@ import SignIn from './pages/SignIn';
 import Dashboard from './pages/Dashboard';
 import OrgSetup from './pages/OrgSetup';
 import UploadPage from './pages/UploadPage';
+import MatchPage from './pages/MatchPage';
 
 export default function App() {
   return (
@@ -22,6 +23,11 @@ export default function App() {
       <Route path="/upload" element={
         <ProtectedRoute requireOrg={true}>
           <UploadPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/match" element={
+        <ProtectedRoute requireOrg={true}>
+          <MatchPage />
         </ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/" replace />} />

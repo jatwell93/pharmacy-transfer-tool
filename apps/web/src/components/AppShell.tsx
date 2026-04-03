@@ -38,7 +38,8 @@ export default function AppShell({ children }: AppShellProps) {
             <NavItem
               icon={<GitCompare size={16} strokeWidth={1.5} aria-hidden="true" />}
               label="Match"
-              disabled={true}
+              disabled={false}
+              href="/match"
             />
             <NavItem
               icon={<CreditCard size={16} strokeWidth={1.5} aria-hidden="true" />}
