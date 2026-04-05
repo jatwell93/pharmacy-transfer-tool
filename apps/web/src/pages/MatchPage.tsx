@@ -21,7 +21,7 @@ type FlatItem =
 
 export default function MatchPage() {
   const { results, warnings, loading, error, hasRun, runMatch } = useMatchRun();
-  const { stores } = useStores();
+  const { stores, loading: storesLoading } = useStores();
 
   // --- State ---
   const [monthsCoverTarget, setMonthsCoverTarget] = useState(3);
@@ -243,44 +243,50 @@ export default function MatchPage() {
         </button>
       </div>
 
-      {/* Store selector — shown when stores are available */}
-      {stores.length > 0 && (
-        <div
-          className="flex items-center gap-3 mb-4 p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]"
-          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-        >
-          <span className="text-[13px] font-medium text-[#475569] flex-shrink-0">Stores</span>
-          <div className="flex flex-wrap gap-2">
-            {stores.map(store => {
-              const active = selectedStores.has(store.name);
-              return (
-                <button
-                  key={store.id}
-                  type="button"
-                  onClick={() => handleToggleStore(store.name)}
-                  className={`rounded-md px-3 py-1 text-[13px] font-medium transition-colors ${
-                    active
-                      ? 'bg-[#0F766E] text-white'
-                      : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0]'
-                  }`}
-                  aria-pressed={active}
-                >
-                  {store.name}
-                </button>
-              );
-            })}
-          </div>
-          {selectedStores.size !== stores.length && (
-            <button
-              type="button"
-              onClick={() => setSelectedStores(new Set(stores.map(s => s.name)))}
-              className="ml-auto text-[12px] text-[#0F766E] hover:underline flex-shrink-0"
-            >
-              Select all
-            </button>
-          )}
-        </div>
-      )}
+      {/* Store selector — always visible so users can pick stores before first run */}
+      <div
+        className="flex items-center gap-3 mb-4 p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]"
+        style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+      >
+        <span className="text-[13px] font-medium text-[#475569] flex-shrink-0">Stores</span>
+        {storesLoading ? (
+          <span className="text-[13px] text-[#94A3B8]">Loading stores...</span>
+        ) : stores.length === 0 ? (
+          <span className="text-[13px] text-[#94A3B8]">No stores uploaded yet — go to Upload to add stores.</span>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              {stores.map(store => {
+                const active = selectedStores.has(store.name);
+                return (
+                  <button
+                    key={store.id}
+                    type="button"
+                    onClick={() => handleToggleStore(store.name)}
+                    className={`rounded-md px-3 py-1 text-[13px] font-medium transition-colors ${
+                      active
+                        ? 'bg-[#0F766E] text-white'
+                        : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0]'
+                    }`}
+                    aria-pressed={active}
+                  >
+                    {store.name}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedStores.size !== stores.length && (
+              <button
+                type="button"
+                onClick={() => setSelectedStores(new Set(stores.map(s => s.name)))}
+                className="ml-auto text-[12px] text-[#0F766E] hover:underline flex-shrink-0"
+              >
+                Select all
+              </button>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Data quality banners — only shown after first run (D-13) */}
       {hasRun && (
@@ -421,7 +427,7 @@ export default function MatchPage() {
                       {/* Destination Store */}
                       <div className="px-3 text-[13px] text-[#475569] truncate">{result.bestMatch.store}</div>
                       {/* Qty to Transfer */}
-                      <div className="px-3 text-[13px] text-[#0F172A] font-medium">{result.bestMatch.qtyToTransfer}</div>
+                      <div className="px-3 text-[13px] text-[#0F172A] font-medium">{result.bestMatch.qtyToTransfer.toFixed(1)}</div>
                       {/* Dest ROU */}
                       <div className="px-3 text-[13px] text-[#475569]">{result.bestMatch.rou.toFixed(1)}</div>
                       {/* Months Cover */}
@@ -456,7 +462,7 @@ export default function MatchPage() {
                     {/* Destination Store */}
                     <div className="px-3 text-[13px] text-[#475569] truncate">{sub.store}</div>
                     {/* Qty to Transfer */}
-                    <div className="px-3 text-[13px] text-[#475569]">{sub.qtyToTransfer}</div>
+                    <div className="px-3 text-[13px] text-[#475569]">{sub.qtyToTransfer.toFixed(1)}</div>
                     {/* Dest ROU */}
                     <div className="px-3 text-[13px] text-[#475569]">{sub.rou.toFixed(1)}</div>
                     {/* Months Cover */}
