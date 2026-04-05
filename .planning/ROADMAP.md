@@ -159,7 +159,11 @@ Plans:
   3. When the free limit is reached the user sees an upgrade prompt with a working link to Stripe Checkout
   4. After completing Stripe payment a Stripe webhook updates the org's plan to paid and subsequent match runs succeed without limit enforcement
   5. Cancelling a paid subscription via Stripe triggers a webhook that reverts the org to the free tier
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Stripe SDK install, atomic usage metering in match route, GET /api/usage endpoint
+- [ ] 05-02-PLAN.md — Stripe Checkout session creation and webhook handler
+- [ ] 05-03-PLAN.md — Frontend freemium UX: useUsage hook, upgrade modal, billing page
 **UI hint**: yes
 
 ### Phase 6: Brand, UI and Export
@@ -184,5 +188,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
 | 3. File Upload Pipeline | 4/4 | Complete   | 2026-03-30 |
 | 4. Matching Algorithm | 1/2 | In Progress|  |
-| 5. Freemium and Billing | 0/TBD | Not started | - |
+| 5. Freemium and Billing | 0/3 | Not started | - |
 | 6. Brand, UI and Export | 0/TBD | Not started | - |
