@@ -356,7 +356,7 @@ export default function MatchPage() {
       {!hasRun && !error && (
         <div className="flex justify-center items-center py-16">
           <p className="text-[#94A3B8] text-[13px] text-center max-w-sm">
-            Upload store data, then click Run Match to find transfer opportunities.
+            Upload store data, select stores, then click Run Match to find transfer opportunities.
           </p>
         </div>
       )}
