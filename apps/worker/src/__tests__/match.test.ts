@@ -20,6 +20,14 @@ vi.mock("../db/client", () => ({
   withOrgContext: vi.fn(),
 }));
 
+// Mock neon from @neondatabase/serverless — match route uses neon() directly
+// for the usage metering transaction (plan check + upsert/increment).
+// Default behaviour: paid plan (skip usage enforcement) so existing tests are unaffected.
+const mockMatchTransaction = vi.fn();
+vi.mock("@neondatabase/serverless", () => ({
+  neon: vi.fn(() => ({ transaction: mockMatchTransaction })),
+}));
+
 import { withOrgContext } from "../db/client";
 import { clerkAuth, requireOrg } from "../middleware/auth";
 import matchRoute from "../routes/match";
@@ -46,6 +54,13 @@ const TEST_ENV = {
 describe("POST /api/match", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: paid plan — usage check runs plan query only (1 transaction call),
+    // then skips the upsert/increment entirely. This keeps all existing tests unaffected
+    // by the usage metering logic added to match.ts in Phase 5.
+    mockMatchTransaction.mockResolvedValue([
+      [], // set_config result
+      [{ status: "paid" }], // subscriptions query — paid = skip limit check
+    ]);
   });
 
   it("returns 400 when monthsCoverTarget is missing from body", async () => {

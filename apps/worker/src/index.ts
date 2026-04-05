@@ -4,6 +4,7 @@ import { clerkAuth, requireOrg } from './middleware/auth';
 import healthRoute from './routes/health';
 import uploadRoute from './routes/upload';
 import matchRoute from './routes/match';
+import billingRoute from './routes/billing';
 import type { Env, Variables } from './types';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -24,5 +25,6 @@ app.use('/api/*', clerkAuth, requireOrg);
 app.route('/api', healthRoute);
 app.route('/api', uploadRoute);
 app.route('/api', matchRoute);
+app.route('/api', billingRoute);
 
 export default app;

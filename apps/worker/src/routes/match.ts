@@ -6,6 +6,7 @@
 //               a single combined JSON response: { results, warnings }.
 
 import { Hono } from 'hono';
+import { neon } from '@neondatabase/serverless';
 import type { Env, Variables } from '../types';
 import { withOrgContext } from '../db/client';
 import { matchTransfers } from '../matcher';
@@ -42,6 +43,42 @@ matchRoute.post('/match', async (c) => {
 
     const orgId = c.get('orgId');
     const dbUrl = c.env.DATABASE_URL;
+
+    // --- Usage metering (D-01, D-05) ---
+    // Step 1: Check org plan from subscriptions table using direct neon sql.transaction()
+    // (withOrgContext not used here — multi-statement upsert+increment needs direct transaction control)
+    const sql = neon(dbUrl);
+    const claims = JSON.stringify({ org_id: orgId });
+
+    const planResults = await sql.transaction((tx) => [
+      tx`SELECT set_config('request.jwt.claims', ${claims}, true)`,
+      tx`SELECT status FROM subscriptions WHERE org_id = ${orgId} LIMIT 1`,
+    ]);
+    const planStatus = (planResults[1] as Array<{ status: string }>)[0]?.status ?? 'free';
+
+    // Step 2: For free-tier orgs, enforce usage limit atomically (T-5-01, T-5-03)
+    if (planStatus !== 'paid') {
+      const freeLimit = 1;
+      const yearMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
+      const usageResults = await sql.transaction((tx) => [
+        tx`SELECT set_config('request.jwt.claims', ${claims}, true)`,
+        tx`INSERT INTO usage_meters (org_id, year_month, count)
+           VALUES (${orgId}, ${yearMonth}, 0)
+           ON CONFLICT (org_id, year_month) DO NOTHING`,
+        tx`UPDATE usage_meters
+           SET count = count + 1
+           WHERE org_id = ${orgId}
+             AND year_month = ${yearMonth}
+             AND count < ${freeLimit}
+           RETURNING count`,
+      ]);
+      const updateRows = usageResults[2] as Array<{ count: number }>;
+      if (updateRows.length === 0) {
+        // UPDATE returned 0 rows — count was already at or above the limit
+        return c.json({ error: 'Monthly match run limit reached. Upgrade to continue.' }, 429);
+      }
+    }
+    // --- End usage metering ---
 
     // Fetch dead-stock data — separate query (per D-03, no JOIN)
     const deadStockRows = await withOrgContext<
