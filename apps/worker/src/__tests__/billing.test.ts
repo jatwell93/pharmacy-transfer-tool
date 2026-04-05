@@ -1,6 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 
+// Mock stripe — used by POST /api/billing/create-checkout
+// Use vi.hoisted so mockSessionsCreate is available inside the vi.mock factory (Workers pool hoisting)
+const { mockSessionsCreate } = vi.hoisted(() => ({
+  mockSessionsCreate: vi.fn().mockResolvedValue({
+    url: "https://checkout.stripe.com/c/pay_test_abc123",
+  }),
+}));
+vi.mock("stripe", () => {
+  function MockStripe() {
+    return {
+      checkout: { sessions: { create: mockSessionsCreate } },
+    };
+  }
+  // Add static methods used by billing.ts (Stripe.createFetchHttpClient, etc.)
+  MockStripe.createFetchHttpClient = () => ({});
+  MockStripe.createSubtleCryptoProvider = () => ({});
+  return { default: MockStripe };
+});
+
 // Mock @hono/clerk-auth — passthrough middleware, returns valid auth state
 vi.mock("@hono/clerk-auth", () => ({
   clerkMiddleware: (_opts?: unknown) => {
@@ -254,5 +273,68 @@ describe("GET /api/usage", () => {
     expect(body.count).toBe(0);
     expect(body.limit).toBe(1);
     expect(body.plan).toBe("free");
+  });
+});
+
+// --- POST /api/billing/create-checkout tests ---
+
+describe("POST /api/billing/create-checkout", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Re-apply default resolved value after clearAllMocks resets it
+    mockSessionsCreate.mockResolvedValue({
+      url: "https://checkout.stripe.com/c/pay_test_abc123",
+    });
+  });
+
+  it("returns 200 with session URL from Stripe", async () => {
+    const app = buildBillingApp();
+
+    const res = await app.request(
+      "/api/billing/create-checkout",
+      { method: "POST" },
+      TEST_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { url: string };
+    expect(body.url).toBe("https://checkout.stripe.com/c/pay_test_abc123");
+  });
+
+  it("calls stripe.checkout.sessions.create with correct subscription params", async () => {
+    const app = buildBillingApp();
+
+    await app.request(
+      "/api/billing/create-checkout",
+      { method: "POST" },
+      TEST_ENV,
+    );
+
+    expect(mockSessionsCreate).toHaveBeenCalledOnce();
+    expect(mockSessionsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: "subscription",
+        line_items: [{ price: "price_test", quantity: 1 }],
+        metadata: { org_id: "org_test" },
+        subscription_data: { metadata: { org_id: "org_test" } },
+      }),
+    );
+  });
+
+  it("passes correct success_url and cancel_url to Stripe", async () => {
+    const app = buildBillingApp();
+
+    await app.request(
+      "/api/billing/create-checkout",
+      { method: "POST" },
+      TEST_ENV,
+    );
+
+    expect(mockSessionsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url: expect.stringContaining("/billing?checkout=success"),
+        cancel_url: expect.stringContaining("/billing"),
+      }),
+    );
   });
 });
