@@ -84,6 +84,9 @@ uploadRoute.post('/upload', async (c) => {
       storeId = created[0].id;
     }
 
+    let rouRowCount: number | undefined;
+    let dsRowCount: number | undefined;
+
     // Process ROU file if provided
     if (rouFile instanceof File) {
       let rows;
@@ -99,6 +102,8 @@ uploadRoute.post('/upload', async (c) => {
           400,
         );
       }
+
+      rouRowCount = rows.length;
 
       // DELETE existing ROU data for this store (per RESEARCH Pattern 6)
       await withOrgContext<void>(
@@ -146,6 +151,8 @@ uploadRoute.post('/upload', async (c) => {
         );
       }
 
+      dsRowCount = rows.length;
+
       await withOrgContext<void>(
         dbUrl,
         orgId,
@@ -174,7 +181,7 @@ uploadRoute.post('/upload', async (c) => {
       }
     }
 
-    return c.json({ ok: true, storeId, storeName });
+    return c.json({ ok: true, storeId, storeName, rouRows: rouRowCount, dsRows: dsRowCount });
   } catch (err) {
     console.error('[upload] handler error:', err);
     return c.json({ error: 'Upload failed — database error. Please try again.' }, 500);

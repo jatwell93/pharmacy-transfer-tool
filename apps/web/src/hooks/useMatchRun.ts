@@ -35,7 +35,7 @@ interface UseMatchRunReturn {
   loading: boolean;
   error: string | null;
   hasRun: boolean;
-  runMatch: (monthsCoverTarget: number) => Promise<void>;
+  runMatch: (monthsCoverTarget: number, storeFilter: string[]) => Promise<void>;
 }
 
 export function useMatchRun(): UseMatchRunReturn {
@@ -46,14 +46,14 @@ export function useMatchRun(): UseMatchRunReturn {
   const [error, setError] = useState<string | null>(null);
   const [hasRun, setHasRun] = useState(false);
 
-  const runMatch = useCallback(async (monthsCoverTarget: number) => {
+  const runMatch = useCallback(async (monthsCoverTarget: number, storeFilter: string[]) => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetchApi('/api/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ monthsCoverTarget }),
+        body: JSON.stringify({ monthsCoverTarget, storeFilter }),
       });
       if (!res.ok) {
         const body = await res.json() as { error?: string };

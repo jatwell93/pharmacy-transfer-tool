@@ -18,7 +18,7 @@ const matchRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 matchRoute.post('/match', async (c) => {
   try {
     // Parse and validate request body
-    const body = await c.req.json<{ monthsCoverTarget?: unknown }>();
+    const body = await c.req.json<{ monthsCoverTarget?: unknown; storeFilter?: unknown }>();
     const monthsCoverTarget = body.monthsCoverTarget;
 
     if (
@@ -33,6 +33,12 @@ matchRoute.post('/match', async (c) => {
         400,
       );
     }
+
+    // Optional store filter — if provided and non-empty, restrict both source and destination
+    const storeFilter: string[] | null =
+      Array.isArray(body.storeFilter) && body.storeFilter.length > 0
+        ? (body.storeFilter as string[])
+        : null;
 
     const orgId = c.get('orgId');
     const dbUrl = c.env.DATABASE_URL;
@@ -77,18 +83,20 @@ matchRoute.post('/match', async (c) => {
       `,
     );
 
-    // Convert rouRows to RouItem[] — set isRanged: false (rou_data has no is_ranged column)
-    const rouData: RouItem[] = rouRows.map((r) => ({
-      sku: r.sku,
-      store: r.store_name,
-      rou: r.rou,
-      isRanged: false, // rou_data table has no is_ranged column; default false
-      soh: r.soh,
-    }));
+    // Convert rouRows to RouItem[] — apply store filter, set isRanged: false
+    const rouData: RouItem[] = rouRows
+      .filter((r) => !storeFilter || storeFilter.includes(r.store_name))
+      .map((r) => ({
+        sku: r.sku,
+        store: r.store_name,
+        rou: r.rou,
+        isRanged: false, // rou_data table has no is_ranged column; default false
+        soh: r.soh,
+      }));
 
-    // Group dead-stock rows by store name
+    // Group dead-stock rows by store name — apply store filter
     const storeDeadStock = new Map<string, DeadStockItem[]>();
-    for (const row of deadStockRows) {
+    for (const row of deadStockRows.filter((r) => !storeFilter || storeFilter.includes(r.store_name))) {
       const items = storeDeadStock.get(row.store_name) || [];
       // cost is 0 — dead_stock table has no cost column (display-only per ALGORITHM-SPEC Section 5)
       items.push({ sku: row.sku, soh: row.soh, description: row.description, cost: 0 });

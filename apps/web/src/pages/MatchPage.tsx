@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import AppShell from '../components/AppShell';
 import { useMatchRun, MatchResult, DestinationMatch } from '../hooks/useMatchRun';
+import { useStores } from '../hooks/useStores';
 
 // --- Constants ---
 
@@ -20,11 +21,23 @@ type FlatItem =
 
 export default function MatchPage() {
   const { results, warnings, loading, error, hasRun, runMatch } = useMatchRun();
+  const { stores } = useStores();
 
   // --- State ---
   const [monthsCoverTarget, setMonthsCoverTarget] = useState(3);
+  const [selectedStores, setSelectedStores] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [warningsExpanded, setWarningsExpanded] = useState(false);
+
+  // Initialise store selection to all stores once loaded
+  useEffect(() => {
+    if (stores.length > 0) {
+      setSelectedStores(prev => {
+        if (prev.size === 0) return new Set(stores.map(s => s.name));
+        return prev;
+      });
+    }
+  }, [stores]);
 
   // Scroll container ref for virtualization
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -34,8 +47,20 @@ export default function MatchPage() {
   // --- Handlers ---
 
   const handleRunMatch = useCallback(() => {
-    runMatch(monthsCoverTarget);
-  }, [runMatch, monthsCoverTarget]);
+    runMatch(monthsCoverTarget, Array.from(selectedStores));
+  }, [runMatch, monthsCoverTarget, selectedStores]);
+
+  const handleToggleStore = useCallback((name: string) => {
+    setSelectedStores(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  }, []);
 
   const handlePreset = useCallback((value: number) => {
     setMonthsCoverTarget(value);
@@ -217,6 +242,45 @@ export default function MatchPage() {
           )}
         </button>
       </div>
+
+      {/* Store selector — shown when stores are available */}
+      {stores.length > 0 && (
+        <div
+          className="flex items-center gap-3 mb-4 p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]"
+          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+        >
+          <span className="text-[13px] font-medium text-[#475569] flex-shrink-0">Stores</span>
+          <div className="flex flex-wrap gap-2">
+            {stores.map(store => {
+              const active = selectedStores.has(store.name);
+              return (
+                <button
+                  key={store.id}
+                  type="button"
+                  onClick={() => handleToggleStore(store.name)}
+                  className={`rounded-md px-3 py-1 text-[13px] font-medium transition-colors ${
+                    active
+                      ? 'bg-[#0F766E] text-white'
+                      : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0]'
+                  }`}
+                  aria-pressed={active}
+                >
+                  {store.name}
+                </button>
+              );
+            })}
+          </div>
+          {selectedStores.size !== stores.length && (
+            <button
+              type="button"
+              onClick={() => setSelectedStores(new Set(stores.map(s => s.name)))}
+              className="ml-auto text-[12px] text-[#0F766E] hover:underline flex-shrink-0"
+            >
+              Select all
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Data quality banners — only shown after first run (D-13) */}
       {hasRun && (

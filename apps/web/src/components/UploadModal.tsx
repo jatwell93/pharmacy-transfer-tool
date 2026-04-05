@@ -24,6 +24,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
   const [dsFile, setDsFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [uploadedCounts, setUploadedCounts] = useState<{ rouRows?: number; dsRows?: number } | null>(null);
   const [rouTooltipVisible, setRouTooltipVisible] = useState(false);
   const [dsTooltipVisible, setDsTooltipVisible] = useState(false);
 
@@ -44,6 +45,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
       setRouFile(null);
       setDsFile(null);
       setErrors({});
+      setUploadedCounts(null);
     }
   }, [isOpen, store]);
 
@@ -155,8 +157,10 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
         setErrors(field ? { [field]: data.error } : { general: data.error || 'Upload failed \u2014 check that this is a valid FRED Office export and try again.' });
         return;
       }
+      const data = await res.json() as { rouRows?: number; dsRows?: number };
+      setUploadedCounts({ rouRows: data.rouRows, dsRows: data.dsRows });
       onUploadComplete(); // triggers store list refresh
-      onClose();
+      // Modal stays open to show row counts — user closes manually
     } catch {
       setErrors({ general: 'Could not reach the server. Check your connection and try again.' });
     } finally {
@@ -290,6 +294,9 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
             {errors.rouFile && (
               <p role="alert" className="text-[13px] text-[#EF4444]">{errors.rouFile}</p>
             )}
+            {uploadedCounts?.rouRows !== undefined && (
+              <p className="text-[13px] text-[#0F766E]">✓ {uploadedCounts.rouRows.toLocaleString()} rows recognised</p>
+            )}
           </div>
 
           {/* Dead-stock file picker */}
@@ -331,6 +338,9 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
             {errors.dsFile && (
               <p role="alert" className="text-[13px] text-[#EF4444]">{errors.dsFile}</p>
             )}
+            {uploadedCounts?.dsRows !== undefined && (
+              <p className="text-[13px] text-[#0F766E]">✓ {uploadedCounts.dsRows.toLocaleString()} rows recognised</p>
+            )}
           </div>
         </div>
 
@@ -348,36 +358,49 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
 
         {/* Buttons row */}
         <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => { if (!isUploading) onClose(); }}
-            disabled={isUploading}
-            className="text-[13px] text-[#475569] min-h-[44px] px-4 hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={handleUpload}
-            disabled={isDisabled}
-            className={[
-              'bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2',
-              isDisabled
-                ? 'opacity-40 cursor-not-allowed'
-                : 'hover:bg-[#0D5D5A] transition-colors cursor-pointer',
-            ].join(' ')}
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                <span>Uploading...</span>
-              </>
-            ) : (
-              <span>Upload Files</span>
-            )}
-          </button>
+          {uploadedCounts ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] hover:bg-[#0D5D5A] transition-colors cursor-pointer"
+              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            >
+              Done
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { if (!isUploading) onClose(); }}
+                disabled={isUploading}
+                className="text-[13px] text-[#475569] min-h-[44px] px-4 hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleUpload}
+                disabled={isDisabled}
+                className={[
+                  'bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2',
+                  isDisabled
+                    ? 'opacity-40 cursor-not-allowed'
+                    : 'hover:bg-[#0D5D5A] transition-colors cursor-pointer',
+                ].join(' ')}
+                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <span>Upload Files</span>
+                )}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
