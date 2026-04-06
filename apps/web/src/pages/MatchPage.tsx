@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
 import AppShell from '../components/AppShell';
 import { useMatchRun, MatchResult, DestinationMatch } from '../hooks/useMatchRun';
 import { useStores } from '../hooks/useStores';
+import { useUsage } from '../hooks/useUsage';
+import { useFetch } from '../hooks/useFetch';
 
 // --- Constants ---
 
@@ -22,12 +24,18 @@ type FlatItem =
 export default function MatchPage() {
   const { results, warnings, loading, error, hasRun, runMatch } = useMatchRun();
   const { stores, loading: storesLoading } = useStores();
+  const { usage, loading: usageLoading, refresh: refreshUsage } = useUsage();
+  const fetchApi = useFetch();
 
   // --- State ---
   const [monthsCoverTarget, setMonthsCoverTarget] = useState(3);
   const [selectedStores, setSelectedStores] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [warningsExpanded, setWarningsExpanded] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Derived: true when free-plan org is at their monthly run limit
+  const isAtLimit = usage?.plan === 'free' && usage.count >= usage.limit;
 
   // Initialise store selection to all stores once loaded
   useEffect(() => {
@@ -39,16 +47,44 @@ export default function MatchPage() {
     }
   }, [stores]);
 
+  // Show upgrade modal when error contains the 429 limit message (D-04)
+  useEffect(() => {
+    if (error && error.includes('Monthly match run limit reached')) {
+      setShowUpgradeModal(true);
+    }
+  }, [error]);
+
   // Scroll container ref for virtualization
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(400);
 
+  // Suppress unused variable warning for usageLoading
+  void usageLoading;
+
   // --- Handlers ---
 
-  const handleRunMatch = useCallback(() => {
-    runMatch(monthsCoverTarget, Array.from(selectedStores));
-  }, [runMatch, monthsCoverTarget, selectedStores]);
+  const handleRunMatch = useCallback(async () => {
+    if (isAtLimit) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    await runMatch(monthsCoverTarget, Array.from(selectedStores));
+    // Re-fetch usage after match run — harmless on error, needed on success (D-09)
+    refreshUsage();
+  }, [runMatch, monthsCoverTarget, selectedStores, isAtLimit, refreshUsage]);
+
+  const handleUpgrade = useCallback(async () => {
+    try {
+      const res = await fetchApi('/api/billing/create-checkout', { method: 'POST' });
+      if (res.ok) {
+        const { url } = (await res.json()) as { url: string };
+        window.location.href = url;
+      }
+    } catch {
+      // Silently fail — user can retry
+    }
+  }, [fetchApi]);
 
   const handleToggleStore = useCallback((name: string) => {
     setSelectedStores(prev => {
@@ -225,22 +261,42 @@ export default function MatchPage() {
           </div>
         </div>
 
-        {/* Right: Run Match button */}
-        <button
-          type="button"
-          onClick={handleRunMatch}
-          className="bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 hover:bg-[#0D5D5A] transition-colors focus-visible:outline-2 focus-visible:outline-[#0F766E] focus-visible:outline-offset-2"
-          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin" size={16} aria-hidden="true" />
-              <span>Running...</span>
-            </>
-          ) : (
-            <span>Run Match</span>
+        {/* Right: Usage counter + Run Match button */}
+        <div className="flex items-center gap-3">
+          {/* Usage counter — only for free-plan orgs (D-07, D-08) */}
+          {usage && usage.plan === 'free' && (
+            <span className="text-[13px] text-[#475569]">
+              {usage.count} of {usage.limit} free run{usage.limit !== 1 ? 's' : ''} used this month
+            </span>
           )}
-        </button>
+
+          {/* Run Match button — disabled state when at limit (D-06) */}
+          <button
+            type="button"
+            onClick={isAtLimit ? () => setShowUpgradeModal(true) : handleRunMatch}
+            disabled={loading}
+            className={`text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+              isAtLimit
+                ? 'bg-[#D97706] text-white hover:bg-[#B45309] focus-visible:outline-[#D97706]'
+                : 'bg-[#0F766E] text-white hover:bg-[#0D5D5A] focus-visible:outline-[#0F766E]'
+            }`}
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            {isAtLimit ? (
+              <>
+                <Lock size={16} aria-hidden="true" />
+                <span>Upgrade to run again</span>
+              </>
+            ) : loading ? (
+              <>
+                <Loader2 className="animate-spin" size={16} aria-hidden="true" />
+                <span>Running...</span>
+              </>
+            ) : (
+              <span>Run Match</span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Store selector — always visible so users can pick stores before first run */}
@@ -473,6 +529,47 @@ export default function MatchPage() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade modal overlay (D-04) */}
+      {showUpgradeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(15, 23, 42, 0.5)' }}
+          onClick={() => setShowUpgradeModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-8 max-w-sm w-full mx-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-labelledby="upgrade-modal-title"
+            aria-modal="true"
+          >
+            <h2
+              id="upgrade-modal-title"
+              className="text-lg font-semibold text-[#0F172A] mb-2"
+              style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+            >
+              You've used your free run for this month
+            </h2>
+            <p className="text-[13px] text-[#475569] mb-6">
+              Upgrade to PharmIQ Pro for unlimited match runs.
+            </p>
+            <button
+              onClick={handleUpgrade}
+              className="w-full bg-[#D97706] text-white font-semibold rounded-md px-4 py-3 hover:bg-[#B45309] transition-colors"
+              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            >
+              Upgrade Now
+            </button>
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className="w-full mt-2 text-[13px] text-[#475569] hover:text-[#0F172A] py-2 transition-colors"
+            >
+              Maybe later
+            </button>
           </div>
         </div>
       )}
