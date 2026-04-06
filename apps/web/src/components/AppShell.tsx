@@ -44,7 +44,8 @@ export default function AppShell({ children }: AppShellProps) {
             <NavItem
               icon={<CreditCard size={16} strokeWidth={1.5} aria-hidden="true" />}
               label="Billing"
-              disabled={true}
+              disabled={false}
+              href="/billing"
             />
           </nav>
 

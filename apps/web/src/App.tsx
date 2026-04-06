@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import OrgSetup from './pages/OrgSetup';
 import UploadPage from './pages/UploadPage';
 import MatchPage from './pages/MatchPage';
+import BillingPage from './pages/BillingPage';
 
 export default function App() {
   return (
@@ -28,6 +29,11 @@ export default function App() {
       <Route path="/match" element={
         <ProtectedRoute requireOrg={true}>
           <MatchPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/billing" element={
+        <ProtectedRoute requireOrg={true}>
+          <BillingPage />
         </ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/" replace />} />
