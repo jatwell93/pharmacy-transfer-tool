@@ -174,7 +174,10 @@ Plans:
   1. All UI elements use the PharmIQ brand palette (teal #0F766E primary, amber #D97706 accent, navy #0F172A dark base) and Space Grotesk headings with Inter body text
   2. User can toggle dark mode and the preference persists across sessions
   3. User can export the current match results as a PDF containing the full results table
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 06-01-PLAN.md — CSS variables dark mode refactor, toggle button, FOUC prevention, favicon, title, Dashboard redesign
+- [ ] 06-02-PLAN.md — @react-pdf/renderer install, TransferReportPDF component, Export PDF button in MatchPage
 **UI hint**: yes
 
 ## Progress
@@ -189,4 +192,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. File Upload Pipeline | 4/4 | Complete   | 2026-03-30 |
 | 4. Matching Algorithm | 1/2 | In Progress|  |
 | 5. Freemium and Billing | 0/3 | Not started | - |
-| 6. Brand, UI and Export | 0/TBD | Not started | - |
+| 6. Brand, UI and Export | 0/2 | Not started | - |
