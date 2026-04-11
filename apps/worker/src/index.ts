@@ -19,7 +19,7 @@ app.use('*', cors({
 
 // Mount webhook route FIRST (before auth middleware) — public route, no Clerk JWT.
 // Stripe sends no Authorization header; mounting after auth middleware causes 401 on all webhook calls.
-app.route('/api', webhookRoute);
+app.route('/', webhookRoute);
 
 // Apply two-stage auth middleware to all /api/* routes:
 // Stage 1 (clerkAuth): verifies Clerk JWT with authorizedParties — returns 401 if invalid/missing
