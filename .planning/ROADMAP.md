@@ -161,9 +161,9 @@ Plans:
   5. Cancelling a paid subscription via Stripe triggers a webhook that reverts the org to the free tier
 **Plans**: 3 plans
 Plans:
-- [ ] 05-01-PLAN.md — Stripe SDK install, atomic usage metering in match route, GET /api/usage endpoint
-- [ ] 05-02-PLAN.md — Stripe Checkout session creation and webhook handler
-- [ ] 05-03-PLAN.md — Frontend freemium UX: useUsage hook, upgrade modal, billing page
+- [x] 05-01-PLAN.md — Stripe SDK install, atomic usage metering in match route, GET /api/usage endpoint
+- [x] 05-02-PLAN.md — Stripe Checkout session creation and webhook handler
+- [x] 05-03-PLAN.md — Frontend freemium UX: useUsage hook, upgrade modal, billing page
 **UI hint**: yes
 
 ### Phase 6: Brand, UI and Export

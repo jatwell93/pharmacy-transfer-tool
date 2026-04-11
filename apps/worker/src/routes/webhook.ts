@@ -75,14 +75,20 @@ webhookRoute.post('/stripe/webhook', async (c) => {
   // plan reverts only on actual deletion, not on cancellation notice.
   if (event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription;
-    const orgId = sub.metadata?.org_id;
+    // Prefer metadata org_id, but fall back to DB lookup by stripe_subscription_id
+    // (Stripe does not always propagate subscription_data.metadata reliably).
+    let orgId = sub.metadata?.org_id;
+    if (!orgId) {
+      const rows = await sql`SELECT org_id FROM subscriptions WHERE stripe_subscription_id = ${sub.id} LIMIT 1`;
+      orgId = rows[0]?.org_id;
+    }
+    if (!orgId && sub.customer) {
+      const rows = await sql`SELECT org_id FROM subscriptions WHERE stripe_customer_id = ${sub.customer as string} LIMIT 1`;
+      orgId = rows[0]?.org_id;
+    }
+    console.log('[webhook] subscription.deleted — sub.id:', sub.id, 'orgId resolved:', orgId);
     if (orgId) {
-      const claims = JSON.stringify({ org_id: orgId });
-      await sql.transaction((tx) => [
-        tx`SELECT set_config('request.jwt.claims', ${claims}, true)`,
-        tx`UPDATE subscriptions SET status = 'free', updated_at = NOW()
-           WHERE org_id = ${orgId}`,
-      ]);
+      await sql`UPDATE subscriptions SET status = 'free', updated_at = NOW() WHERE org_id = ${orgId}`;
     }
   }
 

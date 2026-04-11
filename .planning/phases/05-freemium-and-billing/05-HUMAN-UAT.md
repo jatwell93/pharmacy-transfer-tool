@@ -1,5 +1,5 @@
 ---
-status: partial
+status: complete
 phase: 05-freemium-and-billing
 source: [05-VERIFICATION.md]
 started: 2026-04-06T01:31:41Z
@@ -14,11 +14,11 @@ Stripe Checkout + webhook end-to-end confirmed working.
 
 ### 1. Lock button visual state (free org at limit)
 expected: When a free org has used their 1 match run for the month, the "Run Match" button is amber/locked and disabled before any attempt to click it
-result: [pending]
+result: passed — confirmed via upgrade/cancel cycle; free org at limit shows locked state
 
 ### 2. Upgrade modal appears on 429
 expected: Clicking the locked Run Match button (or receiving a 429 from the API) triggers the upgrade modal overlay with a clear upgrade CTA
-result: [pending]
+result: passed — upgrade modal triggered correctly on limit
 
 ### 3. Stripe Checkout redirect
 expected: Clicking "Upgrade" in the modal calls POST /api/billing/create-checkout, receives a Stripe Checkout URL, and redirects the browser via window.location.href
@@ -30,7 +30,7 @@ result: passed — POST /stripe/webhook returned 200; BillingPage displayed "Pai
 
 ### 5. Subscription cancellation end-to-end
 expected: A customer.subscription.deleted webhook event reverts the org's subscriptions row to status='free' in NEON; the org is again subject to the 1 run/month limit
-result: [pending]
+result: passed — webhook handler updated with stripe_customer_id fallback; BillingPage reverted to freemium after cancellation
 
 ### 6. Usage counter live refresh
 expected: After a successful match run, the usage counter on the Match page updates to reflect the new count without requiring a page reload
@@ -43,9 +43,9 @@ result: passed — paid org displayed "PharmIQ Pro · Paid plan — unlimited ru
 ## Summary
 
 total: 7
-passed: 4
+passed: 7
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
 blocked: 0
 
