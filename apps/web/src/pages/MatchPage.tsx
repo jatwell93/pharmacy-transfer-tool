@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
-import { pdf } from '@react-pdf/renderer';
 import { useOrganization } from '@clerk/react';
 import AppShell from '../components/AppShell';
-import { TransferReportPDF } from '../components/TransferReportPDF';
 import { useMatchRun, MatchResult, DestinationMatch } from '../hooks/useMatchRun';
 import { useStores } from '../hooks/useStores';
 import { useUsage } from '../hooks/useUsage';
@@ -96,6 +94,10 @@ export default function MatchPage() {
     if (results.length === 0 || pdfLoading) return;
     setPdfLoading(true);
     try {
+      const [{ pdf }, { TransferReportPDF }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('../components/TransferReportPDF'),
+      ]);
       const blob = await pdf(<TransferReportPDF results={results} orgName={orgName} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
