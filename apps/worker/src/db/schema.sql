@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS rou_data (
   description TEXT,
   rou         DOUBLE PRECISION,
   soh         DOUBLE PRECISION,
+  is_ranged   BOOLEAN NOT NULL DEFAULT false,
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
