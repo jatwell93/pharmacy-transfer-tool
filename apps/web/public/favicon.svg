@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Hexagon frame — hex-chart motif from brand guide -->
+  <polygon
+    points="16,2 28,9 28,23 16,30 4,23 4,9"
+    fill="none"
+    stroke="#0F766E"
+    stroke-width="2"
+  />
+  <!-- Ascending bar chart: 3 bars, left-to-right -->
+  <rect x="9"  y="17" width="3" height="8" rx="0.5" fill="#0F766E" />
+  <rect x="14" y="13" width="3" height="12" rx="0.5" fill="#14B8A6" />
+  <rect x="19" y="9"  width="3" height="16" rx="0.5" fill="#0F766E" />
+</svg>
