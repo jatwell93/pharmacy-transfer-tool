@@ -25,12 +25,12 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - [ ] **Months cover cap**: user sets cover target (e.g. 3 months); max transfer = (cover × ROU) − receiving store's existing SOH; uses net allocation to prevent overstocking
 - [ ] **Rebuilt on Cloudflare/NEON/Clerk stack**: Workers (Node), Pages (React), NEON Postgres, Clerk auth — replaces Django+SQLite
 - [x] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything — Validated in Phase 03: File Upload Pipeline
-- [ ] **Freemium model**: 1 match run per month on free tier; unlimited on paid
+- [x] **Freemium model**: 1 match run per month on free tier; unlimited on paid — Validated in Phase 05: freemium-and-billing
 - [ ] **Dynamic store list**: derived from uploaded data, not hard-coded in source
 - [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
 - [x] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases — Validated in Phase 02: logic-audit
 - [x] **Multi-store upload UX**: clear workflow for uploading N stores before running match — Validated in Phase 03: File Upload Pipeline
-- [ ] **Results export**: CSV and Excel in addition to PDF
+- [x] **Results export**: PDF export implemented — Validated in Phase 06: pdf-export
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
 
 ### Out of Scope
@@ -79,7 +79,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-04-12 after Phase 08: phase04-verification complete — retroactive VERIFICATION.md created for Phase 4; MATCH-01..04, MATCH-07, RESULTS-01 formally verified and marked complete in REQUIREMENTS.md*
+*Last updated: 2026-04-12 after Phase 09: docs-sync complete — all 26 v1 requirements marked Complete in REQUIREMENTS.md; BILLING-01..04, BRAND-01, BRAND-02, RESULTS-02 traceability corrected; ROADMAP.md progress rows aligned with actual completion dates*
 
 ## Evolution
 
