@@ -34,19 +34,19 @@
 ### Results & Export
 
 - [x] **RESULTS-01**: Match results displayed in a virtualized table: SKU, description, source store, qty to transfer, destination store, destination ROU, months cover, sell-through time
-- [ ] **RESULTS-02**: User can export match results as a PDF (client-side via @react-pdf/renderer)
+- [x] **RESULTS-02**: User can export match results as a PDF (client-side via @react-pdf/renderer)
 
 ### Freemium & Billing
 
-- [ ] **BILLING-01**: Free tier allows 1 match run per calendar month per org; enforced via atomic Postgres counter (not KV) — `UPDATE usage_meters SET count = count + 1 WHERE org_id = $1 AND year_month = $2 AND count < limit RETURNING count`
-- [ ] **BILLING-02**: User can see how many match runs they have used this month and the monthly limit
-- [ ] **BILLING-03**: When free limit is reached, user sees an upgrade prompt with a CTA linking to Stripe checkout
-- [ ] **BILLING-04**: Stripe integration for paid plan — subscription creation, webhook handling for plan activation/cancellation, unlimited match runs on paid tier
+- [x] **BILLING-01**: Free tier allows 1 match run per calendar month per org; enforced via atomic Postgres counter (not KV) — `UPDATE usage_meters SET count = count + 1 WHERE org_id = $1 AND year_month = $2 AND count < limit RETURNING count`
+- [x] **BILLING-02**: User can see how many match runs they have used this month and the monthly limit
+- [x] **BILLING-03**: When free limit is reached, user sees an upgrade prompt with a CTA linking to Stripe checkout
+- [x] **BILLING-04**: Stripe integration for paid plan — subscription creation, webhook handling for plan activation/cancellation, unlimited match runs on paid tier
 
 ### Brand & UI
 
-- [ ] **BRAND-01**: UI implements PharmIQ brand guide — teal `#0F766E` primary, amber `#D97706` accent, navy `#0F172A` dark base, Space Grotesk (headings) + Inter (body)
-- [ ] **BRAND-02**: Dark mode toggle (carries forward from existing app)
+- [x] **BRAND-01**: UI implements PharmIQ brand guide — teal `#0F766E` primary, amber `#D97706` accent, navy `#0F172A` dark base, Space Grotesk (headings) + Inter (body)
+- [x] **BRAND-02**: Dark mode toggle (carries forward from existing app)
 
 ### Logic Audit
 
@@ -104,13 +104,13 @@
 | MATCH-06 | Phase 7 — Fix is_ranged Schema and Pipeline (gap closure) | Complete |
 | MATCH-07 | Phase 8 — Phase 04 Verification (gap closure) | Complete |
 | RESULTS-01 | Phase 8 — Phase 04 Verification (gap closure) | Complete |
-| BILLING-01 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| BILLING-02 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| BILLING-03 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| BILLING-04 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| BRAND-01 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| BRAND-02 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
-| RESULTS-02 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
+| BILLING-01 | Phase 5 — Freemium and Billing | Complete |
+| BILLING-02 | Phase 5 — Freemium and Billing | Complete |
+| BILLING-03 | Phase 5 — Freemium and Billing | Complete |
+| BILLING-04 | Phase 5 — Freemium and Billing | Complete |
+| BRAND-01 | Phase 6 — Brand, UI and Export | Complete |
+| BRAND-02 | Phase 6 — Brand, UI and Export | Complete |
+| RESULTS-02 | Phase 6 — Brand, UI and Export | Complete |
 
 ---
 

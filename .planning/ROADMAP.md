@@ -82,7 +82,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Freemium and Billing** - Atomic usage metering, upgrade prompt, and Stripe subscription integration (completed 2026-04-12)
 - [x] **Phase 6: Brand, UI and Export** - PharmIQ design system, dark mode, and client-side PDF export (completed 2026-04-12)
 - [x] **Phase 7: Fix is_ranged Schema and Pipeline** - Add is_ranged column to rou_data, update ROU upload INSERT, and wire match route to read real ranged status (Gap Closure) (completed 2026-04-12)
-- [ ] **Phase 8: Phase 04 Verification** - Formally verify all 8 Phase 04 requirements (MATCH-01..07, RESULTS-01) by creating VERIFICATION.md (Gap Closure)
+- [x] **Phase 8: Phase 04 Verification** - Formally verify all 8 Phase 04 requirements (MATCH-01..07, RESULTS-01) by creating VERIFICATION.md (Gap Closure) (completed 2026-04-12)
 - [ ] **Phase 9: Requirements and Roadmap Documentation Sync** - Update stale REQUIREMENTS.md checkboxes and ROADMAP.md status for all completed phases (Gap Closure)
 
 ## Phase Details
@@ -179,8 +179,8 @@ Plans:
   3. User can export the current match results as a PDF containing the full results table
 **Plans**: 2 plans
 Plans:
-- [ ] 06-01-PLAN.md — CSS variables dark mode refactor, toggle button, FOUC prevention, favicon, title, Dashboard redesign
-- [ ] 06-02-PLAN.md — @react-pdf/renderer install, TransferReportPDF component, Export PDF button in MatchPage
+- [x] 06-01-PLAN.md — CSS variables dark mode refactor, toggle button, FOUC prevention, favicon, title, Dashboard redesign
+- [x] 06-02-PLAN.md — @react-pdf/renderer install, TransferReportPDF component, Export PDF button in MatchPage
 **UI hint**: yes
 
 ### Phase 7: Fix is_ranged Schema and Pipeline
@@ -210,6 +210,7 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — Create 04-VERIFICATION.md with evidence for all 8 requirements and update REQUIREMENTS.md checkboxes
 
+
 ### Phase 9: Requirements and Roadmap Documentation Sync
 **Goal:** Close the documentation drift gap — update REQUIREMENTS.md checkboxes and ROADMAP.md progress table to accurately reflect all completed work
 **Depends on**: Phase 8
@@ -238,5 +239,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Freemium and Billing | 3/3 | Complete | 2026-04-12 |
 | 6. Brand, UI and Export | 2/2 | Complete | 2026-04-12 |
 | 7. Fix is_ranged Schema and Pipeline | 1/1 | Complete   | 2026-04-12 |
-| 8. Phase 04 Verification | 0/1 | Not started | - |
-| 9. Requirements and Roadmap Documentation Sync | 0/1 | Not started | - |
+| 8. Phase 04 Verification | 1/1 | Complete | 2026-04-12 |
+| 9. Requirements and Roadmap Documentation Sync | 0/1 | In Progress | - |
