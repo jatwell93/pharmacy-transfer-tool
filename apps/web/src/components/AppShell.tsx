@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UserButton, SignOutButton } from '@clerk/react';
-import { Upload, GitCompare, CreditCard, Settings, LogOut } from 'lucide-react';
+import { Upload, GitCompare, CreditCard, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import NavItem from './NavItem';
 
 interface AppShellProps {
@@ -8,6 +8,22 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const [isDark, setIsDark] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('theme') === 'dark'
+  );
+
+  function handleThemeToggle() {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -21,7 +37,16 @@ export default function AppShell({ children }: AppShellProps) {
         >
           PharmIQ
         </span>
-        <UserButton />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleThemeToggle}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="text-white/80 hover:text-white transition-colors p-1 rounded"
+          >
+            {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+          </button>
+          <UserButton />
+        </div>
       </header>
 
       {/* Body: sidebar + main */}
