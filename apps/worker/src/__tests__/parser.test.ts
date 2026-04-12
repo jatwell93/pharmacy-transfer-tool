@@ -154,6 +154,40 @@ describe("parseRouFile", () => {
       "Required headers not found",
     );
   });
+
+  it("parses all RANGED_TRUTHY variants as isRanged:true and others as false", () => {
+    const csv =
+      "Item Code,ROU Value,SOH,Ranged\n" +
+      "SKU001,2.5,10,checked\n" +
+      "SKU002,1.2,5,Yes\n" +
+      "SKU003,3.0,8,TRUE\n" +
+      "SKU004,0.5,2,1\n" +
+      "SKU005,4.0,3,y\n" +
+      "SKU006,2.0,4,\n" +
+      "SKU007,1.0,6,no\n" +
+      "SKU008,3.5,7,false\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseRouFile(buf, "test.csv");
+    expect(rows.length).toBe(8);
+    // Truthy variants — isRanged must be true
+    expect(rows[0].isRanged).toBe(true);  // "checked"
+    expect(rows[1].isRanged).toBe(true);  // "Yes"
+    expect(rows[2].isRanged).toBe(true);  // "TRUE"
+    expect(rows[3].isRanged).toBe(true);  // "1"
+    expect(rows[4].isRanged).toBe(true);  // "y"
+    // Falsy variants — isRanged must be false
+    expect(rows[5].isRanged).toBe(false); // ""
+    expect(rows[6].isRanged).toBe(false); // "no"
+    expect(rows[7].isRanged).toBe(false); // "false"
+  });
+
+  it("defaults isRanged to false when Ranged column is absent from ROU file", () => {
+    const csv = "Item Code,ROU Value,SOH\nSKU001,2.5,10\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseRouFile(buf, "test.csv");
+    expect(rows.length).toBe(1);
+    expect(rows[0].isRanged).toBe(false);
+  });
 });
 
 // --- parseDeadStockFile ---

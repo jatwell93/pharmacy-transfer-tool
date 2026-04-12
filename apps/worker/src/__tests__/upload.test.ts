@@ -139,6 +139,34 @@ describe("POST /api/upload", () => {
     expect(body.storeName).toBe("TestStore");
   });
 
+  it("returns 200 with ok:true for valid ROU upload with Ranged column", async () => {
+    const app = buildApp();
+
+    const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE rou_data, INSERT rou_data
+    mockedWithOrgContext
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "store-uuid-789" }])   // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE rou_data
+      .mockResolvedValueOnce(undefined);                   // INSERT rou_data (with is_ranged column)
+
+    // CSV content includes "Ranged" column with checked value
+    const csvContent = "Item Code,ROU Value,SOH,Ranged\nABC123,2.5,10,checked\n";
+    const rouFile = new File([csvContent], "rou.csv", { type: "text/csv" });
+
+    const form = new FormData();
+    form.append("storeName", "TestStoreRanged");
+    form.append("rouFile", rouFile);
+
+    const res = await app.request("/api/upload", { method: "POST", body: form }, TEST_ENV);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; storeId: string; storeName: string };
+    expect(body.ok).toBe(true);
+    expect(body.storeId).toBe("store-uuid-789");
+  });
+
   it("returns 200 with ok:true for valid dead-stock upload to existing store", async () => {
     const app = buildApp();
 

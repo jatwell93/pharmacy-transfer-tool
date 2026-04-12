@@ -147,11 +147,10 @@ describe("POST /api/match", () => {
       { sku: "SKU1", description: "Item 1", soh: 100, store_name: "Store A" },
       { sku: "SKU2", description: "Item 2", soh: 50, store_name: "Store B" },
     ]);
-    // Call 2: rou_data query — rows for cross-store matching
-    // Note: rou_data rows do NOT include is_ranged (column does not exist in rou_data table)
+    // Call 2: rou_data query — rows for cross-store matching (includes is_ranged after Phase 7 fix)
     mock.mockResolvedValueOnce([
-      { sku: "SKU1", description: "Item 1", rou: 20, soh: 10, store_name: "Store B" },
-      { sku: "SKU2", description: "Item 2", rou: 15, soh: 5, store_name: "Store A" },
+      { sku: "SKU1", description: "Item 1", rou: 20, soh: 10, is_ranged: false, store_name: "Store B" },
+      { sku: "SKU2", description: "Item 2", rou: 15, soh: 5, is_ranged: false, store_name: "Store A" },
     ]);
 
     const res = await app.request(
@@ -187,7 +186,7 @@ describe("POST /api/match", () => {
     ]);
     // Call 2: rou_data — no matches needed (warning is about soh NaN in dead_stock)
     mock.mockResolvedValueOnce([
-      { sku: "SKU_WARN", description: "Problem Item", rou: NaN, soh: 10, store_name: "Store C" },
+      { sku: "SKU_WARN", description: "Problem Item", rou: NaN, soh: 10, is_ranged: false, store_name: "Store C" },
     ]);
 
     const res = await app.request(
@@ -210,6 +209,42 @@ describe("POST /api/match", () => {
       (w) => w.sku === "SKU_WARN" && w.field === "soh",
     );
     expect(sohWarnings.length).toBe(1);
+  });
+
+  it("returns results with ranged items sorted first when is_ranged=true in rou_data", async () => {
+    const app = buildApp();
+    const mock = vi.mocked(withOrgContext);
+    // Call 1: dead_stock — SKU1 at Store A with large SOH
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", soh: 100, store_name: "Store A" },
+    ]);
+    // Call 2: rou_data — SKU1 at two destination stores:
+    //   Store B: non-ranged, higher ROU (5)
+    //   Store C: ranged, lower ROU (3) — must sort FIRST due to is_ranged=true
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", rou: 5, soh: 5, is_ranged: false, store_name: "Store B" },
+      { sku: "SKU1", description: "Item 1", rou: 3, soh: 5, is_ranged: true,  store_name: "Store C" },
+    ]);
+
+    const res = await app.request(
+      "/api/match",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monthsCoverTarget: 3 }),
+      },
+      TEST_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      results: Array<{ sourceStore: string; bestMatch: { store: string; isRanged: boolean } }>;
+      warnings: unknown[];
+    };
+    expect(body.results).toHaveLength(1);
+    // Store C (ranged, rou=3) must be bestMatch despite lower ROU than Store B (non-ranged, rou=5)
+    expect(body.results[0].bestMatch.store).toBe("Store C");
+    expect(body.results[0].bestMatch.isRanged).toBe(true);
   });
 
   it("returns 500 on database error", async () => {
