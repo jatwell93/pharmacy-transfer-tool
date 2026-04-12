@@ -80,7 +80,7 @@ completed: 2026-04-12
 - **Duration:** ~25 min
 - **Started:** 2026-04-12T03:00:00Z
 - **Completed:** 2026-04-12T03:11:23Z
-- **Tasks:** 3 (+ 1 checkpoint awaiting human verification)
+- **Tasks:** 3 (+ 1 checkpoint — human verification: PASSED)
 - **Files modified:** 13
 
 ## Accomplishments
@@ -98,21 +98,34 @@ Each task was committed atomically:
 2. **Task 2: Dark mode toggle in AppShell header + FOUC prevention** - `d7f9408` (feat)
 3. **Task 3: Favicon, Dashboard home screen redesign** - `f509e82` (feat)
 
+## Human Verification
+
+**Status: PASSED**
+
+All verification checks confirmed by user:
+- Browser tab shows "PharmIQ — Dead-Stock Optimizer" with em-dash
+- Teal hex-chart SVG favicon visible in browser tab (not Vite placeholder)
+- Dashboard empty state shows "Welcome to PharmIQ" + Upload CTA
+- Dashboard populated state shows "Ready to run a match" + Run Match CTA
+- Dark mode toggle (Moon/Sun button) flips all surfaces correctly
+- FOUC prevention confirmed — hard reload in dark mode shows no white flash
+- localStorage persistence confirmed — dark mode survives tab close/reopen
+
 ## Files Created/Modified
 
 - `apps/web/src/index.css` — `@custom-variant dark` directive + `:root.dark {}` token overrides; MUST appear before `:root {}`
 - `apps/web/index.html` — FOUC inline script, title update to em-dash form, favicon link to `/favicon.svg`
 - `apps/web/src/components/AppShell.tsx` — `useState` + `isDark` + `handleThemeToggle`; Sun/Moon button in header
-- `apps/web/src/components/StoreCard.tsx` — hex → var() for surface/border/text/teal tokens
-- `apps/web/src/components/FileStatusBadge.tsx` — hex → var() for text tokens
-- `apps/web/src/components/NavItem.tsx` — hex → var() for text-secondary and teal hover
-- `apps/web/src/components/UploadModal.tsx` — hex → var() across all form fields, modal bg, labels, buttons
-- `apps/web/src/pages/MatchPage.tsx` — hex → var() throughout control bar, table, store selector, upgrade modal
-- `apps/web/src/pages/UploadPage.tsx` — hex → var() for headings, CTAs, empty state
-- `apps/web/src/pages/BillingPage.tsx` — hex → var() for plan card, text, icons
+- `apps/web/src/components/StoreCard.tsx` — hex to var() for surface/border/text/teal tokens
+- `apps/web/src/components/FileStatusBadge.tsx` — hex to var() for text tokens
+- `apps/web/src/components/NavItem.tsx` — hex to var() for text-secondary and teal hover
+- `apps/web/src/components/UploadModal.tsx` — hex to var() across all form fields, modal bg, labels, buttons
+- `apps/web/src/pages/MatchPage.tsx` — hex to var() throughout control bar, table, store selector, upgrade modal
+- `apps/web/src/pages/UploadPage.tsx` — hex to var() for headings, CTAs, empty state
+- `apps/web/src/pages/BillingPage.tsx` — hex to var() for plan card, text, icons
 - `apps/web/src/pages/Dashboard.tsx` — complete replacement with useStores two-state landing screen
-- `apps/web/src/pages/OrgSetup.tsx` — hex → var() for surface/text tokens
-- `apps/web/src/pages/SignIn.tsx` — hex → var() for surface/text tokens
+- `apps/web/src/pages/OrgSetup.tsx` — hex to var() for surface/text tokens
+- `apps/web/src/pages/SignIn.tsx` — hex to var() for surface/text tokens
 - `apps/web/public/favicon.svg` — PharmIQ teal hexagon frame + ascending bar chart mark (new file)
 
 ## Decisions Made
@@ -146,6 +159,12 @@ None — build passed on all three task iterations without errors.
 ## Known Stubs
 
 None — Dashboard uses `useStores()` real data hook. Both states render from live API data.
+
+## Self-Check: PASSED
+
+- Commits `8cf52b6`, `d7f9408`, `f509e82` exist on main branch
+- Human verification checkpoint: PASSED
+- All 3 auto tasks complete; 1 checkpoint confirmed
 
 ## Next Phase Readiness
 
