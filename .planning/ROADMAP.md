@@ -65,6 +65,16 @@ Get your API key: NEON Console → Account → API Keys.
 ⚠️ **Hard blocker** — the free plan's 10 ms CPU limit will fail on the first CSV parse. Upgrade before Phase 1:
 Cloudflare Dashboard → Workers & Pages → Plans → Upgrade to Paid ($5/month base).
 
+### Phase 10: fix schema.sql + .dev.vars.example + webhook.test.ts failure + subscriptions.status DEFAULT naming
+
+**Goal:** Close tech-debt items from v1.0 milestone audit — schema.sql fixes, DX config completeness, and documentation sync
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 1 plan
+
+Plans:
+- [ ] 10-01-PLAN.md — Schema fixes, DX config completeness, and Phase 9 close
+
 ---
 
 ## Phases
@@ -83,7 +93,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Brand, UI and Export** - PharmIQ design system, dark mode, and client-side PDF export (completed 2026-04-12)
 - [x] **Phase 7: Fix is_ranged Schema and Pipeline** - Add is_ranged column to rou_data, update ROU upload INSERT, and wire match route to read real ranged status (Gap Closure) (completed 2026-04-12)
 - [x] **Phase 8: Phase 04 Verification** - Formally verify all 8 Phase 04 requirements (MATCH-01..07, RESULTS-01) by creating VERIFICATION.md (Gap Closure) (completed 2026-04-12)
-- [ ] **Phase 9: Requirements and Roadmap Documentation Sync** - Update stale REQUIREMENTS.md checkboxes and ROADMAP.md status for all completed phases (Gap Closure)
+- [x] **Phase 9: Requirements and Roadmap Documentation Sync** - Update stale REQUIREMENTS.md checkboxes and ROADMAP.md status for all completed phases (Gap Closure) (completed 2026-04-13)
 
 ## Phase Details
 
@@ -228,7 +238,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -240,4 +250,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Brand, UI and Export | 2/2 | Complete | 2026-04-12 |
 | 7. Fix is_ranged Schema and Pipeline | 1/1 | Complete   | 2026-04-12 |
 | 8. Phase 04 Verification | 1/1 | Complete | 2026-04-12 |
-| 9. Requirements and Roadmap Documentation Sync | 0/1 | In Progress | - |
+| 9. Requirements and Roadmap Documentation Sync | 1/1 | Complete | 2026-04-13 |
