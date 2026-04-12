@@ -99,20 +99,21 @@ matchRoute.post('/match', async (c) => {
       `,
     );
 
-    // Fetch ROU data — CRITICAL: do NOT select is_ranged from rou_data (column does not exist)
+    // Fetch ROU data — includes is_ranged for ranged-first sort (Phase 7 fix for INT-01)
     const rouRows = await withOrgContext<
       Array<{
         sku: string;
         description: string;
         rou: number;
         soh: number;
+        is_ranged: boolean;   // read from rou_data after Phase 7 ALTER TABLE
         store_name: string;
       }>
     >(
       dbUrl,
       orgId,
       (tx) => tx`
-        SELECT rd.sku, rd.description, rd.rou, rd.soh,
+        SELECT rd.sku, rd.description, rd.rou, rd.soh, rd.is_ranged,
                s.name AS store_name
         FROM rou_data rd
         JOIN stores s ON s.id = rd.store_id
@@ -120,14 +121,14 @@ matchRoute.post('/match', async (c) => {
       `,
     );
 
-    // Convert rouRows to RouItem[] — apply store filter, set isRanged: false
+    // Convert rouRows to RouItem[] — apply store filter, read is_ranged from DB (per MATCH-05, MATCH-06)
     const rouData: RouItem[] = rouRows
       .filter((r) => !storeFilter || storeFilter.includes(r.store_name))
       .map((r) => ({
         sku: r.sku,
         store: r.store_name,
         rou: r.rou,
-        isRanged: false, // rou_data table has no is_ranged column; default false
+        isRanged: r.is_ranged,  // read from rou_data, not hardcoded (INT-01 fix)
         soh: r.soh,
       }));
 

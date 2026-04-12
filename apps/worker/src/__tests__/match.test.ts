@@ -214,9 +214,10 @@ describe("POST /api/match", () => {
   it("returns results with ranged items sorted first when is_ranged=true in rou_data", async () => {
     const app = buildApp();
     const mock = vi.mocked(withOrgContext);
-    // Call 1: dead_stock — SKU1 at Store A with large SOH
+    // Call 1: dead_stock — SKU1 at Store A with soh=10
+    // minRequiredRou = 10/12 ≈ 0.83 — both destination ROUs (5 and 3) pass the sell-through filter
     mock.mockResolvedValueOnce([
-      { sku: "SKU1", description: "Item 1", soh: 100, store_name: "Store A" },
+      { sku: "SKU1", description: "Item 1", soh: 10, store_name: "Store A" },
     ]);
     // Call 2: rou_data — SKU1 at two destination stores:
     //   Store B: non-ranged, higher ROU (5)

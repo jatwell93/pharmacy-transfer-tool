@@ -6,6 +6,9 @@
 //
 // MIGRATION REQUIRED: ALTER TABLE stores ADD COLUMN store_number TEXT;
 // Run once against NEON before deploying this route.
+//
+// MIGRATION REQUIRED (Phase 7): ALTER TABLE rou_data ADD COLUMN IF NOT EXISTS is_ranged BOOLEAN NOT NULL DEFAULT false;
+// Run via NEON SQL editor as neondb_owner before deploying. Do NOT use DATABASE_URL (pharmiq_app has no DDL rights).
 
 import { Hono } from 'hono';
 import type { Env, Variables } from '../types';
@@ -118,17 +121,19 @@ uploadRoute.post('/upload', async (c) => {
         const descriptions = rows.map((r) => r.description);
         const rous = rows.map((r) => r.rou);
         const sohs = rows.map((r) => r.soh);
+        const ranged = rows.map((r) => r.isRanged);
 
         await withOrgContext<void>(
           dbUrl,
           orgId,
           (tx) => tx`
-            INSERT INTO rou_data (org_id, store_id, sku, description, rou, soh, uploaded_at)
+            INSERT INTO rou_data (org_id, store_id, sku, description, rou, soh, is_ranged, uploaded_at)
             SELECT ${orgId}, ${storeId}::uuid,
                    unnest(${skus}::text[]),
                    unnest(${descriptions}::text[]),
                    unnest(${rous}::float8[]),
                    unnest(${sohs}::float8[]),
+                   unnest(${ranged}::boolean[]),
                    NOW()
           `,
         );

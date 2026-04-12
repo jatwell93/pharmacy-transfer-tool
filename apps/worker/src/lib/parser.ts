@@ -13,6 +13,7 @@ export interface RouRow {
   description: string;
   rou: number; // NaN if non-numeric, NOT 0
   soh: number; // NaN if non-numeric, NOT 0
+  isRanged: boolean; // parsed from "Ranged" column via RANGED_TRUTHY; false if column absent
 }
 
 export interface DeadStockRow {
@@ -232,7 +233,14 @@ export function parseRouFile(
     const rou = parseFloat(rouCell);
     const soh = parseFloat(sohCell);
 
-    result.push({ sku, description, rou, soh });
+    // isRanged: false if Ranged column absent, otherwise check truthy set (per MATCH-06)
+    const rangedCol = colMap["Ranged"];
+    const isRanged =
+      rangedCol !== undefined
+        ? RANGED_TRUTHY.has((row[rangedCol]?.trim() ?? "").toLowerCase())
+        : false;
+
+    result.push({ sku, description, rou, soh, isRanged });
   }
 
   return result;
