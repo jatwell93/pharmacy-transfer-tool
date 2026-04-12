@@ -5,3 +5,7 @@ DATABASE_URL=postgresql://pharmiq_app:xxx@xxx.neon.tech/neondb?sslmode=require
 # In production, set this to the Cloudflare Pages URL (e.g. https://pharmiq-stock-transfer-web.pages.dev).
 # Without this, Clerk's @clerk/backend will reject tokens with an "Invalid azp" error (see RESEARCH Pitfall 6).
 ALLOWED_ORIGIN=http://localhost:5173
+# Stripe — required for freemium billing (Phase 5)
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_PRICE_ID=price_xxx

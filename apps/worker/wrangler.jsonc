@@ -11,3 +11,6 @@
 // wrangler secret put CLERK_PUBLISHABLE_KEY
 // wrangler secret put DATABASE_URL
 // wrangler secret put ALLOWED_ORIGIN
+// wrangler secret put STRIPE_SECRET_KEY
+// wrangler secret put STRIPE_WEBHOOK_SECRET
+// wrangler secret put STRIPE_PRICE_ID
