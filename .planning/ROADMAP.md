@@ -193,7 +193,9 @@ Plans:
   2. ROU upload route parses and stores `is_ranged` for each row in `rou_data`
   3. `match.ts` RouItem construction reads `is_ranged` from `rou_data` query result (not hardcoded false)
   4. Ranged items float to the top of match results when is_ranged=true in uploaded ROU data
-**Plans**: 0 plans
+**Plans**: 1 plan
+Plans:
+- [ ] 07-01-PLAN.md — TDD: RED failing tests, GREEN 4-file implementation, schema migration, full suite verification
 
 ### Phase 8: Phase 04 Verification
 **Goal:** Formally verify all 8 Phase 04 requirements by creating the missing VERIFICATION.md — closes the orphaned status of MATCH-01..07 and RESULTS-01
@@ -231,6 +233,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Matching Algorithm | 2/2 | Complete | 2026-03-31 |
 | 5. Freemium and Billing | 3/3 | Complete | 2026-04-12 |
 | 6. Brand, UI and Export | 2/2 | Complete | 2026-04-12 |
-| 7. Fix is_ranged Schema and Pipeline | 0/0 | Not started | - |
+| 7. Fix is_ranged Schema and Pipeline | 0/1 | Not started | - |
 | 8. Phase 04 Verification | 0/0 | Not started | - |
 | 9. Requirements and Roadmap Documentation Sync | 0/0 | Not started | - |
