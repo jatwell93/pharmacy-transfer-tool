@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { useOrganization } from '@clerk/react';
 import AppShell from '../components/AppShell';
+import { TransferReportPDF } from '../components/TransferReportPDF';
 import { useMatchRun, MatchResult, DestinationMatch } from '../hooks/useMatchRun';
 import { useStores } from '../hooks/useStores';
 import { useUsage } from '../hooks/useUsage';
@@ -26,6 +29,14 @@ export default function MatchPage() {
   const { stores, loading: storesLoading } = useStores();
   const { usage, loading: usageLoading, refresh: refreshUsage } = useUsage();
   const fetchApi = useFetch();
+  const { organization } = useOrganization();
+  const orgName = organization?.name ?? 'PharmIQ';
+
+  // Memoize PDF document to avoid re-generation on unrelated renders
+  const pdfDocument = useMemo(
+    () => <TransferReportPDF results={results} orgName={orgName} />,
+    [results, orgName]
+  );
 
   // --- State ---
   const [monthsCoverTarget, setMonthsCoverTarget] = useState(3);
@@ -218,6 +229,26 @@ export default function MatchPage() {
         >
           Match Results
         </h1>
+        <PDFDownloadLink
+          document={pdfDocument}
+          fileName={`pharmiq-transfer-report-${new Date().toISOString().split('T')[0]}.pdf`}
+        >
+          {({ loading: pdfLoading }) => (
+            <button
+              type="button"
+              disabled={pdfLoading || results.length === 0}
+              className={`text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D97706] ${
+                results.length === 0
+                  ? 'bg-[#D97706]/40 text-white cursor-not-allowed'
+                  : 'bg-[#D97706] text-white hover:bg-[#B45309]'
+              }`}
+              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              aria-label="Export match results as PDF"
+            >
+              {pdfLoading ? 'Preparing...' : 'Export PDF'}
+            </button>
+          )}
+        </PDFDownloadLink>
       </div>
 
       {/* Control bar */}
