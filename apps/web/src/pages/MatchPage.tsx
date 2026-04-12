@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { pdf } from '@react-pdf/renderer';
 import { useOrganization } from '@clerk/react';
 import AppShell from '../components/AppShell';
 import { TransferReportPDF } from '../components/TransferReportPDF';
@@ -32,14 +32,9 @@ export default function MatchPage() {
   const { organization } = useOrganization();
   const orgName = organization?.name ?? 'PharmIQ';
 
-  // Memoize PDF document to avoid re-generation on unrelated renders
-  const pdfDocument = useMemo(
-    () => <TransferReportPDF results={results} orgName={orgName} />,
-    [results, orgName]
-  );
-
   // --- State ---
   const [monthsCoverTarget, setMonthsCoverTarget] = useState(3);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [selectedStores, setSelectedStores] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [warningsExpanded, setWarningsExpanded] = useState(false);
@@ -96,6 +91,22 @@ export default function MatchPage() {
       // Silently fail — user can retry
     }
   }, [fetchApi]);
+
+  const handleExportPdf = useCallback(async () => {
+    if (results.length === 0 || pdfLoading) return;
+    setPdfLoading(true);
+    try {
+      const blob = await pdf(<TransferReportPDF results={results} orgName={orgName} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pharmiq-transfer-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [results, orgName, pdfLoading]);
 
   const handleToggleStore = useCallback((name: string) => {
     setSelectedStores(prev => {
@@ -229,26 +240,20 @@ export default function MatchPage() {
         >
           Match Results
         </h1>
-        <PDFDownloadLink
-          document={pdfDocument}
-          fileName={`pharmiq-transfer-report-${new Date().toISOString().split('T')[0]}.pdf`}
+        <button
+          type="button"
+          onClick={handleExportPdf}
+          disabled={pdfLoading || results.length === 0}
+          className={`text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D97706] ${
+            results.length === 0
+              ? 'bg-[#D97706]/40 text-white cursor-not-allowed'
+              : 'bg-[#D97706] text-white hover:bg-[#B45309]'
+          }`}
+          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          aria-label="Export match results as PDF"
         >
-          {({ loading: pdfLoading }) => (
-            <button
-              type="button"
-              disabled={pdfLoading || results.length === 0}
-              className={`text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D97706] ${
-                results.length === 0
-                  ? 'bg-[#D97706]/40 text-white cursor-not-allowed'
-                  : 'bg-[#D97706] text-white hover:bg-[#B45309]'
-              }`}
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-              aria-label="Export match results as PDF"
-            >
-              {pdfLoading ? 'Preparing...' : 'Export PDF'}
-            </button>
-          )}
-        </PDFDownloadLink>
+          {pdfLoading ? 'Preparing...' : 'Export PDF'}
+        </button>
       </div>
 
       {/* Control bar */}
