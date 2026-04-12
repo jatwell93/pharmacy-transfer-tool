@@ -79,7 +79,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-04-12 after Phase 07: is-ranged-schema-fix complete — is_ranged pipeline fully wired, ranged-first sort operational end-to-end*
+*Last updated: 2026-04-12 after Phase 08: phase04-verification complete — retroactive VERIFICATION.md created for Phase 4; MATCH-01..04, MATCH-07, RESULTS-01 formally verified and marked complete in REQUIREMENTS.md*
 
 ## Evolution
 
