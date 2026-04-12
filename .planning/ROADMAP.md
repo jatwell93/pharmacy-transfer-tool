@@ -78,9 +78,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Infrastructure, Clerk auth, NEON schema, and authenticated API skeleton — everything else depends on this (completed 2026-03-28)
 - [x] **Phase 2: Logic Audit** - Audit and document the existing Django matching algorithm before porting to TypeScript (completed 2026-03-29)
 - [x] **Phase 3: File Upload Pipeline** - Multi-store FRED CSV/XLSX upload, parsing, persistence, and per-store status UI (completed 2026-03-30)
-- [ ] **Phase 4: Matching Algorithm** - Port the audited algorithm, add months-cover cap, and display results in a virtualized table
-- [ ] **Phase 5: Freemium and Billing** - Atomic usage metering, upgrade prompt, and Stripe subscription integration
-- [ ] **Phase 6: Brand, UI and Export** - PharmIQ design system, dark mode, and client-side PDF export
+- [x] **Phase 4: Matching Algorithm** - Port the audited algorithm, add months-cover cap, and display results in a virtualized table (completed 2026-03-31)
+- [x] **Phase 5: Freemium and Billing** - Atomic usage metering, upgrade prompt, and Stripe subscription integration (completed 2026-04-12)
+- [x] **Phase 6: Brand, UI and Export** - PharmIQ design system, dark mode, and client-side PDF export (completed 2026-04-12)
+- [ ] **Phase 7: Fix is_ranged Schema and Pipeline** - Add is_ranged column to rou_data, update ROU upload INSERT, and wire match route to read real ranged status (Gap Closure)
+- [ ] **Phase 8: Phase 04 Verification** - Formally verify all 8 Phase 04 requirements (MATCH-01..07, RESULTS-01) by creating VERIFICATION.md (Gap Closure)
+- [ ] **Phase 9: Requirements and Roadmap Documentation Sync** - Update stale REQUIREMENTS.md checkboxes and ROADMAP.md status for all completed phases (Gap Closure)
 
 ## Phase Details
 
@@ -180,6 +183,41 @@ Plans:
 - [ ] 06-02-PLAN.md — @react-pdf/renderer install, TransferReportPDF component, Export PDF button in MatchPage
 **UI hint**: yes
 
+### Phase 7: Fix is_ranged Schema and Pipeline
+**Goal:** Activate ranged-first sort by persisting is_ranged from ROU uploads — fixes the architectural gap where rou_data has no is_ranged column and matchTransfers sort never activates
+**Depends on**: Phase 4
+**Requirements**: MATCH-05, MATCH-06
+**Gap Closure:** Closes INT-01 and the functional gaps in MATCH-05 and MATCH-06 identified by milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `rou_data` table has an `is_ranged BOOLEAN DEFAULT false` column in schema.sql
+  2. ROU upload route parses and stores `is_ranged` for each row in `rou_data`
+  3. `match.ts` RouItem construction reads `is_ranged` from `rou_data` query result (not hardcoded false)
+  4. Ranged items float to the top of match results when is_ranged=true in uploaded ROU data
+**Plans**: 0 plans
+
+### Phase 8: Phase 04 Verification
+**Goal:** Formally verify all 8 Phase 04 requirements by creating the missing VERIFICATION.md — closes the orphaned status of MATCH-01..07 and RESULTS-01
+**Depends on**: Phase 7
+**Requirements**: MATCH-01, MATCH-02, MATCH-03, MATCH-04, MATCH-05, MATCH-06, MATCH-07, RESULTS-01
+**Gap Closure:** Closes orphaned verification status for all Phase 04 requirements identified by milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `04-VERIFICATION.md` exists and documents verified status for MATCH-01..07 and RESULTS-01
+  2. Each requirement has evidence (test output, manual test result, or code reference)
+  3. REQUIREMENTS.md checkboxes `[x]` for MATCH-01..07 and RESULTS-01
+**Plans**: 0 plans
+
+### Phase 9: Requirements and Roadmap Documentation Sync
+**Goal:** Close the documentation drift gap — update REQUIREMENTS.md checkboxes and ROADMAP.md progress table to accurately reflect all completed work
+**Depends on**: Phase 8
+**Requirements**: BILLING-01, BILLING-02, BILLING-03, BILLING-04, BRAND-01, BRAND-02, RESULTS-02
+**Gap Closure:** Closes INT-02 — 7 requirements implemented and code-verified but still showing [ ] and Pending in documentation
+**Success Criteria** (what must be TRUE):
+  1. `cd apps/web && npm run build` exits 0 (confirms RESULTS-02 is satisfied)
+  2. REQUIREMENTS.md checkboxes updated to `[x]` for BILLING-01..04, BRAND-01, BRAND-02, RESULTS-02
+  3. ROADMAP.md progress table and plan checkboxes reflect actual completed state for phases 4, 5, 6
+  4. Traceability table shows Complete for all 26 v1 requirements
+**Plans**: 0 plans
+
 ## Progress
 
 **Execution Order:**
@@ -187,9 +225,12 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 3/3 | Complete   | 2026-03-29 |
-| 2. Logic Audit | 2/2 | Complete   | 2026-03-29 |
-| 3. File Upload Pipeline | 4/4 | Complete   | 2026-03-30 |
-| 4. Matching Algorithm | 1/2 | In Progress|  |
-| 5. Freemium and Billing | 0/3 | Not started | - |
-| 6. Brand, UI and Export | 0/2 | Not started | - |
+| 1. Foundation | 3/3 | Complete | 2026-03-29 |
+| 2. Logic Audit | 2/2 | Complete | 2026-03-29 |
+| 3. File Upload Pipeline | 4/4 | Complete | 2026-03-30 |
+| 4. Matching Algorithm | 2/2 | Complete | 2026-03-31 |
+| 5. Freemium and Billing | 3/3 | Complete | 2026-04-12 |
+| 6. Brand, UI and Export | 2/2 | Complete | 2026-04-12 |
+| 7. Fix is_ranged Schema and Pipeline | 0/0 | Not started | - |
+| 8. Phase 04 Verification | 0/0 | Not started | - |
+| 9. Requirements and Roadmap Documentation Sync | 0/0 | Not started | - |
