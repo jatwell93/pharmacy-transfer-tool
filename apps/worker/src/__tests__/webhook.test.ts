@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 
-// Mock @neondatabase/serverless — webhook handler calls neon() directly for sql.transaction
-const mockTransaction = vi.fn();
+// Mock @neondatabase/serverless — webhook handler calls neon() to get sql, which is used as:
+//   1. sql.transaction(callback) — for checkout.session.completed
+//   2. sql`...template...` — directly for customer.subscription.deleted fallback lookups and UPDATE
+// mockSql must be callable as a template tag AND expose .transaction.
+const { mockSql, mockTransaction } = vi.hoisted(() => {
+  const mockSql = vi.fn().mockResolvedValue([]);
+  const mockTransaction = vi.fn();
+  mockSql.transaction = mockTransaction;
+  return { mockSql, mockTransaction };
+});
 vi.mock("@neondatabase/serverless", () => ({
-  neon: vi.fn(() => ({ transaction: mockTransaction })),
+  neon: vi.fn(() => mockSql),
 }));
 
 // Mock stripe — constructEventAsync and static helpers
@@ -141,18 +149,21 @@ describe("POST /api/stripe/webhook", () => {
   it("returns 200 and reverts subscriptions to free on customer.subscription.deleted", async () => {
     const app = buildApp();
 
-    // Mock verified event: customer.subscription.deleted
+    // Mock verified event: customer.subscription.deleted with org_id in metadata
+    // (fast path — no DB fallback lookups needed)
     mockConstructEventAsync.mockResolvedValueOnce({
       type: "customer.subscription.deleted",
       data: {
         object: {
+          id: "sub_789",
           metadata: { org_id: "org_abc" },
+          customer: "cus_123",
         },
       },
     });
 
-    // Mock transaction: [set_config result, update result]
-    mockTransaction.mockResolvedValueOnce([[], []]);
+    // The subscription.deleted handler calls sql`` directly (not sql.transaction).
+    // mockSql is already set up with .mockResolvedValue([]) as default, so no extra setup needed.
 
     const res = await app.request(
       "/api/stripe/webhook",
@@ -165,16 +176,17 @@ describe("POST /api/stripe/webhook", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(mockTransaction).toHaveBeenCalledOnce();
-    // Verify the SQL contains 'free'
-    const txCallback = mockTransaction.mock.calls[0][0];
-    const mockTx = vi.fn((strings: TemplateStringsArray, ...values: unknown[]) =>
-      ({ sql: String.raw({ raw: strings }, ...values) }),
+    // The handler uses sql`` directly — NOT sql.transaction — for subscription.deleted
+    expect(mockTransaction).not.toHaveBeenCalled();
+    // sql must have been called at least once (for the UPDATE ... SET status = 'free')
+    expect(mockSql).toHaveBeenCalled();
+    // Find the UPDATE call and verify it sets status to 'free'
+    const allCalls = mockSql.mock.calls as Array<[TemplateStringsArray, ...unknown[]]>;
+    const updateCall = allCalls.find(([strings]) =>
+      strings.join("").includes("free"),
     );
-    const queries = txCallback(mockTx);
-    expect(queries).toHaveLength(2);
-    const updateQuery = queries[1] as { sql: string };
-    expect(updateQuery.sql).toContain("free");
+    expect(updateCall).toBeDefined();
+    expect(updateCall![0].join("")).toContain("free");
   });
 
   it("returns 200 and does NOT call transaction for unhandled event types", async () => {
