@@ -11,8 +11,8 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="h-14 bg-[#0F766E] flex items-center justify-between px-6 flex-shrink-0">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-[#0F766E] focus:px-3 focus:py-1 focus:rounded focus:z-50">
+      <header className="h-14 bg-[var(--color-teal)] flex items-center justify-between px-6 flex-shrink-0">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-[var(--color-surface)] focus:text-[var(--color-teal)] focus:px-3 focus:py-1 focus:rounded focus:z-50">
           Skip to main content
         </a>
         <span
@@ -27,7 +27,7 @@ export default function AppShell({ children }: AppShellProps) {
       {/* Body: sidebar + main */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-60 flex-shrink-0 bg-[#F8FAFC] border-r border-[#E2E8F0] flex flex-col">
+        <aside className="w-60 flex-shrink-0 bg-[var(--color-surface-gray)] border-r border-[var(--color-border-light)] flex flex-col">
           <nav aria-label="Main navigation" className="flex-1 py-4">
             <NavItem
               icon={<Upload size={16} strokeWidth={1.5} aria-hidden="true" />}
@@ -50,7 +50,7 @@ export default function AppShell({ children }: AppShellProps) {
           </nav>
 
           {/* Sidebar footer */}
-          <div className="border-t border-[#E2E8F0] py-4">
+          <div className="border-t border-[var(--color-border-light)] py-4">
             <NavItem
               icon={<Settings size={16} strokeWidth={1.5} aria-hidden="true" />}
               label="Settings"
@@ -58,7 +58,7 @@ export default function AppShell({ children }: AppShellProps) {
             />
             <SignOutButton>
               <button
-                className="flex items-center gap-1 min-h-[44px] py-2 px-4 w-full text-[13px] text-[#475569] cursor-pointer hover:text-[#0F172A]"
+                className="flex items-center gap-1 min-h-[44px] py-2 px-4 w-full text-[13px] text-[var(--color-text-secondary)] cursor-pointer hover:text-[var(--color-text-primary)]"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 <LogOut size={16} strokeWidth={1.5} aria-hidden="true" />
@@ -69,7 +69,7 @@ export default function AppShell({ children }: AppShellProps) {
         </aside>
 
         {/* Main content */}
-        <main id="main-content" className="flex-1 p-8 bg-white">
+        <main id="main-content" className="flex-1 p-8 bg-[var(--color-surface)]">
           {children}
         </main>
       </div>

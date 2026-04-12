@@ -17,10 +17,10 @@ export default function StoreCard({ store, onUploadClick }: StoreCardProps) {
     : store.name;
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 flex flex-col gap-3">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-lg p-4 flex flex-col gap-3">
       <div>
         <h2
-          className="text-base font-semibold text-[#0F172A]"
+          className="text-base font-semibold text-[var(--color-text-primary)]"
           style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
         >
           {displayName}
@@ -42,7 +42,7 @@ export default function StoreCard({ store, onUploadClick }: StoreCardProps) {
       <button
         type="button"
         onClick={() => onUploadClick(store)}
-        className="mt-auto text-[13px] text-[#0F766E] font-semibold min-h-[44px] px-3 hover:underline cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-[#0F766E] focus-visible:outline-offset-2"
+        className="mt-auto text-[13px] text-[var(--color-teal)] font-semibold min-h-[44px] px-3 hover:underline cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-[var(--color-teal)] focus-visible:outline-offset-2"
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
         Upload files

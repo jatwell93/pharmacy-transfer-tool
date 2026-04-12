@@ -213,7 +213,7 @@ export default function MatchPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <h1
-          className="text-2xl font-semibold text-[#0F172A] tracking-[-0.01em]"
+          className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-[-0.01em]"
           style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
         >
           Match Results
@@ -222,12 +222,12 @@ export default function MatchPage() {
 
       {/* Control bar */}
       <div
-        className="flex items-center justify-between gap-4 mb-4 p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]"
+        className="flex items-center justify-between gap-4 mb-4 p-4 bg-[var(--color-surface-gray)] rounded-lg border border-[var(--color-border-light)]"
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
         {/* Left: months cover controls */}
         <div className="flex items-center gap-3">
-          <span className="text-[13px] font-medium text-[#475569]">Months Cover</span>
+          <span className="text-[13px] font-medium text-[var(--color-text-secondary)]">Months Cover</span>
 
           {/* Number input */}
           <input
@@ -237,7 +237,7 @@ export default function MatchPage() {
             step={1}
             value={monthsCoverTarget}
             onChange={handleMonthsInput}
-            className="w-16 rounded-md border border-[#E2E8F0] px-2 py-1 text-[13px] text-center text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#0F766E]"
+            className="w-16 rounded-md border border-[var(--color-border-light)] px-2 py-1 text-[13px] text-center text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)]"
             aria-label="Months cover target"
           />
 
@@ -250,8 +250,8 @@ export default function MatchPage() {
                 onClick={() => handlePreset(value)}
                 className={`rounded-md px-3 min-h-[36px] text-[13px] font-medium transition-colors ${
                   monthsCoverTarget === value
-                    ? 'bg-[#0F766E] text-white'
-                    : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0]'
+                    ? 'bg-[var(--color-teal)] text-white'
+                    : 'bg-[var(--color-surface-gray)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]'
                 }`}
                 aria-pressed={monthsCoverTarget === value}
               >
@@ -265,7 +265,7 @@ export default function MatchPage() {
         <div className="flex items-center gap-3">
           {/* Usage counter — only for free-plan orgs (D-07, D-08) */}
           {usage && usage.plan === 'free' && (
-            <span className="text-[13px] text-[#475569]">
+            <span className="text-[13px] text-[var(--color-text-secondary)]">
               {usage.count} of {usage.limit} free run{usage.limit !== 1 ? 's' : ''} used this month
             </span>
           )}
@@ -278,7 +278,7 @@ export default function MatchPage() {
             className={`text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
               isAtLimit
                 ? 'bg-[#D97706] text-white hover:bg-[#B45309] focus-visible:outline-[#D97706]'
-                : 'bg-[#0F766E] text-white hover:bg-[#0D5D5A] focus-visible:outline-[#0F766E]'
+                : 'bg-[var(--color-teal)] text-white hover:bg-[var(--color-teal-dark)] focus-visible:outline-[var(--color-teal)]'
             }`}
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
@@ -301,14 +301,14 @@ export default function MatchPage() {
 
       {/* Store selector — always visible so users can pick stores before first run */}
       <div
-        className="flex items-center gap-3 mb-4 p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]"
+        className="flex items-center gap-3 mb-4 p-3 bg-[var(--color-surface-gray)] rounded-lg border border-[var(--color-border-light)]"
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
-        <span className="text-[13px] font-medium text-[#475569] flex-shrink-0">Stores</span>
+        <span className="text-[13px] font-medium text-[var(--color-text-secondary)] flex-shrink-0">Stores</span>
         {storesLoading ? (
-          <span className="text-[13px] text-[#94A3B8]">Loading stores...</span>
+          <span className="text-[13px] text-[var(--color-text-muted)]">Loading stores...</span>
         ) : stores.length === 0 ? (
-          <span className="text-[13px] text-[#94A3B8]">No stores uploaded yet — go to Upload to add stores.</span>
+          <span className="text-[13px] text-[var(--color-text-muted)]">No stores uploaded yet — go to Upload to add stores.</span>
         ) : (
           <>
             <div className="flex flex-wrap gap-2">
@@ -321,8 +321,8 @@ export default function MatchPage() {
                     onClick={() => handleToggleStore(store.name)}
                     className={`rounded-md px-3 py-1 text-[13px] font-medium transition-colors ${
                       active
-                        ? 'bg-[#0F766E] text-white'
-                        : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0]'
+                        ? 'bg-[var(--color-teal)] text-white'
+                        : 'bg-[var(--color-surface-gray)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]'
                     }`}
                     aria-pressed={active}
                   >
@@ -335,7 +335,7 @@ export default function MatchPage() {
               <button
                 type="button"
                 onClick={() => setSelectedStores(new Set(stores.map(s => s.name)))}
-                className="ml-auto text-[12px] text-[#0F766E] hover:underline flex-shrink-0"
+                className="ml-auto text-[12px] text-[var(--color-teal)] hover:underline flex-shrink-0"
               >
                 Select all
               </button>
@@ -411,7 +411,7 @@ export default function MatchPage() {
       {/* Results table or empty state */}
       {!hasRun && !error && (
         <div className="flex justify-center items-center py-16">
-          <p className="text-[#94A3B8] text-[13px] text-center max-w-sm">
+          <p className="text-[var(--color-text-muted)] text-[13px] text-center max-w-sm">
             Upload store data, select stores, then click Run Match to find transfer opportunities.
           </p>
         </div>
@@ -419,23 +419,23 @@ export default function MatchPage() {
 
       {hasRun && results.length === 0 && !error && (
         <div className="flex justify-center items-center py-16">
-          <p className="text-[#94A3B8] text-[13px] text-center max-w-sm">
+          <p className="text-[var(--color-text-muted)] text-[13px] text-center max-w-sm">
             No transfer matches found. Try adjusting the months cover target or uploading more store data.
           </p>
         </div>
       )}
 
       {results.length > 0 && (
-        <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
+        <div className="border border-[var(--color-border-light)] rounded-lg overflow-hidden">
           {/* Sticky header row */}
-          <div className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+          <div className="bg-[var(--color-surface-gray)] border-b border-[var(--color-border-light)]">
             <div className="grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center">
               {/* Expand chevron column */}
               <div className="h-10" />
               {columnHeaders.map(header => (
                 <div
                   key={header}
-                  className="px-3 py-2.5 text-[13px] font-semibold text-[#475569]"
+                  className="px-3 py-2.5 text-[13px] font-semibold text-[var(--color-text-secondary)]"
                 >
                   {header}
                 </div>
@@ -463,33 +463,33 @@ export default function MatchPage() {
                       key={rowKey}
                       onClick={() => hasMultiple && handleToggleRow(rowKey)}
                       style={{ position: 'absolute', top: item.top, height: item.height, width: '100%' }}
-                      className={`grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors ${hasMultiple ? 'cursor-pointer' : ''}`}
+                      className={`grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] hover:bg-[var(--color-surface-gray)] transition-colors ${hasMultiple ? 'cursor-pointer' : ''}`}
                     >
                       {/* Expand/collapse chevron */}
                       <div className="flex items-center justify-center">
                         {hasMultiple ? (
                           isExpanded
-                            ? <ChevronDown size={14} className="text-[#94A3B8]" aria-hidden="true" />
-                            : <ChevronRight size={14} className="text-[#94A3B8]" aria-hidden="true" />
+                            ? <ChevronDown size={14} className="text-[var(--color-text-muted)]" aria-hidden="true" />
+                            : <ChevronRight size={14} className="text-[var(--color-text-muted)]" aria-hidden="true" />
                         ) : null}
                       </div>
 
                       {/* SKU */}
-                      <div className="px-3 text-[13px] font-medium text-[#0F172A] truncate">{result.sku}</div>
+                      <div className="px-3 text-[13px] font-medium text-[var(--color-text-primary)] truncate">{result.sku}</div>
                       {/* Description */}
-                      <div className="px-3 text-[13px] text-[#475569] truncate">{result.description}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{result.description}</div>
                       {/* Source Store */}
-                      <div className="px-3 text-[13px] text-[#475569] truncate">{result.sourceStore}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{result.sourceStore}</div>
                       {/* Destination Store */}
-                      <div className="px-3 text-[13px] text-[#475569] truncate">{result.bestMatch.store}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{result.bestMatch.store}</div>
                       {/* Qty to Transfer */}
-                      <div className="px-3 text-[13px] text-[#0F172A] font-medium">{result.bestMatch.qtyToTransfer.toFixed(1)}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-primary)] font-medium">{result.bestMatch.qtyToTransfer.toFixed(1)}</div>
                       {/* Dest ROU */}
-                      <div className="px-3 text-[13px] text-[#475569]">{result.bestMatch.rou.toFixed(1)}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{result.bestMatch.rou.toFixed(1)}</div>
                       {/* Months Cover */}
-                      <div className="px-3 text-[13px] text-[#475569]">{result.bestMatch.monthsCover}</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{result.bestMatch.monthsCover}</div>
                       {/* Sell-Through Time */}
-                      <div className="px-3 text-[13px] text-[#475569]">{result.bestMatch.sellThrough.toFixed(1)} mo</div>
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{result.bestMatch.sellThrough.toFixed(1)} mo</div>
                     </div>
                   );
                 }
@@ -502,29 +502,29 @@ export default function MatchPage() {
                   <div
                     key={subKey}
                     style={{ position: 'absolute', top: item.top, height: item.height, width: '100%' }}
-                    className="grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[#E2E8F0] bg-[#FAFAFA] hover:bg-[#F8FAFC] transition-colors"
+                    className="grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-gray)] transition-colors"
                   >
                     {/* Indent chevron placeholder */}
                     <div className="flex items-center justify-center pl-4">
-                      <div className="w-px h-4 bg-[#E2E8F0]" />
+                      <div className="w-px h-4 bg-[var(--color-border-light)]" />
                     </div>
 
                     {/* SKU — greyed out (same as parent) */}
-                    <div className="px-3 text-[13px] text-[#94A3B8] truncate">{item.parentSku}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentSku}</div>
                     {/* Description — greyed out */}
-                    <div className="px-3 text-[13px] text-[#94A3B8] truncate">{item.parentDescription}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentDescription}</div>
                     {/* Source Store — greyed out */}
-                    <div className="px-3 text-[13px] text-[#94A3B8] truncate">{item.parentSourceStore}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentSourceStore}</div>
                     {/* Destination Store */}
-                    <div className="px-3 text-[13px] text-[#475569] truncate">{sub.store}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{sub.store}</div>
                     {/* Qty to Transfer */}
-                    <div className="px-3 text-[13px] text-[#475569]">{sub.qtyToTransfer.toFixed(1)}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{sub.qtyToTransfer.toFixed(1)}</div>
                     {/* Dest ROU */}
-                    <div className="px-3 text-[13px] text-[#475569]">{sub.rou.toFixed(1)}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{sub.rou.toFixed(1)}</div>
                     {/* Months Cover */}
-                    <div className="px-3 text-[13px] text-[#475569]">{sub.monthsCover}</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{sub.monthsCover}</div>
                     {/* Sell-Through Time */}
-                    <div className="px-3 text-[13px] text-[#475569]">{sub.sellThrough.toFixed(1)} mo</div>
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">{sub.sellThrough.toFixed(1)} mo</div>
                   </div>
                 );
               })}
@@ -541,7 +541,7 @@ export default function MatchPage() {
           onClick={() => setShowUpgradeModal(false)}
         >
           <div
-            className="bg-white rounded-xl p-8 max-w-sm w-full mx-4 shadow-xl"
+            className="bg-[var(--color-surface)] rounded-xl p-8 max-w-sm w-full mx-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-labelledby="upgrade-modal-title"
@@ -549,12 +549,12 @@ export default function MatchPage() {
           >
             <h2
               id="upgrade-modal-title"
-              className="text-lg font-semibold text-[#0F172A] mb-2"
+              className="text-lg font-semibold text-[var(--color-text-primary)] mb-2"
               style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
             >
               You've used your free run for this month
             </h2>
-            <p className="text-[13px] text-[#475569] mb-6">
+            <p className="text-[13px] text-[var(--color-text-secondary)] mb-6">
               Upgrade to PharmIQ Pro for unlimited match runs.
             </p>
             <button
@@ -566,7 +566,7 @@ export default function MatchPage() {
             </button>
             <button
               onClick={() => setShowUpgradeModal(false)}
-              className="w-full mt-2 text-[13px] text-[#475569] hover:text-[#0F172A] py-2 transition-colors"
+              className="w-full mt-2 text-[13px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] py-2 transition-colors"
             >
               Maybe later
             </button>

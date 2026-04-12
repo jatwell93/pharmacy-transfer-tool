@@ -23,14 +23,14 @@ export default function FileStatusBadge({ label, uploadedAt }: FileStatusBadgePr
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[13px] text-[#0F172A] font-semibold">{label}:</span>
+      <span className="text-[13px] text-[var(--color-text-primary)] font-semibold">{label}:</span>
       {uploadedAt ? (
         <>
           <span className="w-2 h-2 bg-[#10B981] rounded-full flex-shrink-0" aria-hidden="true" />
-          <span className="text-[13px] text-[#475569]">{formatDate(uploadedAt)}</span>
+          <span className="text-[13px] text-[var(--color-text-secondary)]">{formatDate(uploadedAt)}</span>
         </>
       ) : (
-        <span className="text-[13px] text-[#94A3B8]">&#8211; not uploaded</span>
+        <span className="text-[13px] text-[var(--color-text-muted)]">&#8211; not uploaded</span>
       )}
     </div>
   );

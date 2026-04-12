@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Brand */
   --color-teal:          #0F766E;
@@ -24,6 +26,17 @@
   --color-warning:       #D97706;
   --color-critical:      #EF4444;
   --color-info:          #0EA5E9;
+}
+
+:root.dark {
+  /* Surface tokens flip — brand colors stay the same */
+  --color-surface:       #0F172A;   /* Navy — brand dark page bg */
+  --color-surface-gray:  #1E293B;   /* Slate-800 — dark sidebar/cards */
+  --color-border-light:  #334155;   /* Slate-700 — dark dividers */
+  --color-border-mid:    #475569;   /* Slate-600 — dark form fields */
+  --color-text-primary:  #F8FAFC;   /* Near-white — dark headings */
+  --color-text-secondary:#CBD5E1;   /* Slate-300 — dark body text */
+  --color-text-muted:    #64748B;   /* Slate-500 — dark captions */
 }
 
 body {

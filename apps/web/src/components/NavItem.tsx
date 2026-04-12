@@ -11,10 +11,10 @@ interface NavItemProps {
 export default function NavItem({ icon, label, disabled, href = '#' }: NavItemProps) {
   const className = [
     'flex items-center gap-1 min-h-[44px] py-2 px-4',
-    'text-[13px] text-[#475569]',
+    'text-[13px] text-[var(--color-text-secondary)]',
     disabled
       ? 'opacity-40 cursor-not-allowed pointer-events-none'
-      : 'hover:text-[#0F766E] cursor-pointer',
+      : 'hover:text-[var(--color-teal)] cursor-pointer',
   ].join(' ');
 
   const style = { fontFamily: "'Inter', system-ui, sans-serif" };

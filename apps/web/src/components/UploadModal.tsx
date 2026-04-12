@@ -171,22 +171,23 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
   const tooltipContent = 'Before exporting from FRED: filter by relevant departments/categories, filter for ROU > 0.01, filter for active items only, filter out $0 cost lines. Review in a spreadsheet (Excel, Google Sheets, or LibreOffice Calc) and delete unnecessary rows before upload.';
 
   const fieldClass = [
-    'w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-base text-[#0F172A] outline-none',
-    'focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E]',
+    'w-full border border-[var(--color-border-light)] rounded-md px-3 py-2 text-base text-[var(--color-text-primary)] outline-none',
+    'focus:border-[var(--color-teal)] focus:ring-1 focus:ring-[var(--color-teal)]',
     isUploading ? 'pointer-events-none opacity-60' : '',
   ].join(' ');
 
   const fileInputClass = [
-    'block w-full text-[13px] text-[#475569]',
+    'block w-full text-[13px] text-[var(--color-text-secondary)]',
     'file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0',
-    'file:text-[13px] file:font-semibold file:bg-[#F8FAFC] file:text-[#0F172A]',
-    'hover:file:bg-[#E2E8F0] cursor-pointer',
+    'file:text-[13px] file:font-semibold file:bg-[var(--color-surface-gray)] file:text-[var(--color-text-primary)]',
+    'hover:file:bg-[var(--color-border-light)] cursor-pointer',
     isUploading ? 'pointer-events-none opacity-60' : '',
   ].join(' ');
 
   return (
     <div
-      className="fixed inset-0 bg-[#0F172A]/60 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ background: 'rgba(15, 23, 42, 0.6)' }}
       onClick={() => { if (!isUploading) onClose(); }}
       aria-hidden="false"
     >
@@ -195,7 +196,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 flex flex-col gap-6"
+        className="relative bg-[var(--color-surface)] rounded-xl shadow-xl w-full max-w-md mx-4 p-6 flex flex-col gap-6"
         onClick={e => e.stopPropagation()}
       >
         {/* Close X button */}
@@ -203,7 +204,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
           type="button"
           onClick={() => { if (!isUploading) onClose(); }}
           disabled={isUploading}
-          className="absolute top-4 right-4 flex items-center justify-center min-h-[44px] min-w-[44px] text-[#475569] hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="absolute top-4 right-4 flex items-center justify-center min-h-[44px] min-w-[44px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Close"
         >
           <X size={16} aria-hidden="true" />
@@ -212,7 +213,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
         {/* Title */}
         <h2
           id="modal-title"
-          className="text-2xl font-semibold text-[#0F172A] tracking-[-0.01em] pr-10"
+          className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-[-0.01em] pr-10"
           style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
         >
           {modalTitle}
@@ -222,7 +223,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
         <div className="flex flex-col gap-4">
           {/* Store Name */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="store-name" className="text-[13px] font-semibold text-[#0F172A]">
+            <label htmlFor="store-name" className="text-[13px] font-semibold text-[var(--color-text-primary)]">
               Store Name <span className="text-[#EF4444]" aria-hidden="true">*</span>
             </label>
             <input
@@ -234,13 +235,13 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
               readOnly={isExistingStore}
               required
               placeholder={isExistingStore ? undefined : 'e.g. Balwyn'}
-              className={[fieldClass, isExistingStore ? 'bg-[#F8FAFC]' : 'bg-white'].join(' ')}
+              className={[fieldClass, isExistingStore ? 'bg-[var(--color-surface-gray)]' : 'bg-[var(--color-surface)]'].join(' ')}
             />
           </div>
 
           {/* Store Number */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="store-number" className="text-[13px] font-semibold text-[#0F172A]">
+            <label htmlFor="store-number" className="text-[13px] font-semibold text-[var(--color-text-primary)]">
               Store Number
             </label>
             <input
@@ -250,20 +251,20 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
               onChange={e => setStoreNumber(e.target.value)}
               readOnly={isExistingStore}
               placeholder="Optional"
-              className={[fieldClass, 'placeholder-[#94A3B8]', isExistingStore ? 'bg-[#F8FAFC]' : 'bg-white'].join(' ')}
+              className={[fieldClass, 'placeholder-[var(--color-text-muted)]', isExistingStore ? 'bg-[var(--color-surface-gray)]' : 'bg-[var(--color-surface)]'].join(' ')}
             />
           </div>
 
           {/* ROU file picker */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
-              <label htmlFor="rou-file" className="text-[13px] font-semibold text-[#0F172A]">
+              <label htmlFor="rou-file" className="text-[13px] font-semibold text-[var(--color-text-primary)]">
                 ROU Report
               </label>
               <div className="relative">
                 <button
                   type="button"
-                  className="flex items-center justify-center text-[#94A3B8] hover:text-[#475569] p-1"
+                  className="flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] p-1"
                   aria-label="Help: ROU Report upload tips"
                   onMouseEnter={() => setRouTooltipVisible(true)}
                   onMouseLeave={() => setRouTooltipVisible(false)}
@@ -275,7 +276,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
                 {rouTooltipVisible && (
                   <div
                     role="tooltip"
-                    className="absolute left-6 top-0 z-10 w-64 bg-[#0F172A] text-white text-[13px] rounded-md px-3 py-2 shadow-lg"
+                    className="absolute left-6 top-0 z-10 w-64 bg-[var(--color-navy)] text-white text-[13px] rounded-md px-3 py-2 shadow-lg"
                   >
                     {tooltipContent}
                   </div>
@@ -295,20 +296,20 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
               <p role="alert" className="text-[13px] text-[#EF4444]">{errors.rouFile}</p>
             )}
             {uploadedCounts?.rouRows !== undefined && (
-              <p className="text-[13px] text-[#0F766E]">✓ {uploadedCounts.rouRows.toLocaleString()} rows recognised</p>
+              <p className="text-[13px] text-[var(--color-teal)]">✓ {uploadedCounts.rouRows.toLocaleString()} rows recognised</p>
             )}
           </div>
 
           {/* Dead-stock file picker */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
-              <label htmlFor="ds-file" className="text-[13px] font-semibold text-[#0F172A]">
+              <label htmlFor="ds-file" className="text-[13px] font-semibold text-[var(--color-text-primary)]">
                 Dead-Stock Report
               </label>
               <div className="relative">
                 <button
                   type="button"
-                  className="flex items-center justify-center text-[#94A3B8] hover:text-[#475569] p-1"
+                  className="flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] p-1"
                   aria-label="Help: Dead-Stock Report upload tips"
                   onMouseEnter={() => setDsTooltipVisible(true)}
                   onMouseLeave={() => setDsTooltipVisible(false)}
@@ -320,7 +321,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
                 {dsTooltipVisible && (
                   <div
                     role="tooltip"
-                    className="absolute left-6 top-0 z-10 w-64 bg-[#0F172A] text-white text-[13px] rounded-md px-3 py-2 shadow-lg"
+                    className="absolute left-6 top-0 z-10 w-64 bg-[var(--color-navy)] text-white text-[13px] rounded-md px-3 py-2 shadow-lg"
                   >
                     {tooltipContent}
                   </div>
@@ -339,14 +340,14 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
               <p role="alert" className="text-[13px] text-[#EF4444]">{errors.dsFile}</p>
             )}
             {uploadedCounts?.dsRows !== undefined && (
-              <p className="text-[13px] text-[#0F766E]">✓ {uploadedCounts.dsRows.toLocaleString()} rows recognised</p>
+              <p className="text-[13px] text-[var(--color-teal)]">✓ {uploadedCounts.dsRows.toLocaleString()} rows recognised</p>
             )}
           </div>
         </div>
 
         {/* Replace-confirmation warning */}
         {replaceWarning && (
-          <div className="border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3 text-[13px] text-[#0F172A]">
+          <div className="border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3 text-[13px] text-[var(--color-text-primary)]">
             {replaceWarning}
           </div>
         )}
@@ -362,7 +363,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
             <button
               type="button"
               onClick={onClose}
-              className="bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] hover:bg-[#0D5D5A] transition-colors cursor-pointer"
+              className="bg-[var(--color-teal)] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] hover:bg-[var(--color-teal-dark)] transition-colors cursor-pointer"
               style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
               Done
@@ -373,7 +374,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
                 type="button"
                 onClick={() => { if (!isUploading) onClose(); }}
                 disabled={isUploading}
-                className="text-[13px] text-[#475569] min-h-[44px] px-4 hover:text-[#0F172A] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="text-[13px] text-[var(--color-text-secondary)] min-h-[44px] px-4 hover:text-[var(--color-text-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 Close
@@ -383,10 +384,10 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
                 onClick={handleUpload}
                 disabled={isDisabled}
                 className={[
-                  'bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2',
+                  'bg-[var(--color-teal)] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2',
                   isDisabled
                     ? 'opacity-40 cursor-not-allowed'
-                    : 'hover:bg-[#0D5D5A] transition-colors cursor-pointer',
+                    : 'hover:bg-[var(--color-teal-dark)] transition-colors cursor-pointer',
                 ].join(' ')}
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >

@@ -29,7 +29,7 @@ export default function UploadPage() {
       {/* Header row */}
       <div className="flex items-center justify-between mb-6">
         <h1
-          className="text-2xl font-semibold text-[#0F172A] tracking-[-0.01em]"
+          className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-[-0.01em]"
           style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
         >
           Upload Stores
@@ -37,7 +37,7 @@ export default function UploadPage() {
         <button
           type="button"
           onClick={handleAddStore}
-          className="bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 hover:bg-[#0D5D5A] transition-colors focus-visible:outline-2 focus-visible:outline-[#0F766E] focus-visible:outline-offset-2"
+          className="bg-[var(--color-teal)] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 hover:bg-[var(--color-teal-dark)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-teal)] focus-visible:outline-offset-2"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           <Plus size={16} strokeWidth={1.5} aria-hidden="true" />
@@ -48,26 +48,26 @@ export default function UploadPage() {
       {/* Loading state */}
       {loading && (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-[#0F766E]" size={24} aria-label="Loading stores" />
+          <Loader2 className="animate-spin text-[var(--color-teal)]" size={24} aria-label="Loading stores" />
         </div>
       )}
 
       {/* Error state */}
       {!loading && error && (
         <div className="flex justify-center py-12">
-          <p className="text-[#EF4444] text-[13px]">{error}</p>
+          <p className="text-[#EF4444] text-[13px]">{error}</p>  {/* semantic red — intentionally kept as-is */}
         </div>
       )}
 
       {/* Empty state */}
       {!loading && !error && stores.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <h2 className="text-base font-semibold text-[#0F172A]">No stores yet</h2>
-          <p className="text-[13px] text-[#94A3B8]">Add your first store to get started.</p>
+          <h2 className="text-base font-semibold text-[var(--color-text-primary)]">No stores yet</h2>
+          <p className="text-[13px] text-[var(--color-text-muted)]">Add your first store to get started.</p>
           <button
             type="button"
             onClick={handleAddStore}
-            className="mx-auto bg-[#0F766E] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 hover:bg-[#0D5D5A] transition-colors focus-visible:outline-2 focus-visible:outline-[#0F766E] focus-visible:outline-offset-2"
+            className="mx-auto bg-[var(--color-teal)] text-white text-[13px] font-semibold rounded-md px-4 min-h-[44px] flex items-center gap-2 hover:bg-[var(--color-teal-dark)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-teal)] focus-visible:outline-offset-2"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             <Plus size={16} strokeWidth={1.5} aria-hidden="true" />
