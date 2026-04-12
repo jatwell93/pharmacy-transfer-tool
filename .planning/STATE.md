@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase_complete
-stopped_at: Phase 6 complete — all plans verified and merged
-last_updated: "2026-04-12T05:00:00.000Z"
-last_activity: 2026-04-12 -- Phase 06 complete (brand-ui-and-export)
+status: verifying
+stopped_at: Completed 07-is-ranged-schema-fix-01-PLAN.md
+last_updated: "2026-04-12T06:32:44.649Z"
+last_activity: 2026-04-12
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 9
+  completed_phases: 7
+  total_plans: 17
+  completed_plans: 17
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 06 — brand-ui-and-export
+**Current focus:** Phase 07 — is-ranged-schema-fix
 
 ## Current Position
 
-Phase: 06 (brand-ui-and-export) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 06
-Last activity: 2026-04-12 -- Phase 06 execution started
+Phase: 07 (is-ranged-schema-fix) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-04-12
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-file-upload-pipeline P04 | 4 | 2 tasks | 2 files |
 | Phase 04-matching-algorithm P01 | 268 | 2 tasks | 3 files |
 | Phase 04-matching-algorithm P02 | 247 | 2 tasks | 4 files |
+| Phase 07-is-ranged-schema-fix P01 | 45 | 4 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,10 @@ Recent decisions affecting current work:
 - [Phase 04-matching-algorithm]: Warning deduplication uses sku+field composite key Set to prevent duplicate warnings across multi-store match runs
 - [Phase 04-matching-algorithm]: overflowY via inline style (not Tailwind class) to combine with calc() maxHeight
 - [Phase 04-matching-algorithm]: Flat items array with pre-computed top/height for virtualization — no library dependency
+- [Phase 07-is-ranged-schema-fix]: isRanged read from r.is_ranged in match.ts RouItem construction — not hardcoded false (INT-01 fix)
+- [Phase 07-is-ranged-schema-fix]: RANGED_TRUTHY Set reused in parseRouFile — mirrors parseDeadStockFile pattern; no duplication
+- [Phase 07-is-ranged-schema-fix]: UNNEST boolean array pattern (unnest(boolean[])) used for ROU INSERT is_ranged column — reused from dead_stock INSERT
+- [Phase 07-is-ranged-schema-fix]: Ranged-first sort test uses soh:10 (not soh:100) — soh:100 yields minRequiredRou>8, excluding both destination stores via sell-through filter
 
 ### Pending Todos
 
@@ -108,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-11T09:12:56.919Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-brand-ui-and-export/06-CONTEXT.md
+Last session: 2026-04-12T06:32:44.641Z
+Stopped at: Completed 07-is-ranged-schema-fix-01-PLAN.md
+Resume file: None

@@ -27,8 +27,8 @@
 - [ ] **MATCH-02**: System applies sell-through filter — only matches destination stores where ROU ≥ SOH / 12 (will sell through existing stock within 12 months)
 - [ ] **MATCH-03**: User can set a months-cover target (e.g. 3); maximum transfer quantity = (cover × destination ROU) − destination existing SOH; result is clamped to ≥ 0
 - [ ] **MATCH-04**: When destination store's existing SOH already exceeds months-cover target, that store is excluded from results (0 qty transfer makes no sense)
-- [ ] **MATCH-05**: Results are sorted ranged-first, then by ROU descending within each group
-- [ ] **MATCH-06**: `is_ranged` parsing accepts all truthy variants: `checked`, `yes`, `true`, `1`, `y` (case-insensitive) — not just `"checked"`
+- [x] **MATCH-05**: Results are sorted ranged-first, then by ROU descending within each group
+- [x] **MATCH-06**: `is_ranged` parsing accepts all truthy variants: `checked`, `yes`, `true`, `1`, `y` (case-insensitive) — not just `"checked"`
 - [ ] **MATCH-07**: NaN and missing ROU/cost values are explicitly handled (pd.isna / null check) rather than silently defaulted to 0
 
 ### Results & Export
@@ -100,8 +100,8 @@
 | MATCH-02 | Phase 8 — Phase 04 Verification (gap closure) | Pending |
 | MATCH-03 | Phase 8 — Phase 04 Verification (gap closure) | Pending |
 | MATCH-04 | Phase 8 — Phase 04 Verification (gap closure) | Pending |
-| MATCH-05 | Phase 7 — Fix is_ranged Schema and Pipeline (gap closure) | Pending |
-| MATCH-06 | Phase 7 — Fix is_ranged Schema and Pipeline (gap closure) | Pending |
+| MATCH-05 | Phase 7 — Fix is_ranged Schema and Pipeline (gap closure) | Complete |
+| MATCH-06 | Phase 7 — Fix is_ranged Schema and Pipeline (gap closure) | Complete |
 | MATCH-07 | Phase 8 — Phase 04 Verification (gap closure) | Pending |
 | RESULTS-01 | Phase 8 — Phase 04 Verification (gap closure) | Pending |
 | BILLING-01 | Phase 9 — Requirements and Roadmap Documentation Sync (gap closure) | Pending |
