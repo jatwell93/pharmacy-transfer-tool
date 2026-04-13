@@ -17,10 +17,11 @@ CREATE TABLE IF NOT EXISTS orgs (
 );
 
 CREATE TABLE IF NOT EXISTS stores (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id      TEXT NOT NULL REFERENCES orgs(org_id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id       TEXT NOT NULL REFERENCES orgs(org_id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,
+  store_number TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(org_id, name)
 );
 
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   org_id                  TEXT NOT NULL REFERENCES orgs(org_id) ON DELETE CASCADE UNIQUE,
   stripe_customer_id      TEXT,
   stripe_subscription_id  TEXT,
-  status                  TEXT NOT NULL DEFAULT 'inactive',
+  status                  TEXT NOT NULL DEFAULT 'free',
   updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
