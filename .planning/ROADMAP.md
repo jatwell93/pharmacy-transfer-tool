@@ -70,10 +70,10 @@ Cloudflare Dashboard → Workers & Pages → Plans → Upgrade to Paid ($5/month
 **Goal:** Close tech-debt items from v1.0 milestone audit — schema.sql fixes, DX config completeness, and documentation sync
 **Requirements**: TBD
 **Depends on:** Phase 9
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 10-01-PLAN.md — Schema fixes, DX config completeness, and Phase 9 close
+- [x] 10-01-PLAN.md — Schema fixes, DX config completeness, and Phase 9 close
 
 ---
 
