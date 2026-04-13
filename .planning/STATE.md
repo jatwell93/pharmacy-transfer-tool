@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Completed 10-01-PLAN.md
 last_updated: "2026-04-13T10:10:53.935Z"
-last_activity: 2026-04-12
+last_activity: 2026-04-13
 progress:
   total_phases: 10
   completed_phases: 10
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 09 — docs-sync
+**Current focus:** Phase 10 — fix-schema-sql-dev-vars-example-webhook-test-ts-failure-subs
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
-Status: Executing Phase 09
-Last activity: 2026-04-12
+Phase: 10 (fix-schema-sql-dev-vars-example-webhook-test-ts-failure-subs) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 10
+Last activity: 2026-04-12 -- Phase 10 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -107,6 +107,10 @@ Recent decisions affecting current work:
 - [Phase 07-is-ranged-schema-fix]: Ranged-first sort test uses soh:10 (not soh:100) — soh:100 yields minRequiredRou>8, excluding both destination stores via sell-through filter
 - [Phase 10]: subscriptions.status DEFAULT changed from 'inactive' to 'free' — aligns with orgs.plan='free' default and billing route logic
 - [Phase 10]: schema.sql stores table gains store_number TEXT (nullable) — no migration needed as this is the canonical DDL
+
+### Roadmap Evolution
+
+- Phase 10 added: fix schema.sql + .dev.vars.example + webhook.test.ts failure + subscriptions.status DEFAULT naming
 
 ### Pending Todos
 
