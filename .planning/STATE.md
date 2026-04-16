@@ -7,7 +7,7 @@ stopped_at: ~
 last_updated: "2026-04-16T00:00:00.000Z"
 last_activity: 2026-04-16
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
