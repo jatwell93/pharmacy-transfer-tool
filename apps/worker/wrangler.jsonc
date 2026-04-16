@@ -14,3 +14,5 @@
 // wrangler secret put STRIPE_SECRET_KEY
 // wrangler secret put STRIPE_WEBHOOK_SECRET
 // wrangler secret put STRIPE_PRICE_ID
+// wrangler secret put STRIPE_PRICE_ID_PRO         // Phase 11 (v1.1)
+// wrangler secret put STRIPE_PRICE_ID_ENTERPRISE  // Phase 11 (v1.1)

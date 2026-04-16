@@ -9,3 +9,12 @@ ALLOWED_ORIGIN=http://localhost:5173
 STRIPE_SECRET_KEY=sk_test_xxx
 STRIPE_WEBHOOK_SECRET=whsec_xxx
 STRIPE_PRICE_ID=price_xxx
+# Phase 11 (v1.1): Stripe price IDs for Pro and Enterprise tiers (required by Phase 15)
+# Create these prices in the Stripe Dashboard → Products → Add Product:
+#   - PharmIQ Pro: $10 AUD/month recurring → save price ID as STRIPE_PRICE_ID_PRO
+#   - PharmIQ Enterprise: $100 AUD/month recurring → save price ID as STRIPE_PRICE_ID_ENTERPRISE
+# Then register them as Worker secrets:
+#   wrangler secret put STRIPE_PRICE_ID_PRO
+#   wrangler secret put STRIPE_PRICE_ID_ENTERPRISE
+STRIPE_PRICE_ID_PRO=price_xxx
+STRIPE_PRICE_ID_ENTERPRISE=price_xxx
