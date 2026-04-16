@@ -21,6 +21,7 @@ export interface DeadStockRow {
   description: string;
   soh: number; // NaN if non-numeric
   isRanged: boolean;
+  costEx: number; // NaN when Cost Ex column absent OR cell non-numeric
 }
 
 // --- HEADER_ALIASES — ported from stock_transfer_project/api/views.py ---
@@ -275,6 +276,11 @@ export function parseDeadStockFile(
   }
 
   const colMap = buildColumnMap(rows[headerIdx]);
+
+  // D-04: detect Cost Ex column at header level — SheetJS defval:"" means
+  // both an absent column AND a blank cell return ""; only colMap absence is reliable.
+  const hasCostColumn = colMap["Cost Ex"] !== undefined;
+
   const result: DeadStockRow[] = [];
 
   for (let i = headerIdx + 1; i < rows.length; i++) {
@@ -299,7 +305,14 @@ export function parseDeadStockFile(
         ? RANGED_TRUTHY.has((row[rangedCol]?.trim() ?? "").toLowerCase())
         : false;
 
-    result.push({ sku, description, soh, isRanged });
+    // Cost Ex extraction — NaN when column absent OR cell non-numeric.
+    // Zero is preserved per D-08 (legitimate samples/donations in FRED).
+    // Negative values are preserved here; upload route emits DataQualityWarning later (D-09).
+    const costEx = hasCostColumn
+      ? parseFloat(row[colMap["Cost Ex"]] ?? "")
+      : NaN;
+
+    result.push({ sku, description, soh, isRanged, costEx });
   }
 
   return result;

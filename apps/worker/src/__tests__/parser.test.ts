@@ -242,3 +242,67 @@ describe("parseDeadStockFile", () => {
     );
   });
 });
+
+// --- parseDeadStockFile cost_ex extraction ---
+
+describe("parseDeadStockFile cost_ex extraction", () => {
+  it("Test 1: extracts costEx from Cost Ex column with numeric values", () => {
+    const csv = "Item Code,SOH,Cost Ex\nABC,10,4.50\nDEF,5,12\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result[0].costEx).toBe(4.5);
+    expect(result[1].costEx).toBe(12);
+  });
+
+  it("Test 2: returns NaN for every row when Cost Ex column is absent — no error thrown", () => {
+    const csv = "Item Code,SOH\nABC,10\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result.length).toBe(1);
+    expect(Number.isNaN(result[0].costEx)).toBe(true);
+  });
+
+  it("Test 3: returns NaN when Cost Ex column is present but cell is blank", () => {
+    const csv = "Item Code,SOH,Cost Ex\nABC,10,\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result.length).toBe(1);
+    expect(Number.isNaN(result[0].costEx)).toBe(true);
+  });
+
+  it("Test 4: zero cost is preserved as 0 per D-08 — not NaN and not null", () => {
+    const csv = "Item Code,SOH,Cost Ex\nABC,10,0\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result[0].costEx).toBe(0);
+    expect(Number.isNaN(result[0].costEx)).toBe(false);
+  });
+
+  it("Test 5: negative cost is preserved at parse layer — warning emitted later in upload route per D-09", () => {
+    const csv = "Item Code,SOH,Cost Ex\nABC,10,-2.5\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result[0].costEx).toBe(-2.5);
+  });
+
+  it("Test 6: header alias 'Cost' works per D-02", () => {
+    const csv = "Item Code,SOH,Cost\nABC,10,7\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result[0].costEx).toBe(7);
+  });
+
+  it("Test 7: FRED Stock Valuation full-column CSV — only relevant columns extracted", () => {
+    const csv =
+      "Item Code,Department,Category,Item Description,Cost Ex,Retail,SOH,SOH $,Alias\n" +
+      "ABC,GEN,CAT,Test,4.50,9,10,45,X\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result.length).toBe(1);
+    expect(result[0].sku).toBe("ABC");
+    expect(result[0].description).toBe("Test");
+    expect(result[0].soh).toBe(10);
+    expect(result[0].isRanged).toBe(false);
+    expect(result[0].costEx).toBe(4.5);
+  });
+});
