@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS dead_stock (
   sku         TEXT NOT NULL,
   description TEXT,
   soh         DOUBLE PRECISION,
+  cost_ex     DOUBLE PRECISION,
   is_ranged   BOOLEAN NOT NULL DEFAULT false,
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -61,7 +62,9 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   org_id                  TEXT NOT NULL REFERENCES orgs(org_id) ON DELETE CASCADE UNIQUE,
   stripe_customer_id      TEXT,
   stripe_subscription_id  TEXT,
+  stripe_price_id         TEXT,
   status                  TEXT NOT NULL DEFAULT 'free',
+  plan_tier               TEXT NOT NULL DEFAULT 'free',
   updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
