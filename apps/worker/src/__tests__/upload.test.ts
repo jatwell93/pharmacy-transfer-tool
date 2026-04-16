@@ -195,6 +195,132 @@ describe("POST /api/upload", () => {
   });
 });
 
+// --- POST /api/upload — Cost Ex column ---
+
+describe("POST /api/upload — Cost Ex column", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("Test A: dead-stock upload WITH Cost Ex column writes cost_ex array; warnings is empty array", async () => {
+    const app = buildApp();
+
+    const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE dead_stock, INSERT dead_stock
+    mockedWithOrgContext
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "s1" }])              // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE dead_stock
+      .mockResolvedValueOnce(undefined);                   // INSERT dead_stock (with cost_ex)
+
+    const csvContent = "Item Code,SOH,Cost Ex\nABC,5,4.50\nDEF,3,2.25\n";
+    const dsFile = new File([csvContent], "dead-stock.csv", { type: "text/csv" });
+
+    const form = new FormData();
+    form.append("storeName", "CostStore");
+    form.append("dsFile", dsFile);
+
+    const res = await app.request("/api/upload", { method: "POST", body: form }, TEST_ENV);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; warnings: unknown[] };
+    expect(body.ok).toBe(true);
+    expect(body.warnings).toEqual([]);
+    expect(mockedWithOrgContext).toHaveBeenCalledTimes(5);
+  });
+
+  it("Test B: dead-stock upload WITHOUT Cost Ex column still succeeds; warnings is empty", async () => {
+    const app = buildApp();
+
+    const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE dead_stock, INSERT dead_stock
+    mockedWithOrgContext
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "s1" }])              // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE dead_stock
+      .mockResolvedValueOnce(undefined);                   // INSERT dead_stock (no cost_ex column in CSV)
+
+    const csvContent = "Item Code,SOH\nABC,5\n";
+    const dsFile = new File([csvContent], "dead-stock.csv", { type: "text/csv" });
+
+    const form = new FormData();
+    form.append("storeName", "NoCostStore");
+    form.append("dsFile", dsFile);
+
+    const res = await app.request("/api/upload", { method: "POST", body: form }, TEST_ENV);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; warnings: unknown[] };
+    expect(body.ok).toBe(true);
+    expect(body.warnings).toEqual([]);
+  });
+
+  it("Test C: negative cost emits DataQualityWarning with field: 'cost'", async () => {
+    const app = buildApp();
+
+    const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE dead_stock, INSERT dead_stock
+    mockedWithOrgContext
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "s1" }])              // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE dead_stock
+      .mockResolvedValueOnce(undefined);                   // INSERT dead_stock
+
+    const csvContent = "Item Code,SOH,Cost Ex\nABC,5,4.50\nNEG,3,-1.50\n";
+    const dsFile = new File([csvContent], "dead-stock.csv", { type: "text/csv" });
+
+    const form = new FormData();
+    form.append("storeName", "NegCostStore");
+    form.append("dsFile", dsFile);
+
+    const res = await app.request("/api/upload", { method: "POST", body: form }, TEST_ENV);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      warnings: Array<{ sku: string; field: string; reason: string }>;
+    };
+    expect(body.ok).toBe(true);
+    // NEG row must produce a cost warning
+    const negWarning = body.warnings.find((w) => w.sku === "NEG");
+    expect(negWarning).toBeDefined();
+    expect(negWarning?.field).toBe("cost");
+    expect(negWarning?.reason).toMatch(/negative/i);
+    // ABC row (positive cost) must NOT produce a warning
+    expect(body.warnings.find((w) => w.sku === "ABC")).toBeUndefined();
+  });
+
+  it("Test D: zero cost is valid, no warning emitted per D-08", async () => {
+    const app = buildApp();
+
+    const mockedWithOrgContext = vi.mocked(withOrgContext);
+    // Call sequence: org upsert, SELECT (no store), INSERT store, DELETE dead_stock, INSERT dead_stock
+    mockedWithOrgContext
+      .mockResolvedValueOnce(undefined)                    // org upsert — INSERT INTO orgs ON CONFLICT DO NOTHING
+      .mockResolvedValueOnce([])                           // SELECT stores → not found
+      .mockResolvedValueOnce([{ id: "s1" }])              // INSERT stores RETURNING id
+      .mockResolvedValueOnce(undefined)                    // DELETE dead_stock
+      .mockResolvedValueOnce(undefined);                   // INSERT dead_stock
+
+    const csvContent = "Item Code,SOH,Cost Ex\nFREE,5,0\n";
+    const dsFile = new File([csvContent], "dead-stock.csv", { type: "text/csv" });
+
+    const form = new FormData();
+    form.append("storeName", "ZeroCostStore");
+    form.append("dsFile", dsFile);
+
+    const res = await app.request("/api/upload", { method: "POST", body: form }, TEST_ENV);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; warnings: unknown[] };
+    expect(body.ok).toBe(true);
+    expect(body.warnings).toEqual([]);
+  });
+});
+
 // --- GET /api/stores ---
 
 describe("GET /api/stores", () => {

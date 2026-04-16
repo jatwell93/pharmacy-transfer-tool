@@ -14,6 +14,7 @@ import { Hono } from 'hono';
 import type { Env, Variables } from '../types';
 import { withOrgContext } from '../db/client';
 import { parseRouFile, parseDeadStockFile } from '../lib/parser';
+import type { DataQualityWarning } from '../matcher';
 
 const uploadRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -25,6 +26,7 @@ uploadRoute.post('/upload', async (c) => {
   try {
     const body = await c.req.parseBody();
     const orgId = c.get('orgId');
+    const warnings: DataQualityWarning[] = [];
     const storeName = (body['storeName'] as string)?.trim();
     const storeNumber = (body['storeNumber'] as string)?.trim() || null;
     const rouFile = body['rouFile'];
@@ -158,6 +160,17 @@ uploadRoute.post('/upload', async (c) => {
 
       dsRowCount = rows.length;
 
+      // D-09: negative cost_ex is a data entry error — emit warning, store NULL
+      for (const row of rows) {
+        if (!Number.isNaN(row.costEx) && row.costEx < 0) {
+          warnings.push({
+            sku: row.sku,
+            field: "cost",
+            reason: "cost_ex is negative — likely a data entry error in FRED; stored as null",
+          });
+        }
+      }
+
       await withOrgContext<void>(
         dbUrl,
         orgId,
@@ -169,24 +182,31 @@ uploadRoute.post('/upload', async (c) => {
         const descriptions = rows.map((r) => r.description);
         const sohs = rows.map((r) => r.soh);
         const ranged = rows.map((r) => r.isRanged);
+        const costs: (number | null)[] = rows.map((r) => {
+          // D-08: zero is valid (preserved). D-09: negative → NULL (warning emitted above). NaN → NULL.
+          if (Number.isNaN(r.costEx)) return null;
+          if (r.costEx < 0) return null;
+          return r.costEx;
+        });
 
         await withOrgContext<void>(
           dbUrl,
           orgId,
           (tx) => tx`
-            INSERT INTO dead_stock (org_id, store_id, sku, description, soh, is_ranged, uploaded_at)
+            INSERT INTO dead_stock (org_id, store_id, sku, description, soh, is_ranged, cost_ex, uploaded_at)
             SELECT ${orgId}, ${storeId}::uuid,
                    unnest(${skus}::text[]),
                    unnest(${descriptions}::text[]),
                    unnest(${sohs}::float8[]),
                    unnest(${ranged}::boolean[]),
+                   unnest(${costs}::float8[]),
                    NOW()
           `,
         );
       }
     }
 
-    return c.json({ ok: true, storeId, storeName, rouRows: rouRowCount, dsRows: dsRowCount });
+    return c.json({ ok: true, storeId, storeName, rouRows: rouRowCount, dsRows: dsRowCount, warnings });
   } catch (err) {
     console.error('[upload] handler error:', err);
     return c.json({ error: 'Upload failed — database error. Please try again.' }, 500);
