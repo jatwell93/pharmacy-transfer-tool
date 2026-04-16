@@ -5,6 +5,7 @@ import healthRoute from './routes/health';
 import uploadRoute from './routes/upload';
 import matchRoute from './routes/match';
 import billingRoute from './routes/billing';
+import summaryRoute from './routes/dead-stock-summary';
 import webhookRoute from './routes/webhook';
 import type { Env, Variables } from './types';
 
@@ -31,5 +32,6 @@ app.route('/api', healthRoute);
 app.route('/api', uploadRoute);
 app.route('/api', matchRoute);
 app.route('/api', billingRoute);
+app.route('/api', summaryRoute);
 
 export default app;
