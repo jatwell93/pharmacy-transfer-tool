@@ -1,304 +1,290 @@
-# Technology Stack
+# Stack Research: v1.1
 
-**Project:** PharmIQ Stock Transfer
-**Researched:** 2026-03-28
-**Overall confidence:** HIGH (all versions verified against npm registry and official documentation)
-
----
-
-## Overview
-
-This is a greenfield rebuild of a working Django + SQLite + React (CRA) app onto the Cloudflare Workers + NEON Postgres + Clerk stack. The stack must match a companion app (use-by dates tracker) already running on this platform. The primary technical challenge is file processing (CSV/XLSX ingestion) inside a constrained Workers runtime with no Node.js `fs`, limited memory (128 MB), and CPU time limits.
+**Project:** PharmIQ Stock Transfer — v1.1 Reporting & Tiered Billing
+**Researched:** 2026-04-16
+**Scope:** Additions and changes only. Existing v1.0 stack (Hono, NEON, Clerk, Vite, React 19, Tailwind 4, @react-pdf/renderer, SheetJS) is validated and unchanged.
 
 ---
 
-## Recommended Stack
+## Charting Library
 
-### Runtime & Deployment
+### Recommendation: recharts 3.x
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Cloudflare Workers | N/A (platform) | API/backend runtime | Matches companion app; edge-deployed, zero cold-start for V8 isolates; stateless serverless model fits the workload |
-| Cloudflare Pages | N/A (platform) | Frontend hosting | Same project, served from same Cloudflare account; Git-based deploys, preview URLs on PRs |
-| `wrangler` | 4.78.0 | Worker CLI / deploy tool | Official Cloudflare toolchain; required for local dev, secrets, and deploy |
-| `@cloudflare/workers-types` | 4.20260317.1 | TypeScript types for Workers bindings | Gives type safety for `env.R2`, `env.HYPERDRIVE`, `env.CLERK_SECRET_KEY`, etc. |
+**Install:**
+```bash
+npm install recharts
+```
 
-**wrangler.jsonc flags required:**
+If npm throws peer dep errors due to `react-is`, add this override to `apps/web/package.json`:
 ```json
-{
-  "compatibility_flags": ["nodejs_compat"],
-  "compatibility_date": "2025-09-27"
+"overrides": {
+  "react-is": "^19.0.0"
 }
 ```
-`nodejs_compat` is mandatory for `@neondatabase/serverless`, `pg`, and other packages that use Node.js built-ins. As of Sept 2025, this flag also enables `node:fs` — do not rely on that for file processing (use in-memory ArrayBuffer instead).
+Then re-run `npm install`. This is the shadcn/ui-documented workaround (MEDIUM confidence — documented by shadcn, not by recharts maintainers directly, though issue #4558 is closed/completed).
+
+**Version:** 3.8.1 (current as of April 2026). Latest stable releases as of research date.
+
+**Why recharts, not the alternatives:**
+
+| Criterion | recharts | Chart.js (react-chartjs-2) | visx | victory |
+|-----------|----------|---------------------------|------|---------|
+| React-native API | Yes — SVG component composition | No — imperative canvas API wrapped in React | Yes — low-level primitives | Yes |
+| SSR / Cloudflare Pages safe | Yes — SVG renders without `window`/`canvas` | No — requires `document.createElement('canvas')` | Yes | Yes |
+| Pie chart | PieChart + Pie + Cell | Yes | Yes (complex setup) | VictoryPie |
+| Bar/grouped-bar chart | BarChart + Bar (multiple Bar children = grouped) | Yes | Yes (complex setup) | VictoryBar |
+| Bundle size | ~300 KB min, ~90 KB gzip | ~200 KB min, ~70 KB gzip | Modular (pay per primitive) | ~400 KB+ |
+| Learning curve | Low (declarative JSX) | Medium (config object) | High (D3 primitives) | Low |
+| React 19 support | Resolved (issue #4558 closed) | Yes | Yes | Yes |
+| Tailwind 4 compatible | Yes (no CSS conflict) | Yes | Yes | Yes |
+
+**Chart.js is ruled out** because canvas-based rendering requires `document.createElement('canvas')`, which fails in Cloudflare Pages SSR pre-render and also fails in any worker-side rendering. While this app is a SPA (no SSR), the canvas dependency is a fragility — it also cannot render without a live DOM, meaning any component that mounts before hydration can throw. recharts uses SVG, which serialises cleanly.
+
+**visx is ruled out** because it is D3 primitive wrappers — appropriate for custom visualisation products, not for adding two standard chart types to an existing app in a milestone. Setup effort is disproportionate to the need.
+
+**victory is ruled out** because it has the largest bundle of the contenders and no meaningful advantage over recharts for standard pie + bar charts.
+
+**Charts needed for v1.1:**
+
+1. **Dead stock units per store (pre-match)** — `PieChart` + `Pie` + `Cell` (one slice per store, sized by total dead-stock SOH units). Colour each store slice using the PharmIQ teal/amber palette.
+
+2. **Projected change chart (post-match)** — `BarChart` with two `Bar` children per store: current dead SOH vs. projected remaining dead SOH after all recommended transfers. This is a grouped bar chart (side-by-side bars per store), which recharts supports natively by rendering multiple `<Bar dataKey="...">` elements inside one `<BarChart>`.
+
+**Cloudflare Pages compatibility:** recharts is SVG-only, pure React, no canvas, no `window` dependency at import time. Vite tree-shakes unused chart types. No known issues with Cloudflare Pages static hosting.
+
+**Bundle size note:** recharts adds approximately 90 KB gzip to the frontend bundle. Given `@react-pdf/renderer` (~150 KB gzip) is already in the bundle, this keeps the total well under Cloudflare Pages' 25 MB asset limit. For Vite, only imported chart components are bundled — import only `{ PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer }`.
+
+**Confidence: MEDIUM** — recharts 3.x React 19 compatibility confirmed via GitHub issue #4558 (closed) and shadcn/ui docs. Bundle size estimate from community reports (Bundlephobia was unreachable during research). SSR safety confirmed from recharts docs statement that SVG renders in isomorphic contexts.
 
 ---
 
-### API Framework
+## Stripe Multi-Tier
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `hono` | 4.12.9 | HTTP router/framework on Workers | Purpose-built for Workers and Web Standards APIs; fastest router benchmarked on Workers; first-class TypeScript; `c.env` for bindings (not `process.env`); built-in middleware primitives |
-| `@hono/clerk-auth` | 3.1.0 | Clerk auth middleware for Hono | Official Hono integration; wraps `@clerk/backend`'s `authenticateRequest`; provides `clerkMiddleware()` and `getAuth(c)` helpers |
-| `@clerk/backend` | 3.2.3 | Clerk SDK for server-side JWT verification | Works in V8 isolates; exposes `createClerkClient`, `authenticateRequest()`, `verifyToken()` |
+### Current state
 
-**Auth pattern (Hono + Clerk):**
+The existing integration (Phase 5) uses:
+- One `STRIPE_PRICE_ID` env binding pointing to a single paid price
+- `checkout.session.completed` webhook: sets `subscriptions.status = 'paid'`
+- `customer.subscription.deleted` webhook: sets `subscriptions.status = 'free'`
+- Plan check in `match.ts`: `planStatus !== 'paid'` triggers usage enforcement
+- `billing.ts` `/usage` route: returns `plan: 'free' | 'paid'` and `limit: 1 | -1`
+
+### Target state
+
+Three tiers: **Free** (1 match/mo, any stores), **Pro** ($10/mo, 10 matches/mo, max 10 stores), **Enterprise** ($100/mo, unlimited matches and stores).
+
+### Stripe product/price setup
+
+Create **two** Stripe products (in Stripe dashboard or via API):
+- Product: "PharmIQ Pro" — one recurring Price: $10 AUD/month → gives `price_pro_xxx` ID
+- Product: "PharmIQ Enterprise" — one recurring Price: $100 AUD/month → gives `price_enterprise_xxx` ID
+
+Store both price IDs as Worker env secrets:
+```
+STRIPE_PRICE_ID_PRO=price_pro_xxx
+STRIPE_PRICE_ID_ENTERPRISE=price_enterprise_xxx
+```
+
+Add both to the `Env` interface in `types.ts`.
+
+### Checkout session changes
+
+The `/billing/create-checkout` endpoint must accept a `tier` parameter in the request body (`'pro' | 'enterprise'`) and select the correct price ID:
 ```typescript
-import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
-import { Hono } from "hono";
-
-const app = new Hono<{ Bindings: Env }>();
-
-app.use("*", clerkMiddleware());
-
-app.post("/api/upload", async (c) => {
-  const auth = getAuth(c);
-  if (!auth?.userId) return c.json({ error: "Unauthorized" }, 401);
-  // auth.orgId for tenancy scoping
-});
+const priceId = tier === 'enterprise'
+  ? c.env.STRIPE_PRICE_ID_ENTERPRISE
+  : c.env.STRIPE_PRICE_ID_PRO;
 ```
 
-Required env vars (via `wrangler secret put`):
-- `CLERK_SECRET_KEY`
-- `CLERK_PUBLISHABLE_KEY`
+### Webhook changes
 
-**Confidence: HIGH** — verified against Hono docs, @hono/clerk-auth npm package, and Clerk backend SDK docs.
+**Add `customer.subscription.updated`** to the webhook handler. This fires when a customer upgrades or downgrades between Pro and Enterprise via the Stripe Customer Portal or an API call.
 
----
+Read the new plan tier from `subscription.items.data[0].price.id` (not from metadata — the `plan_tier` in metadata is not auto-updated by Stripe on subscription changes):
 
-### Database
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| NEON Postgres | N/A (hosted service) | Persistent data store per-org | Scale-to-zero serverless Postgres; matches companion app; supports PgBouncer connection pooling; free tier includes 0.5 GB storage |
-| `@neondatabase/serverless` | 1.0.2 | Neon HTTP/WebSocket driver | Connects over HTTP (no TCP) — required in Workers where TCP connections are not native |
-| `drizzle-orm` | 0.45.2 | ORM and query builder | Type-safe SQL; schema-as-code; lightweight; no runtime reflection; Neon HTTP driver integration is first-class |
-| `drizzle-kit` | 0.31.10 | Migration tooling (dev-time only) | Generates SQL migrations from Drizzle schema; run locally against Neon dev branch |
-
-**Connection setup (HTTP driver — preferred for Workers):**
 ```typescript
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
-
-// Inside fetch handler — NOT at module top level
-const sql = neon(env.DATABASE_URL);
-const db = drizzle(sql);
+if (event.type === 'customer.subscription.updated') {
+  const sub = event.data.object as Stripe.Subscription;
+  const priceId = sub.items.data[0]?.price?.id;
+  const tier = priceId === env.STRIPE_PRICE_ID_ENTERPRISE ? 'enterprise' : 'pro';
+  // Update subscriptions table: status = tier
+}
 ```
 
-**Hyperdrive option:** Cloudflare Hyperdrive (included free up to 100k queries/day, unlimited on paid $5/month plan) provides connection pooling at the network level and allows using the standard `pg` driver. However, for this app's workload (match runs are batch operations, not high-frequency OLTP), the `@neondatabase/serverless` HTTP driver is simpler and avoids a Hyperdrive configuration dependency. Use Hyperdrive if query latency becomes measurable under load in production.
+**`checkout.session.completed`** handler needs to write the tier (not just 'paid') to `subscriptions.status`. Read `session.subscription`, then look up the subscription object to get the price ID — OR pass `tier` as a metadata field on `subscription_data` at checkout creation time (simpler):
 
-**Do NOT use `drizzle-orm/neon-serverless` (WebSocket pool) in Workers.** WebSocket connections cannot outlive a single Worker request, making the Pool constructor pattern unsafe. Use `drizzle-orm/neon-http` exclusively.
-
-**Confidence: HIGH** — verified against Neon docs (`neon.com/docs/guides/cloudflare-workers`), Drizzle ORM docs (`orm.drizzle.team/docs/connect-neon`), and @neondatabase/serverless npm.
-
----
-
-### Frontend
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `react` | 19.2.4 | UI framework | Industry standard; required for Clerk's `@clerk/react` |
-| `vite` | 8.0.3 | Build tool / dev server | Replaces CRA (unmaintained since 2023); official Cloudflare Vite plugin support; HMR with Workers runtime in dev |
-| `@cloudflare/vite-plugin` | 1.30.2 | Vite plugin for Workers dev/build | Bridges Vite dev server with Workers runtime; GA as of April 2025; hot reload across frontend + Worker; SPA mode via `not_found_handling = "single-page-application"` |
-| `@clerk/react` | 6.1.3 | Clerk React components | `<ClerkProvider>`, `useAuth()`, `useUser()`, `<SignIn>`, `<SignUp>` |
-| `tailwindcss` | 4.2.2 | Utility CSS | v4 (current); `@import "tailwindcss"` syntax; compatible with shadcn/ui |
-| `shadcn/ui` | (copied components) | Component primitives | Copy-owns components built on Radix UI + Tailwind; no versioning conflict; updated for Tailwind v4 + React 19 |
-| `@tanstack/react-table` | 8.21.3 | Virtualized table for match results | Required for displaying N×M transfer match results without DOM explosion; existing app uses virtualized list |
-| `@tanstack/react-query` | 5.95.2 | Server state / async data | Caching, loading states, mutation invalidation for upload/match endpoints |
-| `react-hook-form` | 7.72.0 | Form state | Months-cover input, upload forms |
-| `zod` | 4.3.6 | Schema validation (shared) | Validate API request bodies on the Worker and form inputs on the frontend |
-
-**Do NOT use Create React App.** It is unmaintained (last release 2022), uses Webpack (slow), and has no Cloudflare integration path.
-
-**Confidence: HIGH** — verified against Cloudflare Vite plugin changelog (GA April 2025), npm registry, Cloudflare Pages React deployment docs.
-
----
-
-### File Storage
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Cloudflare R2 | N/A (platform) | Store raw uploaded CSV/XLSX files per org | S3-compatible; no egress fees; bound directly to Worker via `env.R2`; free tier: 10 GB storage, 1M Class A ops/month |
-| `aws4fetch` | 1.0.20 | Presigned URL generation for R2 | The AWS SDK v3 does NOT work in Workers (uses Node.js APIs); `aws4fetch` is Web Crypto compatible and works natively in V8 isolates |
-
-**Upload flow (recommended for this app):**
-
-```
-1. Frontend requests presigned PUT URL from Worker API
-2. Worker generates R2 presigned URL via aws4fetch (short TTL ~5 min)
-3. Browser uploads file directly to R2 (no proxying through Worker)
-4. Browser POSTs the R2 key to Worker to trigger processing
-5. Worker reads from R2, parses in-memory, writes results to Neon
-```
-
-This avoids the Worker's 100 MB request body size limit (Free/Pro Cloudflare plan) and keeps large file bytes out of Worker memory during the request-response cycle.
-
-**Confidence: HIGH** — verified against Cloudflare R2 presigned URLs docs and `aws4fetch` Worker-compatibility docs.
-
----
-
-### File Processing (CSV/XLSX Parsing in Workers)
-
-This is the most constrained area of the stack. Workers have **128 MB memory** and **30 seconds CPU time** (paid plan default; 5 minutes max opt-in; 10 ms on free plan). No `node:fs`. Files must be processed from `ArrayBuffer` or `Uint8Array` in memory.
-
-| Technology | Version | Purpose | Confidence | Notes |
-|------------|---------|---------|------------|-------|
-| `papaparse` | 5.5.3 | CSV parsing in Worker | HIGH | Pure JS, no Node deps; accepts string input; works in Workers; use `Papa.parse(csvText, { header: true, skipEmptyLines: true })` |
-| SheetJS (xlsx) | 0.20.3 | XLSX parsing in Worker | MEDIUM | **CRITICAL: Do NOT use the `xlsx` package on npm (v0.18.5, unmaintained, security flags).** Install directly from SheetJS CDN: `npm i --save https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`. Works in Workers from `ArrayBuffer`: `XLSX.read(arrayBuffer, { type: "buffer" })` |
-
-**FRED export file sizes:** Based on the use case (per-store ROU + dead stock reports for a pharmacy network), files are likely 100–2000 rows each. This is well within the 128 MB memory limit. Large-file streaming is not required for this use case.
-
-**Worker-side XLSX parsing pattern:**
 ```typescript
-// File already stored in R2; fetch as ArrayBuffer
-const object = await env.R2.get(r2Key);
-const arrayBuffer = await object.arrayBuffer();
-
-// CSV
-import Papa from "papaparse";
-const { data } = Papa.parse(
-  new TextDecoder().decode(arrayBuffer),
-  { header: true, skipEmptyLines: true }
-);
-
-// XLSX
-import * as XLSX from "xlsx";
-const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
-const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+subscription_data: {
+  metadata: { org_id: orgId, plan_tier: tier },  // add plan_tier here
+}
 ```
 
-**Confidence for papaparse: HIGH.** Confirmed working in Cloudflare Workers via community examples and Cloudflare forum.
-**Confidence for SheetJS 0.20.3: MEDIUM.** The library claims Web Standard compatibility but is no longer on npm mainline; using the CDN tarball is required and introduces a vendoring dependency.
+Then in the webhook: `session.metadata?.plan_tier ?? 'pro'` gives the tier directly without a second Stripe API call.
+
+**`customer.subscription.deleted`** handler is unchanged — always reverts to `'free'`.
+
+**Events to listen for (complete set):**
+- `checkout.session.completed` — initial subscription activation (set tier)
+- `customer.subscription.updated` — tier upgrade/downgrade (update tier)
+- `customer.subscription.deleted` — cancellation/expiry (revert to free)
+- `invoice.payment_failed` — optional: flag `status = 'past_due'` if grace period needed
+
+**Confidence: HIGH** — Stripe official docs confirm `customer.subscription.updated` is the correct event for plan changes; `subscription.items.data[0].price.id` is the authoritative field for new plan identification. Metadata approach for passing tier through checkout is documented as a standard Stripe pattern.
 
 ---
 
-### Export (CSV, XLSX, PDF)
+## Schema Changes
 
-Export should be **client-side** wherever possible. Worker-side PDF generation is constrained and fragile.
+### Current schema gaps
 
-| Export | Method | Library | Why |
-|--------|--------|---------|-----|
-| CSV | Client-side | `papaparse` (unparse) or native `Blob` + `URL.createObjectURL` | Trivial in browser; no library needed beyond `papaparse` already in the stack |
-| XLSX | Client-side | SheetJS (`xlsx` CDN tarball 0.20.3) | Already in stack for parsing; `XLSX.writeFile()` / `XLSX.write()` for export; runs well in browser |
-| PDF | Client-side | `@react-pdf/renderer` 4.3.2 | React-component model for PDF layout matches the existing "match results" table design; runs fully in browser; avoids Worker PDF generation entirely |
-
-**Do NOT attempt PDF generation in a Worker.** jsPDF and pdfmake both have reported module compatibility issues in Workers. Cloudflare Browser Rendering (Puppeteer) works but adds cost and latency — overkill for a tabular report.
-
-**Do NOT use `pdf-lib` for new PDF generation in this app.** It excels at manipulating existing PDFs, not generating from data.
-
-**Confidence: HIGH for CSV. MEDIUM for XLSX (same SheetJS caveat). HIGH for @react-pdf/renderer (pure JS, browser-native, well-maintained).**
-
----
-
-### Validation & Type Safety
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `zod` | 4.3.6 | Schema validation | Shared between Worker (request body validation) and frontend (form validation via `react-hook-form` + Zod resolver); single source of truth for upload payload shapes |
-
-Define shared schema types in a `packages/shared` or `src/shared/` directory imported by both Worker and frontend.
-
----
-
-### Dev Tooling
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| TypeScript | 5.x (via Vite) | Type safety across Worker + frontend | Required for `drizzle-orm` schema inference, `@cloudflare/workers-types` bindings, Zod inference |
-| `@cloudflare/vitest-pool-workers` | latest | Unit tests running in Workers runtime | Official Cloudflare test pool; tests run in actual V8 isolate context, not Node.js — catches runtime incompatibilities |
-| `vitest` | latest | Test runner | Works with `@cloudflare/vitest-pool-workers`; fastest for the Vite ecosystem |
-
----
-
-## Alternatives Considered
-
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| API framework | Hono | itty-router | Hono has better TypeScript, middleware, and official Cloudflare docs coverage |
-| API framework | Hono | Express | Express requires Node.js TCP; does not run in Workers |
-| ORM | Drizzle | Prisma | Prisma uses a query engine binary incompatible with Workers; Drizzle is pure JS |
-| ORM | Drizzle | direct SQL via `neon()` | Drizzle adds type safety and migration management at near-zero overhead |
-| DB driver | `@neondatabase/serverless` (HTTP) | `pg` (node-postgres) | `pg` requires TCP which needs Hyperdrive proxy; adds operational complexity for low query volume |
-| DB driver | `@neondatabase/serverless` (HTTP) | `@neondatabase/serverless` (WebSocket Pool) | WebSocket Pool objects cannot outlive a single Worker request — unsafe pattern |
-| Frontend | Vite + React 19 | Create React App | CRA unmaintained since 2022; no Cloudflare Vite plugin support |
-| Frontend | Vite + React 19 | Next.js | Next.js SSR/RSC adds complexity not needed for this SPA-style tool; Pages-only deploy is simpler |
-| CSV parse | `papaparse` | `csv-parse` | `csv-parse` has Node.js stream dependencies that may fail in Workers |
-| XLSX parse | SheetJS (CDN tarball) | ExcelJS | ExcelJS has significant memory issues with its workbook model; not designed for Workers; SheetJS reads from ArrayBuffer natively |
-| XLSX parse | SheetJS (CDN tarball) | `xlsx` (npm 0.18.5) | npm version is unmaintained, 2+ years behind, and has known security false-positives that trigger CI alerts |
-| PDF export | `@react-pdf/renderer` (client) | Cloudflare Browser Rendering (Puppeteer) | Adds cost ($0.005/1000 pages), latency, and operational surface area for a report that can be generated in the browser |
-| PDF export | `@react-pdf/renderer` (client) | jsPDF | jsPDF is not modular-import safe in Workers and struggles with complex layouts |
-| Auth | Clerk | Auth.js (next-auth) | Auth.js adapter for Cloudflare Workers is experimental; companion app already uses Clerk — same users, same orgs |
-| Auth | Clerk + `@hono/clerk-auth` | Manual JWT verify | `@hono/clerk-auth` handles JWKS fetching and token verification automatically; manual implementation is error-prone |
-| Component library | shadcn/ui | MUI / Chakra | Both add heavy bundle weight; shadcn components are copy-owned and already Tailwind-based, matching PharmIQ brand guide |
-
----
-
-## Cloudflare Workers Constraints Reference
-
-These constraints must inform implementation decisions throughout the roadmap.
-
-| Constraint | Free Plan | Paid Plan | Implication |
-|------------|-----------|-----------|-------------|
-| CPU time per request | 10 ms | 30 s default, up to 5 min opt-in | FRED file parsing (100–2000 rows) fits in paid plan 30 s default; **free plan cannot run CSV parsing** — the matching algorithm alone will exceed 10 ms |
-| Memory per isolate | 128 MB | 128 MB | Sets ceiling for in-memory file size; FRED exports of typical pharmacy size are well under limit, but multi-store batch processing should be sequential, not parallel |
-| Request body size | 100 MB (Free/Pro) | Up to 500 MB (Enterprise) | Use R2 presigned URLs so the Worker never receives raw file bytes |
-| No native `node:fs` (pre-2025-09-01) | — | — | Files must be processed from `ArrayBuffer`; do not use streaming file I/O patterns |
-| No TCP connections | — | — | Must use `@neondatabase/serverless` HTTP driver or Hyperdrive for Postgres |
-| Worker bundle size (compressed) | 3 MB | 10 MB | SheetJS + papaparse add ~500 KB compressed; within limits on paid plan, borderline on free — use dynamic imports if needed |
-| WebSocket lifetime | Single request | Single request | No persistent DB connection pools; create and close connections per request |
-
-**Business model implication:** The 1 match run/month free tier gate must be enforced in the Worker (not the frontend). However, the actual CSV processing cannot run on Cloudflare's free Worker plan (10 ms CPU limit). The app requires the **Workers Paid plan ($5/month)** for any production use. This is consistent with a freemium SaaS model where the operator pays for the infrastructure.
-
----
-
-## Installation
-
-```bash
-# Worker (run in worker package / root)
-npm install hono @hono/clerk-auth @clerk/backend
-npm install @neondatabase/serverless drizzle-orm
-npm install papaparse zod
-npm install aws4fetch
-npm install https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
-
-# Worker dev dependencies
-npm install -D wrangler drizzle-kit @cloudflare/workers-types typescript
-npm install -D @cloudflare/vitest-pool-workers vitest
-
-# Frontend (run in frontend package / pages dir)
-npm install react react-dom @clerk/react
-npm install @tanstack/react-query @tanstack/react-table
-npm install react-hook-form zod @hookform/resolvers
-npm install tailwindcss @react-pdf/renderer
-npm install https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
-
-# Frontend dev dependencies
-npm install -D vite @cloudflare/vite-plugin @vitejs/plugin-react
-npm install -D typescript @cloudflare/workers-types
+The existing `subscriptions` table stores only binary state:
+```sql
+status TEXT NOT NULL DEFAULT 'free'  -- values: 'free' | 'paid'
 ```
+
+The `orgs` table has a `plan` column but it is not written to by any current route (it defaults to `'free'` and stays there).
+
+The `usage_meters` table hardcodes the free tier limit as a constant (`freeLimit = 1`) in application code.
+
+### Required changes
+
+#### 1. `subscriptions.status` — expand value set
+
+No ALTER needed for the column type (already `TEXT`). The application will simply write `'free'`, `'pro'`, or `'enterprise'` as values. Update all plan-check logic to treat `'pro'` and `'enterprise'` as paid tiers:
+
+```typescript
+// Old
+const isPaid = planStatus === 'paid';
+
+// New
+const isPaid = planStatus === 'pro' || planStatus === 'enterprise';
+const isEnterprise = planStatus === 'enterprise';
+```
+
+#### 2. Migration SQL (apply via NEON SQL editor)
+
+```sql
+-- Migration 002: v1.1 multi-tier billing
+-- Adds stripe_price_id to subscriptions for audit trail
+-- Adds plan_tier to orgs (kept in sync with subscriptions.status)
+
+ALTER TABLE subscriptions
+  ADD COLUMN IF NOT EXISTS stripe_price_id TEXT;
+
+-- No type change needed for status — it's already TEXT.
+-- Update any existing 'paid' rows to 'pro' (the lower paid tier)
+UPDATE subscriptions SET status = 'pro' WHERE status = 'paid';
+
+-- Keep orgs.plan in sync (currently always 'free' — update via webhook going forward)
+-- No schema change needed for orgs.plan — it's already TEXT.
+```
+
+#### 3. Store-count enforcement (Pro tier: max 10 stores)
+
+Do NOT add a `store_limit` column to the schema. This is plan-aware logic, not a stored value. Enforce it at the upload endpoint before inserting a new store row:
+
+```typescript
+// In the upload route, before INSERT INTO stores:
+if (planStatus === 'pro') {
+  const storeCountRows = await sql`
+    SELECT COUNT(*) AS count FROM stores WHERE org_id = ${orgId}
+  `;
+  const storeCount = Number(storeCountRows[0]?.count ?? 0);
+  if (storeCount >= 10) {
+    return c.json({ error: 'Pro plan limited to 10 stores. Upgrade to Enterprise for unlimited stores.' }, 403);
+  }
+}
+```
+
+This keeps the schema clean and avoids stale limit values if plan logic changes.
+
+#### 4. Usage limit enforcement (Pro tier: 10 matches/mo)
+
+The match route currently hardcodes `freeLimit = 1`. For Pro, the limit is 10. Extract limits from plan status:
+
+```typescript
+const limits: Record<string, number> = {
+  free: 1,
+  pro: 10,
+  enterprise: Infinity,
+};
+const matchLimit = limits[planStatus] ?? 1;
+
+if (matchLimit !== Infinity) {
+  // Run the existing upsert+increment pattern with matchLimit instead of freeLimit
+}
+```
+
+No schema change needed — `usage_meters` is already plan-agnostic (it stores a count; the limit is enforced by the application comparing count against the plan-derived limit).
+
+#### 5. `subscriptions.stripe_price_id` — optional audit column
+
+Add `stripe_price_id TEXT` to `subscriptions` to record which Stripe price ID was active at last update. This helps debug tier mismatches without querying the Stripe API. Written by the webhook handler on `checkout.session.completed` and `customer.subscription.updated`.
+
+**Summary of migration file to create:**
+
+```sql
+-- File: apps/worker/src/db/migrations/002-multi-tier-billing.sql
+
+ALTER TABLE subscriptions
+  ADD COLUMN IF NOT EXISTS stripe_price_id TEXT;
+
+UPDATE subscriptions
+  SET status = 'pro'
+  WHERE status = 'paid';
+```
+
+**Confidence: HIGH** — schema analysis is based on direct reading of the existing schema.sql in this repo. Logic for plan enforcement is a code pattern, not a schema design question.
+
+---
+
+## Cost Column (SOH vs Dead Stock Dollar Report)
+
+No new library is needed. The dead stock upload already parses FRED export columns via header aliasing (`HEADER_ALIASES` dict). Adding `Cost Ex` (cost price per unit) follows the same pattern:
+
+- Add `cost_ex` to the `HEADER_ALIASES` map in the upload route (or equivalent header normalisation logic)
+- Add `cost_ex DOUBLE PRECISION` column to the `dead_stock` table
+- Calculate `dead_stock_value = soh * cost_ex` per row in the Worker after parsing
+- Frontend: user inputs `total_soh_value_aud`, Worker or frontend calculates `dead_stock_value / total_soh_value_aud * 100` to get the percentage
+
+**Migration SQL for `dead_stock.cost_ex`:**
+```sql
+ALTER TABLE dead_stock
+  ADD COLUMN IF NOT EXISTS cost_ex DOUBLE PRECISION;
+```
+
+This column is nullable — existing rows without Cost Ex data are unaffected, and the dollar report feature gracefully degrades if Cost Ex is absent from an upload.
+
+**Confidence: HIGH** — this is a straightforward additive column following the existing pattern.
+
+---
+
+## What NOT to Add
+
+| Library/Approach | Avoid Because |
+|-----------------|---------------|
+| Chart.js / react-chartjs-2 | Canvas-dependent; cannot render without DOM; fragile in any pre-render context; unnecessary given recharts SVG approach |
+| D3 directly | Low-level primitive; 10x more setup than recharts for two standard chart types; bundle weight equivalent |
+| visx (@visx/*) | Airbnb's D3 wrapper; appropriate for custom viz products, not standard chart types; steep learning curve |
+| nivo | Larger bundle than recharts; adds its own animation system that conflicts with React 19's concurrent rendering in some edge cases (LOW confidence flag); also SVG-based like recharts but heavier |
+| Multiple Stripe subscriptions per customer | Stripe docs warn: each subscription has its own billing period and invoice. For tier switching, update the single subscription's price — do NOT create a second subscription. Creating multiple subscriptions per customer causes double-billing and complicates cancellation logic. |
+| Stripe Plans API (deprecated) | The `Plan` object is a legacy alias for `Price`. Use the `Price` object and Products API. Plans are read-only now in newer API versions. |
+| `plan_tier` column on `subscriptions` table | Redundant — `status` already stores the tier value (`'free'`, `'pro'`, `'enterprise'`). Adding a separate `plan_tier` column creates a sync risk between two columns holding the same truth. |
+| `store_limit` column on `orgs` or `subscriptions` | Hard-coding a limit value in the DB creates stale-value risk when plan rules change. Keep limits as application constants keyed by plan name. |
+| Recharts 2.x | React 19 compatibility required the `react-is` override workaround in 2.x. 3.x resolved this and removed the `react-smooth` and `recharts-scale` dependencies — cleaner bundle. Use 3.x. |
 
 ---
 
 ## Sources
 
-- Cloudflare Workers Limits: https://developers.cloudflare.com/workers/platform/limits/
-- Cloudflare Workers Limits (CPU 5-min opt-in, March 2025): https://developers.cloudflare.com/changelog/post/2025-03-25-higher-cpu-limits/
-- Neon + Cloudflare Workers guide: https://neon.com/docs/guides/cloudflare-workers
-- Neon serverless driver docs: https://neon.com/docs/serverless/serverless-driver
-- Drizzle ORM + Neon connection guide: https://orm.drizzle.team/docs/connect-neon
-- Cloudflare Hyperdrive + Neon: https://developers.cloudflare.com/hyperdrive/examples/connect-to-postgres/postgres-database-providers/neon/
-- Hyperdrive pricing: https://developers.cloudflare.com/hyperdrive/platform/pricing/
-- Hono on Cloudflare Workers: https://hono.dev/docs/getting-started/cloudflare-workers
-- Hono official Cloudflare docs: https://developers.cloudflare.com/workers/framework-guides/web-apps/more-web-frameworks/hono/
-- @hono/clerk-auth + Hono example: https://honobyexample.com/posts/clerk-backend
-- Clerk backend authenticateRequest: https://clerk.com/docs/reference/backend/authenticate-request
-- Cloudflare R2 upload objects: https://developers.cloudflare.com/r2/objects/upload-objects/
-- Cloudflare R2 presigned URLs: https://developers.cloudflare.com/r2/api/s3/presigned-urls/
-- R2 presigned URL Hono guide: https://lirantal.com/blog/cloudflare-r2-presigned-url-uploads-hono
-- Cloudflare Vite plugin (GA April 2025): https://developers.cloudflare.com/changelog/post/2025-04-08-vite-plugin/
-- Cloudflare React + Vite guide: https://developers.cloudflare.com/workers/framework-guides/web-apps/react/
-- SheetJS installation (CDN required): https://docs.sheetjs.com/docs/getting-started/installation/nodejs/
-- Node.js compat in Workers (2025): https://blog.cloudflare.com/nodejs-workers-2025/
-- papaparse + Cloudflare Workers community: https://community.cloudflare.com/t/how-to-use-papaparse-or-streaming-csv-workers-to-convert-csv-to-json/443163
-- @react-pdf/renderer overview: https://dev.to/ansonch/6-open-source-pdf-generation-and-modification-libraries-every-react-dev-should-know-in-2025-13g0
-- TanStack Query v5: https://tanstack.com/query/v5/docs/framework/react/overview
+- recharts React 19 support (Issue #4558, closed): https://github.com/recharts/recharts/issues/4558
+- recharts 3.0 migration guide: https://github.com/recharts/recharts/wiki/3.0-migration-guide
+- shadcn/ui recharts + React 19 override docs: https://ui.shadcn.com/docs/react-19
+- recharts npm (version 3.8.1): https://www.npmjs.com/package/recharts
+- Stripe upgrade/downgrade subscriptions: https://docs.stripe.com/billing/subscriptions/upgrade-downgrade
+- Stripe webhooks for subscriptions: https://docs.stripe.com/billing/subscriptions/webhooks
+- Stripe metadata use cases: https://docs.stripe.com/metadata/use-cases
+- Stripe change subscription price: https://docs.stripe.com/billing/subscriptions/change-price
+- Stripe multiple products in one subscription: https://docs.stripe.com/billing/subscriptions/multiple-products
+
+*Researched: 2026-04-16*
