@@ -8,6 +8,15 @@ A dead-stock matching tool for Australian pharmacy groups. Pharmacy managers upl
 
 A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
 
+## Current Milestone: v1.1 Reporting & Tiered Billing
+
+**Goal:** Give pharmacy managers visual insight into their dead stock position and unlock revenue growth with 3 pricing tiers.
+
+**Target features:**
+- Dead stock visualisation — pie chart of units per store (pre-match) and projected change chart (post-match, assuming all transfers completed)
+- SOH vs Dead Stock dollar report — optional Cost Ex column in dead stock upload; user types total SOH $ to see dead stock $ as % of total inventory value
+- 3-tier billing: Free (1 match/mo), Pro ($10/mo, 10 matches/mo + max 10 stores), Enterprise ($100/mo, unlimited)
+
 ## Requirements
 
 ### Validated
@@ -22,16 +31,19 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 
 ### Active
 
-- [ ] **Months cover cap**: user sets cover target (e.g. 3 months); max transfer = (cover × ROU) − receiving store's existing SOH; uses net allocation to prevent overstocking
-- [ ] **Rebuilt on Cloudflare/NEON/Clerk stack**: Workers (Node), Pages (React), NEON Postgres, Clerk auth — replaces Django+SQLite
+- [x] **Months cover cap**: user sets cover target (e.g. 3 months); max transfer = (cover × ROU) − receiving store's existing SOH; uses net allocation to prevent overstocking — Validated in Phase 04: Matching Algorithm
+- [x] **Rebuilt on Cloudflare/NEON/Clerk stack**: Workers (Node), Pages (React), NEON Postgres, Clerk auth — replaces Django+SQLite — Validated in v1.0
 - [x] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything — Validated in Phase 03: File Upload Pipeline
 - [x] **Freemium model**: 1 match run per month on free tier; unlimited on paid — Validated in Phase 05: freemium-and-billing
-- [ ] **Dynamic store list**: derived from uploaded data, not hard-coded in source
+- [x] **Dynamic store list**: derived from uploaded data, not hard-coded in source — Validated in Phase 03: File Upload Pipeline
 - [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
 - [x] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases — Validated in Phase 02: logic-audit
 - [x] **Multi-store upload UX**: clear workflow for uploading N stores before running match — Validated in Phase 03: File Upload Pipeline
 - [x] **Results export**: PDF export implemented — Validated in Phase 06: pdf-export
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
+- [ ] **Dead stock visualisation**: pie chart showing dead stock units per store before match; projected change chart after match (assuming all transfers completed)
+- [ ] **SOH vs Dead Stock dollar report**: optional Cost Ex column in dead stock upload; dead stock value $ calculated per store; user inputs total SOH $ to see dead stock as % of total inventory value
+- [ ] **3-tier billing**: Free (1 match/mo), Pro ($10/mo, 10 matches/mo, max 10 stores), Enterprise ($100/mo, unlimited matches and stores); Stripe products for both paid tiers
 
 ### Out of Scope
 
@@ -65,7 +77,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - **Auth**: Clerk — already integrated in companion app, users will be the same
 - **Data**: NEON Postgres — replaces SQLite; must support multi-tenant (per-org) data scoping
 - **Deployment**: Cloudflare Pages/Workers — no traditional server, no Python
-- **Business model**: Free tier = 1 match run/month; must be enforced in backend
+- **Business model**: 3 tiers — Free (1 match/mo), Pro ($10/mo, 10 matches/mo + max 10 stores), Enterprise ($100/mo, unlimited); enforced in backend via atomic counters and store-count gating
 - **Market**: Australian pharmacies — FRED Office export formats are the integration surface
 
 ## Key Decisions
@@ -79,7 +91,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-04-12 after Phase 09: docs-sync complete — all 26 v1 requirements marked Complete in REQUIREMENTS.md; BILLING-01..04, BRAND-01, BRAND-02, RESULTS-02 traceability corrected; ROADMAP.md progress rows aligned with actual completion dates*
+*Last updated: 2026-04-16 — Milestone v1.1 started: dead stock visualisation, SOH vs dead stock dollar report, 3-tier billing*
 
 ## Evolution
 
