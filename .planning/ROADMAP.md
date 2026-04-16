@@ -251,3 +251,184 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Fix is_ranged Schema and Pipeline | 1/1 | Complete   | 2026-04-12 |
 | 8. Phase 04 Verification | 1/1 | Complete | 2026-04-12 |
 | 9. Requirements and Roadmap Documentation Sync | 1/1 | Complete | 2026-04-13 |
+
+---
+
+## v1.1 Phases — Reporting & Tiered Billing
+
+**Milestone goal:** Give pharmacy managers visual insight into their dead stock position and unlock revenue growth with 3 pricing tiers.
+
+**v1.1 Pre-Flight — Manual Prerequisite for Phase 15:**
+
+Before Phase 15 code runs, create two Stripe products in the Stripe dashboard (both test and live mode):
+- Product "PharmIQ Pro" → recurring price $10 AUD/month → save price ID as `STRIPE_PRICE_ID_PRO`
+- Product "PharmIQ Enterprise" → recurring price $100 AUD/month → save price ID as `STRIPE_PRICE_ID_ENTERPRISE`
+
+Add both to Worker secrets (`wrangler secret put`) and to `.dev.vars`.
+
+**v1.1 Phase Checklist:**
+- [ ] **Phase 11: Schema Migration** - Add cost_ex column to dead_stock and plan_tier column to subscriptions; migrate existing paid rows to pro
+- [ ] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary
+- [ ] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage
+- [ ] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI
+- [ ] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage
+
+**v1.1 Execution Order:**
+Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 each depend on Phase 12 (or Phase 11 for 15) and can proceed in parallel once prerequisites are met.
+
+---
+
+### Phase 11: Schema Migration
+
+**Goal:** Both new database columns exist in NEON and schema.sql before any v1.1 feature code runs — cost_ex on dead_stock and plan_tier on subscriptions, with existing paid rows migrated to pro.
+
+**Depends on:** Phase 10
+
+**Requirements:** (schema prerequisite — no v1.1 REQ-ID maps here; all downstream phases depend on this)
+
+**Plans:**
+- [ ] 11-01-PLAN.md — Run migration SQL in NEON (cost_ex column, plan_tier column, UPDATE paid→pro), update schema.sql, update .dev.vars.example with STRIPE_PRICE_ID_PRO and STRIPE_PRICE_ID_ENTERPRISE, verify with \d queries
+
+**UAT:**
+- `\d dead_stock` in NEON shows `cost_ex DOUBLE PRECISION` column (nullable, no default)
+- `\d subscriptions` shows `plan_tier TEXT NOT NULL DEFAULT 'free'` column and `stripe_price_id TEXT` column
+- `SELECT status, plan_tier FROM subscriptions` shows no rows with `status = 'paid'`; any previously paid rows now have `plan_tier = 'pro'`
+- schema.sql in the repo matches the live NEON schema exactly
+- `.dev.vars.example` includes `STRIPE_PRICE_ID_PRO` and `STRIPE_PRICE_ID_ENTERPRISE` placeholder entries
+
+**Pitfalls:**
+- Run the DB migration BEFORE deploying any v1.1 Worker code — if the Worker deploy races ahead, the first upload or billing route will error on the missing column
+- Use `ADD COLUMN IF NOT EXISTS` in the migration SQL so re-running is safe
+- `cost_ex` must be `DOUBLE PRECISION` (not TEXT) — aggregation queries (`SUM`, `AVG`) on a TEXT column return wrong types or fail silently
+
+---
+
+### Phase 12: Cost Column Parser + Summary Endpoint
+
+**Goal:** A dead stock file uploaded with a Cost Ex column has its per-unit cost stored in NEON, and the GET /api/dead-stock-summary endpoint returns per-store unit totals and dollar values that both the charts and cost report can consume.
+
+**Depends on:** Phase 11
+
+**Requirements:** COST-01, COST-02, COST-04
+
+**Plans:**
+- [ ] 12-01-PLAN.md — Extend DeadStockRow interface and parseDeadStockFile in parser.ts to extract Cost Ex column; extend upload route dead_stock INSERT to write cost_ex; add parser unit tests for cost_ex extraction and absent-column detection
+- [ ] 12-02-PLAN.md — Build GET /api/dead-stock-summary Worker route (aggregate total_units and total_value per store); register route in index.ts; add useDeadStockSummary hook in apps/web; integration test for the endpoint
+
+**UAT:**
+- Upload a FRED dead stock file that includes a Cost Ex column; query `SELECT cost_ex FROM dead_stock WHERE org_id = $1 LIMIT 5` — values are non-null and match the file
+- Upload a FRED dead stock file without a Cost Ex column; query returns `cost_ex IS NULL` for all rows; no upload error is thrown
+- `GET /api/dead-stock-summary` returns `{ stores: [{ name, totalUnits, totalValue }] }` with correct aggregated figures
+- When cost_ex is absent for all stores, totalValue is 0 for every store entry (not an error)
+- Cost report panel on MatchPage shows "Re-upload using FRED Stock Valuation report format to see dollar values" when totalValue is 0 for all stores (COST-04)
+
+**Pitfalls:**
+- Detect Cost Ex column absence at the header level, not the row level — SheetJS returns `undefined` for both an absent column header and a blank cell in a present column; inspect the header row array before parsing data rows to set `hasCostColumn` flag
+- Validate FRED Cost Ex header aliases against a real FRED Stock Valuation export before writing the alias map — the current HEADER_ALIASES entry (`"Cost Ex", "Cost", "Unit Cost", "Price", "Cost Excl"`) was inferred from research, not validated against a live export; user will supply a real sample before this phase executes
+- Use `SUM(cost_ex) FILTER (WHERE cost_ex IS NOT NULL)` in the summary query — a plain `SUM` across a mix of NULL and valued rows returns NULL, not the sum of non-null values
+- Negative and zero cost values should be excluded from aggregation and surfaced as a data quality warning, not silently summed
+
+---
+
+### Phase 13: Charts
+
+**Goal:** A pharmacy manager sees a pie chart of dead stock units per store as soon as data is uploaded, and after running a match sees a grouped bar chart showing before/after dead stock units per store alongside a net units recovered KPI card.
+
+**Depends on:** Phase 12
+
+**Requirements:** VIZ-01, VIZ-02, VIZ-03
+
+**Plans:**
+- [ ] 13-01-PLAN.md — Install recharts 3.8.1 in apps/web (with react-is override if needed); build DeadStockChart.tsx (PieChart, useDeadStockSummary data, PharmIQ brand colours, empty state); mount on UploadPage below store list
+- [ ] 13-02-PLAN.md — Build PostMatchChart.tsx (grouped BarChart, client-side before/after aggregation from match results + summary data, amber/teal bars, "Projected if all transfers complete" label); build net units recovered KPI card; mount both on MatchPage below results table
+
+**UAT:**
+- After uploading dead stock data for at least two stores, UploadPage shows a pie chart with one slice per store labelled with store name and unit count; slices use PharmIQ teal/amber palette
+- After running a match, MatchPage shows a grouped bar chart with Before (amber) and After (teal) bars per store; a KPI card above the chart shows total net units recovered across all stores
+- Both charts render correctly in dark mode
+- Re-uploading a dead stock file clears and redraws the pie chart without a page reload; the post-match chart does not appear until a new match is run
+- When no dead stock data has been uploaded, the chart area shows an appropriate empty state message (not a blank space)
+
+**Pitfalls:**
+- Wrap every Recharts chart in a `div` with explicit `min-h-[300px]` — `ResponsiveContainer` with `height="100%"` renders a 0x0 SVG silently if the parent has no explicit height; no error is thrown
+- Set `isAnimationActive={false}` on all chart components — animations feel jarring in a B2B operations context and add accessibility concerns
+- Use hex literals for chart colours (`#0F766E`, `#D97706`) — CSS custom properties (`var(--color-teal)`) do not work inside SVG `fill` props; Recharts renders SVG, not HTML
+- Reset chart-derived state in the same setState call that clears `matches` on new upload — do not let the chart and results table derive from different data snapshots
+- PostMatchChart depends on `useDeadStockSummary` being loaded; show a loading state if summary data has not arrived when the match completes
+**UI hint**: yes
+
+---
+
+### Phase 14: Cost Report UI
+
+**Goal:** When cost data is present, a pharmacy manager can enter their total SOH dollar value and instantly see their dead stock as a percentage of total inventory value with amber/red benchmark indicators, and after a match run sees the recoverable dollar value of matched transfers.
+
+**Depends on:** Phase 12
+
+**Requirements:** COST-03, COST-05
+
+**Plans:**
+- [ ] 14-01-PLAN.md — Build CostReport.tsx: total SOH $ input field (client-side only, not stored), dead stock dollar value per store from summary endpoint, dead stock % of total SOH with amber (10–25%) and red (>25%) benchmark indicators, recoverable value KPI card (shown post-match when cost data is present), guard rendering against missing cost data; mount on MatchPage below PostMatchChart
+
+**UAT:**
+- Upload a dead stock file with Cost Ex column; run a match; MatchPage shows a CostReport panel with dead stock dollar value per store
+- User types a total SOH $ value into the input field; dead stock percentage updates immediately without a page reload
+- When dead stock % is between 10–25%, the indicator renders in amber; when above 25%, it renders in red; when below 10%, it renders in the neutral teal palette
+- After a match run with cost data present, a "Recoverable value" KPI card shows the dollar value of dead stock matched for transfer
+- When no cost data is present (all stores have totalValue = 0), the cost panel shows an instructional message to re-upload using FRED Stock Valuation format, not zeros or an error
+- Typing 0 or leaving the SOH field empty suppresses the percentage calculation and shows a placeholder — the UI never displays Infinity% or NaN%
+
+**Pitfalls:**
+- Validate that the user-entered SOH value is a positive number before computing the percentage — division by zero produces `Infinity`, division of NaN produces `NaN`; disable the percentage display until a valid positive SOH is entered
+- The cost report shows pre-match (current) dead stock values by default; if a post-match recoverable figure is shown alongside it, label both sections unambiguously to prevent a pharmacist from mistaking the current figure for the projected post-transfer figure
+- Track which stores contributed cost data; if only a subset of stores have cost_ex data, show "X of Y stores have cost data" above the totals — never aggregate a partial set without surfacing the coverage gap
+**UI hint**: yes
+
+---
+
+### Phase 15: 3-Tier Billing
+
+**Goal:** Three pricing tiers (Free, Pro, Enterprise) are enforced server-side in the Worker, users can upgrade or downgrade via Stripe Checkout and the Customer Portal, and the billing page shows current plan, usage, and a side-by-side tier comparison.
+
+**Depends on:** Phase 11 (plan_tier column must exist before billing code reads it); Phases 12–14 can be in progress or complete
+
+**Requirements:** BILLING-05, BILLING-06, BILLING-07, BILLING-08, BILLING-09, BILLING-10, BILLING-11, BILLING-12
+
+**Plans:**
+- [ ] 15-01-PLAN.md — Create lib/plans.ts with PLAN_LIMITS constant and PlanTier type; update types.ts Env interface to add STRIPE_PRICE_ID_PRO and STRIPE_PRICE_ID_ENTERPRISE; update match.ts to use tier-aware run limit and store-count gate; update billing.ts GET /usage to return plan_tier and tier-aware limit; update billing.ts POST /billing/create-checkout to accept tier parameter and select correct price ID; update webhook.ts to write plan_tier from checkout session metadata and handle customer.subscription.updated event; add stripe_event_id idempotency guard
+- [ ] 15-02-PLAN.md — Update BillingPage.tsx to show 3 pricing cards (Free, Pro, Enterprise) with current plan highlighted; update useUsage hook to expose plan_tier; update MatchPage upgrade modal copy to reference tier names; add store-count and match-count usage display to BillingPage
+
+**UAT:**
+- Free org: first match run succeeds; second match run this calendar month returns 429 with an upgrade prompt
+- Pro org (test mode): 10th match run succeeds; 11th match run returns 429; uploading an 11th store and running a match returns 403 with an upgrade-to-Enterprise message
+- Enterprise org (test mode): unlimited match runs succeed; no store count gate fires
+- Upgrading Free→Pro via Stripe Checkout (test mode) results in the org's plan_tier updating to 'pro' synchronously on the success redirect — a match run immediately after the redirect succeeds without hitting the free tier limit
+- `customer.subscription.updated` webhook correctly updates plan_tier when a user upgrades or downgrades between Pro and Enterprise via the Customer Portal
+- Cancelling a subscription fires `customer.subscription.deleted` and resets plan_tier to 'free'
+- BillingPage shows current plan, match runs used this month vs limit, and all 3 pricing tiers side by side
+- Stripe Customer Portal link works and allows subscription management
+
+**Pitfalls:**
+- Store stripe_customer_id at checkout session creation time (before redirecting to Stripe), not in the webhook — if the webhook fires before the customer ID is stored, the org lookup fails and the upgrade is silently dropped
+- On the checkout success redirect URL, fetch the Stripe session status synchronously and write plan_tier to NEON before rendering the page — do not wait for the async webhook as the authoritative upgrade trigger (webhook typically arrives 1–5 seconds after redirect, during which time a match run would still be blocked)
+- Deduplicate webhook events via stripe_event_id: `INSERT INTO processed_webhook_events (stripe_event_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id` — if no row is returned the event was already processed; return 200 immediately without applying DB changes
+- When upgrading an existing Pro subscription to Enterprise, always pass the existing subscription item ID in the update call — passing only the new price ID creates a second subscription item and the next invoice charges for both tiers simultaneously
+- Run the Phase 11 DB migration BEFORE deploying Phase 15 Worker code — match.ts and billing.ts read plan_tier from subscriptions; if that column does not exist the Worker will error on every request
+- Existing Free-tier users with more than 3 stores already uploaded are not retroactively blocked at launch — the store cap applies only to new match runs, not to historical upload data (BILLING-07 grace period)
+- Use the atomic `UPDATE usage_meters SET count = count + 1 WHERE org_id = $1 AND year_month = $2 AND count < $limit RETURNING count` pattern for all tier limits — never do a separate SELECT then UPDATE; this is the same pattern as v1.0 and must not regress
+**UI hint**: yes
+
+---
+
+## v1.1 Progress
+
+**Execution Order:**
+Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete; Phase 15 requires only Phase 11)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 11. Schema Migration | 0/1 | Not started | - |
+| 12. Cost Column Parser + Summary Endpoint | 0/2 | Not started | - |
+| 13. Charts | 0/2 | Not started | - |
+| 14. Cost Report UI | 0/1 | Not started | - |
+| 15. 3-Tier Billing | 0/2 | Not started | - |
