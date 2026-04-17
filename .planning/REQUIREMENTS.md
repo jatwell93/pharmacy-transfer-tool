@@ -65,10 +65,10 @@
 
 ### Cost & Dollar Reporting
 
-- [ ] **COST-01**: Dead stock upload accepts an optional "Cost Ex" column (unit cost excl. GST from FRED Stock Valuation report); absence detected at header level; does not cause upload errors
-- [ ] **COST-02**: When cost data is present, dead stock dollar value is displayed per store (`SUM(Cost Ex × SOH)` per store's dead stock SKUs)
+- [x] **COST-01**: Dead stock upload accepts an optional "Cost Ex" column (unit cost excl. GST from FRED Stock Valuation report); absence detected at header level; does not cause upload errors
+- [x] **COST-02**: When cost data is present, dead stock dollar value is displayed per store (`SUM(Cost Ex × SOH)` per store's dead stock SKUs)
 - [ ] **COST-03**: User can enter a single org-level total SOH $ value; app displays dead stock as a % of total SOH with amber (10–25%) / red (>25%) benchmark indicator
-- [ ] **COST-04**: When cost column is absent from the upload, cost report panel shows an instructional message to re-upload using FRED Stock Valuation report format
+- [x] **COST-04**: When cost column is absent from the upload, cost report panel shows an instructional message to re-upload using FRED Stock Valuation report format
 - [ ] **COST-05**: When cost data is present after a match run, app shows a "Recoverable value" KPI: dollar value of dead stock matched for transfer
 
 ### Billing
@@ -143,10 +143,10 @@
 | VIZ-01 | Phase 13 — Charts | Pending |
 | VIZ-02 | Phase 13 — Charts | Pending |
 | VIZ-03 | Phase 13 — Charts | Pending |
-| COST-01 | Phase 12 — Cost Column Parser + Summary Endpoint | Pending |
-| COST-02 | Phase 12 — Cost Column Parser + Summary Endpoint | Pending |
+| COST-01 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
+| COST-02 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
 | COST-03 | Phase 14 — Cost Report UI | Pending |
-| COST-04 | Phase 12 — Cost Column Parser + Summary Endpoint | Pending |
+| COST-04 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
 | COST-05 | Phase 14 — Cost Report UI | Pending |
 | BILLING-05 | Phase 15 — 3-Tier Billing | Pending |
 | BILLING-06 | Phase 15 — 3-Tier Billing | Pending |

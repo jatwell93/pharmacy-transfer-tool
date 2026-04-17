@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Phases — Reporting & Tiered Billing
 status: executing
-stopped_at: Phase 12 planned — 2 plans ready for execution
-last_updated: "2026-04-17T00:00:00.000Z"
-last_activity: 2026-04-17 -- Phase 12 planning complete (2 plans, COST-01/02/04 covered)
+stopped_at: Phase 12 context gathered
+last_updated: "2026-04-17T00:37:28.802Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 15
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 11 — schema-migration
+**Current focus:** Phase 12 — cost-column-parser-summary-endpoint
 
 ## Current Position
 
-Phase: 11 (schema-migration) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 11
-Last activity: 2026-04-16 -- Phase 11 execution started
+Phase: 13
+Plan: Not started
+Status: Executing Phase 12
+Last activity: 2026-04-17
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 5
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | 07 | 1 | - | - |
 | 08 | 1 | - | - |
 | 09 | 1 | - | - |
+| 12 | 2 | - | - |
 
 **Recent Trend:**
 

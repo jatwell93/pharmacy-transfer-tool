@@ -268,7 +268,7 @@ Add both to Worker secrets (`wrangler secret put`) and to `.dev.vars`.
 
 **v1.1 Phase Checklist:**
 - [ ] **Phase 11: Schema Migration** - Add cost_ex column to dead_stock and plan_tier column to subscriptions; migrate existing paid rows to pro
-- [ ] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary
+- [x] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary (completed 2026-04-16)
 - [ ] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage
 - [ ] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI
 - [ ] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage
@@ -312,8 +312,8 @@ Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 eac
 **Requirements:** COST-01, COST-02, COST-04
 
 **Plans:**
-- [ ] 12-01-PLAN.md — Extend DeadStockRow interface and parseDeadStockFile in parser.ts to extract Cost Ex column; extend upload route dead_stock INSERT to write cost_ex; add parser unit tests for cost_ex extraction and absent-column detection
-- [ ] 12-02-PLAN.md — Build GET /api/dead-stock-summary Worker route (aggregate total_units and total_value per store); register route in index.ts; add useDeadStockSummary hook in apps/web; integration test for the endpoint
+2/2 plans complete
+- [x] 12-02-PLAN.md — Build GET /api/dead-stock-summary Worker route (aggregate total_units and total_value per store); register route in index.ts; add useDeadStockSummary hook in apps/web; integration test for the endpoint
 
 **UAT:**
 - Upload a FRED dead stock file that includes a Cost Ex column; query `SELECT cost_ex FROM dead_stock WHERE org_id = $1 LIMIT 5` — values are non-null and match the file
@@ -428,7 +428,7 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 11. Schema Migration | 0/1 | Not started | - |
-| 12. Cost Column Parser + Summary Endpoint | 0/2 | Not started | - |
+| 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
 | 13. Charts | 0/2 | Not started | - |
 | 14. Cost Report UI | 0/1 | Not started | - |
 | 15. 3-Tier Billing | 0/2 | Not started | - |
