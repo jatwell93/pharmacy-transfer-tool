@@ -347,7 +347,7 @@ export default function UploadModal({ isOpen, onClose, store, onUploadComplete }
 
         {/* Replace-confirmation warning */}
         {replaceWarning && (
-          <div className="border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3 text-[13px] text-[var(--color-text-primary)]">
+          <div className="border-l-4 border-[#D97706] bg-[#FEF3C7] px-4 py-3 text-[13px] text-[#92400E]">
             {replaceWarning}
           </div>
         )}
