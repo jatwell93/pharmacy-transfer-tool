@@ -3,9 +3,11 @@ import { Loader2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock }
 import { useOrganization } from '@clerk/react';
 import AppShell from '../components/AppShell';
 import { useMatchRun, MatchResult, DestinationMatch } from '../hooks/useMatchRun';
+import { useDeadStockSummary } from '../hooks/useDeadStockSummary';
 import { useStores } from '../hooks/useStores';
 import { useUsage } from '../hooks/useUsage';
 import { useFetch } from '../hooks/useFetch';
+import { PostMatchChart } from '../components/PostMatchChart';
 
 // --- Constants ---
 
@@ -26,6 +28,7 @@ export default function MatchPage() {
   const { results, warnings, loading, error, hasRun, runMatch } = useMatchRun();
   const { stores, loading: storesLoading } = useStores();
   const { usage, loading: usageLoading, refresh: refreshUsage } = useUsage();
+  const { summary, loading: summaryLoading } = useDeadStockSummary();
   const fetchApi = useFetch();
   const { organization } = useOrganization();
   const orgName = organization?.name ?? 'PharmIQ';
@@ -569,6 +572,28 @@ export default function MatchPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Post-match chart and KPI card (VIZ-02, VIZ-03) -- only after first match run with results */}
+      {hasRun && results.length > 0 && (
+        <section className="mt-8">
+          <h2
+            className="text-base font-semibold text-[var(--color-text-primary)] mb-4"
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+          >
+            Transfer Impact
+          </h2>
+          {summaryLoading ? (
+            <div className="min-h-[300px] flex items-center justify-center">
+              <Loader2 className="animate-spin text-[var(--color-teal)]" size={24} aria-label="Loading chart data" />
+            </div>
+          ) : (
+            <PostMatchChart
+              results={results}
+              summary={summary?.stores ?? []}
+            />
+          )}
+        </section>
       )}
 
       {/* Upgrade modal overlay (D-04) */}
