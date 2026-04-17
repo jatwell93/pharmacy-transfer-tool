@@ -4,9 +4,12 @@ import AppShell from '../components/AppShell';
 import StoreCard from '../components/StoreCard';
 import UploadModal from '../components/UploadModal';
 import { useStores, Store } from '../hooks/useStores';
+import { useDeadStockSummary } from '../hooks/useDeadStockSummary';
+import { DeadStockChart } from '../components/DeadStockChart';
 
 export default function UploadPage() {
   const { stores, loading, error, refresh } = useStores();
+  const { summary, loading: summaryLoading, refetch: summaryRefetch } = useDeadStockSummary();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
@@ -22,6 +25,11 @@ export default function UploadPage() {
 
   function handleCloseModal() {
     setIsModalOpen(false);
+  }
+
+  function handleUploadComplete() {
+    refresh();          // refresh store card grid
+    summaryRefetch();   // redraw DeadStockChart with updated data
   }
 
   return (
@@ -89,12 +97,35 @@ export default function UploadPage() {
         </div>
       )}
 
+      {/* Dead Stock Distribution Chart (D-09: always visible) */}
+      <section className="mt-8">
+        <h2
+          className="text-base font-semibold text-[var(--color-text-primary)] mb-4"
+          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+        >
+          Dead Stock by Store
+        </h2>
+        {summaryLoading ? (
+          <div className="min-h-[300px] flex items-center justify-center">
+            <Loader2 className="animate-spin text-[var(--color-teal)]" size={24} aria-label="Loading chart data" />
+          </div>
+        ) : (summary?.stores ?? []).some(s => s.totalUnits > 0) ? (
+          <DeadStockChart stores={summary?.stores ?? []} />
+        ) : (
+          <div className="min-h-[300px] flex items-center justify-center rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)]">
+            <p className="text-[13px] text-[var(--color-text-muted)]">
+              Upload dead stock data to see distribution here.
+            </p>
+          </div>
+        )}
+      </section>
+
       {/* Upload modal */}
       <UploadModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         store={selectedStore}
-        onUploadComplete={refresh}
+        onUploadComplete={handleUploadComplete}
       />
     </AppShell>
   );
