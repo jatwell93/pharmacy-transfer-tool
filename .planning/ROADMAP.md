@@ -367,8 +367,10 @@ Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 eac
 
 **Requirements:** COST-03, COST-05
 
-**Plans:**
-- [ ] 14-01-PLAN.md — Build CostReport.tsx: total SOH $ input field (client-side only, not stored), dead stock dollar value per store from summary endpoint, dead stock % of total SOH with amber (10–25%) and red (>25%) benchmark indicators, recoverable value KPI card (shown post-match when cost data is present), guard rendering against missing cost data; mount on MatchPage below PostMatchChart
+**Plans:** 1 plan
+
+Plans:
+- [ ] 14-01-PLAN.md — match.ts cost_ex fix (2-line SQL patch + 2 unit tests) + CostReport.tsx panel (per-store cards, SOH input, progress bar, recoverable KPI)
 
 **UAT:**
 - Upload a dead stock file with Cost Ex column; run a match; MatchPage shows a CostReport panel with dead stock dollar value per store
@@ -430,5 +432,5 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 | 11. Schema Migration | 0/1 | Not started | - |
 | 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
 | 13. Charts | 2/2 | Complete    | 2026-04-18 |
-| 14. Cost Report UI | 0/1 | Not started | - |
+| 14. Cost Report UI | 0/1 | Planned     | - |
 | 15. 3-Tier Billing | 0/2 | Not started | - |
