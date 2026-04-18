@@ -36,8 +36,8 @@ export function PostMatchChart({ results, summary }: PostMatchChartProps) {
   // so both bars would be 0). Units Out/In shows meaningful data for every store.
   const chartData = summary.map(s => ({
     store: s.name,
-    'Units Out': outgoingByStore.get(s.name) ?? 0,
-    'Units In': incomingByStore.get(s.name) ?? 0,
+    'Units Out': Math.round(outgoingByStore.get(s.name) ?? 0),
+    'Units In': Math.round(incomingByStore.get(s.name) ?? 0),
   }));
 
   // Per-store net: incoming − outgoing for ALL stores in summary
