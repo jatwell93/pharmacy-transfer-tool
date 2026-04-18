@@ -17,44 +17,60 @@ interface PostMatchChartProps {
 }
 
 export function PostMatchChart({ results, summary }: PostMatchChartProps) {
-  // Step 1 -- Compute outgoing transfers per source store (D-01, D-02)
+  // Compute outgoing transfers per source store
   const outgoingByStore = new Map<string, number>();
   for (const r of results) {
     const prev = outgoingByStore.get(r.sourceStore) ?? 0;
     outgoingByStore.set(r.sourceStore, prev + r.bestMatch.qtyToTransfer);
   }
 
-  // Step 2 -- Build chart data array. Only include stores that appear as a source store (D-01)
-  // Per D-03: stores appearing as both source and destination are treated as source only.
-  const chartData = summary
-    .filter(s => outgoingByStore.has(s.name))
-    .map(s => ({
-      store: s.name,
-      before: s.totalUnits,
-      after: Math.max(0, s.totalUnits - (outgoingByStore.get(s.name) ?? 0)), // D-04 clamp
-    }));
+  // Compute incoming transfers per destination store
+  const incomingByStore = new Map<string, number>();
+  for (const r of results) {
+    const prev = incomingByStore.get(r.bestMatch.store) ?? 0;
+    incomingByStore.set(r.bestMatch.store, prev + r.bestMatch.qtyToTransfer);
+  }
 
-  // Step 3 -- Compute net units recovered across ALL match results (D-05)
-  const netUnitsRecovered = results.reduce(
-    (sum, r) => sum + r.bestMatch.qtyToTransfer,
-    0
-  );
+  // Build bar chart data for ALL stores (not just source stores)
+  // Destination-only stores have after === before (they receive sellable items, not dead stock)
+  const chartData = summary.map(s => ({
+    store: s.name,
+    before: s.totalUnits,
+    after: Math.max(0, s.totalUnits - (outgoingByStore.get(s.name) ?? 0)),
+  }));
+
+  // Per-store net: incoming − outgoing for ALL stores in summary
+  const storeNets = summary.map(s => ({
+    name: s.name,
+    net: (incomingByStore.get(s.name) ?? 0) - (outgoingByStore.get(s.name) ?? 0),
+  }));
+
+  const hasChartData = summary.some(s => s.totalUnits > 0);
 
   return (
     <div>
-      {/* KPI card (D-05) */}
-      <div className="rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)] p-4 mb-6">
-        <p className="text-[12px] text-[var(--color-text-muted)] mb-1">Net Units Recovered</p>
-        <p
-          className="text-3xl font-semibold text-[#0F766E]"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-        >
-          {Math.round(netUnitsRecovered).toLocaleString()}
-        </p>
+      {/* Per-store Net Units Received KPI cards — all stores */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 mb-6">
+        {storeNets.map(({ name, net }) => (
+          <div
+            key={name}
+            className="rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)] p-4"
+          >
+            <p className="text-[12px] text-[var(--color-text-muted)] mb-1 leading-snug">
+              {name}<br />Net Units Received
+            </p>
+            <p
+              className={`text-2xl font-semibold ${net >= 0 ? 'text-[#0F766E]' : 'text-[#DC2626]'}`}
+              style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+            >
+              {net > 0 ? '+' : ''}{Math.round(net).toLocaleString()}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Bar chart -- only render when there are source stores to show (D-01) */}
-      {chartData.length > 0 && (
+      {/* Bar chart — only render when stores have dead stock data */}
+      {hasChartData && (
         <div>
           <p className="text-[12px] text-[var(--color-text-muted)] mb-2">
             Projected if all transfers complete

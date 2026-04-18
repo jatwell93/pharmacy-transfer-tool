@@ -112,10 +112,20 @@ export default function UploadPage() {
         ) : (summary?.stores ?? []).some(s => s.totalUnits > 0) ? (
           <DeadStockChart stores={summary?.stores ?? []} />
         ) : (
-          <div className="min-h-[300px] flex items-center justify-center rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)]">
-            <p className="text-[13px] text-[var(--color-text-muted)]">
-              Upload dead stock data to see distribution here.
+          <div className="min-h-[300px] flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)] px-6 py-10">
+            <p className="text-base font-semibold text-[var(--color-text-primary)]">
+              No dead stock data yet
             </p>
+            <p className="text-sm text-[var(--color-text-muted)] text-center max-w-xs">
+              Upload dead stock files for each store to see the distribution here.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="mt-1 text-sm font-semibold text-[var(--color-teal)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-teal)] focus-visible:outline-offset-2"
+            >
+              Upload files ↑
+            </button>
           </div>
         )}
       </section>
