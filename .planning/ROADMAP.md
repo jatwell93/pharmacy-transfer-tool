@@ -269,7 +269,7 @@ Add both to Worker secrets (`wrangler secret put`) and to `.dev.vars`.
 **v1.1 Phase Checklist:**
 - [ ] **Phase 11: Schema Migration** - Add cost_ex column to dead_stock and plan_tier column to subscriptions; migrate existing paid rows to pro
 - [x] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary (completed 2026-04-16)
-- [ ] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage
+- [x] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage (completed 2026-04-17)
 - [ ] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI
 - [ ] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage
 
@@ -339,8 +339,8 @@ Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 eac
 **Requirements:** VIZ-01, VIZ-02, VIZ-03
 
 **Plans:**
-- [ ] 13-01-PLAN.md — Install recharts 3.8.1 in apps/web (with react-is override if needed); build DeadStockChart.tsx (PieChart, useDeadStockSummary data, PharmIQ brand colours, empty state); mount on UploadPage below store list
-- [ ] 13-02-PLAN.md — Build PostMatchChart.tsx (grouped BarChart, client-side before/after aggregation from match results + summary data, amber/teal bars, "Projected if all transfers complete" label); build net units recovered KPI card; mount both on MatchPage below results table
+2/2 plans complete
+- [x] 13-02-PLAN.md — Build PostMatchChart.tsx (grouped BarChart, client-side before/after aggregation from match results + summary data, amber/teal bars, "Projected if all transfers complete" label); build net units recovered KPI card; mount both on MatchPage below results table
 
 **UAT:**
 - After uploading dead stock data for at least two stores, UploadPage shows a pie chart with one slice per store labelled with store name and unit count; slices use PharmIQ teal/amber palette
@@ -429,6 +429,6 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 |-------|----------------|--------|-----------|
 | 11. Schema Migration | 0/1 | Not started | - |
 | 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
-| 13. Charts | 0/2 | Not started | - |
+| 13. Charts | 2/2 | Complete    | 2026-04-18 |
 | 14. Cost Report UI | 0/1 | Not started | - |
 | 15. 3-Tier Billing | 0/2 | Not started | - |

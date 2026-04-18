@@ -59,9 +59,9 @@
 
 ### Visualisation
 
-- [ ] **VIZ-01**: User sees a pie chart of dead stock units per store when dead stock data is uploaded (pre-match view — no cost data required)
-- [ ] **VIZ-02**: After running a match, user sees a grouped bar chart: current vs projected dead stock units per store (assuming all recommended transfers complete)
-- [ ] **VIZ-03**: Post-match view shows a "Net units recovered" KPI card — total units cleared across all stores
+- [x] **VIZ-01**: User sees a pie chart of dead stock units per store when dead stock data is uploaded (pre-match view — no cost data required)
+- [x] **VIZ-02**: After running a match, user sees a grouped bar chart: current vs projected dead stock units per store (assuming all recommended transfers complete)
+- [x] **VIZ-03**: Post-match view shows a "Net units recovered" KPI card — total units cleared across all stores
 
 ### Cost & Dollar Reporting
 
@@ -140,9 +140,9 @@
 | BRAND-01 | Phase 6 — Brand, UI and Export | Complete |
 | BRAND-02 | Phase 6 — Brand, UI and Export | Complete |
 | RESULTS-02 | Phase 6 — Brand, UI and Export | Complete |
-| VIZ-01 | Phase 13 — Charts | Pending |
-| VIZ-02 | Phase 13 — Charts | Pending |
-| VIZ-03 | Phase 13 — Charts | Pending |
+| VIZ-01 | Phase 13 — Charts | Complete |
+| VIZ-02 | Phase 13 — Charts | Complete |
+| VIZ-03 | Phase 13 — Charts | Complete |
 | COST-01 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
 | COST-02 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
 | COST-03 | Phase 14 — Cost Report UI | Pending |
