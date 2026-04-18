@@ -41,7 +41,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - [x] **Multi-store upload UX**: clear workflow for uploading N stores before running match — Validated in Phase 03: File Upload Pipeline
 - [x] **Results export**: PDF export implemented — Validated in Phase 06: pdf-export
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
-- [ ] **Dead stock visualisation**: pie chart showing dead stock units per store before match; projected change chart after match (assuming all transfers completed)
+- [x] **Dead stock visualisation**: pie chart showing dead stock units per store before match; projected change chart after match (assuming all transfers completed) — Validated in Phase 13: charts
 - [x] **Cost Ex column parsing**: optional Cost Ex column captured from FRED Stock Valuation uploads; per-unit cost stored in dead_stock.cost_ex; GET /api/dead-stock-summary endpoint returns per-store unit totals and dollar values with hasCostData signal — Validated in Phase 12: cost-column-parser-summary-endpoint
 - [ ] **SOH vs Dead Stock dollar report**: optional Cost Ex column in dead stock upload; dead stock value $ calculated per store; user inputs total SOH $ to see dead stock as % of total inventory value
 - [ ] **3-tier billing**: Free (1 match/mo), Pro ($10/mo, 10 matches/mo, max 10 stores), Enterprise ($100/mo, unlimited matches and stores); Stripe products for both paid tiers
@@ -92,7 +92,7 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 | Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
 
 ---
-*Last updated: 2026-04-17 — Phase 12 complete: Cost Ex parsing + dead-stock summary endpoint + useDeadStockSummary hook*
+*Last updated: 2026-04-18 — Phase 13 complete: recharts pie chart (UploadPage) + grouped bar chart + KPI card (MatchPage) with PharmIQ brand colours*
 
 ## Evolution
 
