@@ -31,12 +31,13 @@ export function PostMatchChart({ results, summary }: PostMatchChartProps) {
     incomingByStore.set(r.bestMatch.store, prev + r.bestMatch.qtyToTransfer);
   }
 
-  // Build bar chart data for ALL stores (not just source stores)
-  // Destination-only stores have after === before (they receive sellable items, not dead stock)
+  // Bar chart: Units Out / Units In per store — from transfer data directly.
+  // Before/After dead-stock framing is wrong for destination stores (they have 0 dead stock,
+  // so both bars would be 0). Units Out/In shows meaningful data for every store.
   const chartData = summary.map(s => ({
     store: s.name,
-    before: s.totalUnits,
-    after: Math.max(0, s.totalUnits - (outgoingByStore.get(s.name) ?? 0)),
+    'Units Out': outgoingByStore.get(s.name) ?? 0,
+    'Units In': incomingByStore.get(s.name) ?? 0,
   }));
 
   // Per-store net: incoming − outgoing for ALL stores in summary
@@ -45,7 +46,7 @@ export function PostMatchChart({ results, summary }: PostMatchChartProps) {
     net: (incomingByStore.get(s.name) ?? 0) - (outgoingByStore.get(s.name) ?? 0),
   }));
 
-  const hasChartData = summary.some(s => s.totalUnits > 0);
+  const hasChartData = results.length > 0;
 
   return (
     <div>
@@ -69,11 +70,11 @@ export function PostMatchChart({ results, summary }: PostMatchChartProps) {
         ))}
       </div>
 
-      {/* Bar chart — only render when stores have dead stock data */}
+      {/* Bar chart — units in/out per store */}
       {hasChartData && (
         <div>
           <p className="text-[12px] text-[var(--color-text-muted)] mb-2">
-            Projected if all transfers complete
+            Units transferred per store
           </p>
           <div className="min-h-[300px]">
             <ResponsiveContainer width="100%" height={300}>
@@ -100,14 +101,12 @@ export function PostMatchChart({ results, summary }: PostMatchChartProps) {
                 />
                 <Legend />
                 <Bar
-                  dataKey="before"
-                  name="Before"
+                  dataKey="Units Out"
                   fill="#D97706"
                   isAnimationActive={false}
                 />
                 <Bar
-                  dataKey="after"
-                  name="After"
+                  dataKey="Units In"
                   fill="#0F766E"
                   isAnimationActive={false}
                 />
