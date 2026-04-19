@@ -8,6 +8,7 @@ import { useStores } from '../hooks/useStores';
 import { useUsage } from '../hooks/useUsage';
 import { useFetch } from '../hooks/useFetch';
 import { PostMatchChart } from '../components/PostMatchChart';
+import { CostReport } from '../components/CostReport';
 
 // --- Constants ---
 
@@ -595,6 +596,27 @@ export default function MatchPage() {
           )}
         </section>
       )}
+
+      {/* Dead Stock Value panel (COST-03, COST-05) — always visible (D-01) */}
+      <section className="mt-8">
+        <h2
+          className="text-base font-semibold text-[var(--color-text-primary)] mb-4"
+          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+        >
+          Dead Stock Value
+        </h2>
+        {summaryLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="animate-spin text-[var(--color-teal)]" size={24} aria-label="Loading cost data" />
+          </div>
+        ) : (
+          <CostReport
+            stores={summary?.stores ?? []}
+            results={results}
+            hasRun={hasRun}
+          />
+        )}
+      </section>
 
       {/* Upgrade modal overlay (D-04) */}
       {showUpgradeModal && (
