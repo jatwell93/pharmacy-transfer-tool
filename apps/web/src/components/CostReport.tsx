@@ -78,24 +78,34 @@ export function CostReport({ stores, results, hasRun }: CostReportProps) {
       )}
 
       {/* Per-store dead stock dollar cards — horizontal row (D-03, D-04) */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 mb-6">
-        {stores.filter(s => s.hasCostData).map(s => (
-          <div
-            key={s.name}
-            className="rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)] p-4"
-          >
-            <p className="text-[12px] text-[var(--color-text-muted)] mb-1 leading-snug">
-              {s.name}<br />Dead Stock Value
-            </p>
-            <p
-              className="text-2xl font-semibold text-[#0F766E]"
-              style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-            >
-              {formatAUD(s.totalValue)}
-            </p>
+      {(() => {
+        const costStores = stores.filter(s => s.hasCostData);
+        const n = costStores.length;
+        const labelSize = n <= 2 ? '15px' : n <= 4 ? '13px' : '12px';
+        const valueSize = n <= 1 ? '3rem' : n <= 2 ? '2.25rem' : n <= 4 ? '1.75rem' : '1.5rem';
+        const minH = n <= 1 ? '160px' : n <= 2 ? '130px' : '100px';
+        return (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3 mb-6">
+            {costStores.map(s => (
+              <div
+                key={s.name}
+                className="rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-gray)] flex flex-col items-center justify-center text-center p-6"
+                style={{ minHeight: minH }}
+              >
+                <p className="text-[var(--color-text-muted)] mb-2 leading-snug" style={{ fontSize: labelSize }}>
+                  {s.name}<br />Dead Stock Value
+                </p>
+                <p
+                  className="font-semibold text-[#0F766E]"
+                  style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: valueSize }}
+                >
+                  {formatAUD(s.totalValue)}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })()}
 
       {/* SOH input — below store cards, above percentage (D-05) */}
       <div className="mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>

@@ -31,12 +31,10 @@ export default function AppShell({ children }: AppShellProps) {
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-[var(--color-surface)] focus:text-[var(--color-teal)] focus:px-3 focus:py-1 focus:rounded focus:z-50">
           Skip to main content
         </a>
-        <span
-          className="font-semibold text-[32px] text-white leading-[1.2] tracking-[-0.01em]"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-        >
-          PharmIQ
-        </span>
+        <div className="flex flex-col leading-tight" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
+          <span className="font-semibold text-[22px] text-white tracking-[-0.01em]">Pharma IQ</span>
+          <span className="text-[11px] text-white/75 tracking-[0.06em] uppercase font-medium">Deadstock Optimiser</span>
+        </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleThemeToggle}
