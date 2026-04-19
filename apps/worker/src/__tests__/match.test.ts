@@ -268,4 +268,66 @@ describe("POST /api/match", () => {
     const body = (await res.json()) as { error: string };
     expect(body.error).toContain("Match run failed");
   });
+
+  it("returns MatchResult.cost equal to cost_ex when dead_stock row has cost_ex value", async () => {
+    const app = buildApp();
+    const mock = vi.mocked(withOrgContext);
+    // Call 1: dead_stock — SKU1 with cost_ex: 5.99
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", soh: 10, store_name: "Store A", cost_ex: 5.99 },
+    ]);
+    // Call 2: rou_data — SKU1 at Store B so a match is produced
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", rou: 5, soh: 0, is_ranged: false, store_name: "Store B" },
+    ]);
+
+    const res = await app.request(
+      "/api/match",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monthsCoverTarget: 3 }),
+      },
+      TEST_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      results: Array<{ cost: number }>;
+      warnings: unknown[];
+    };
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].cost).toBe(5.99);
+  });
+
+  it("returns MatchResult.cost of 0 when dead_stock row has cost_ex: null", async () => {
+    const app = buildApp();
+    const mock = vi.mocked(withOrgContext);
+    // Call 1: dead_stock — SKU1 with cost_ex: null (no cost data uploaded)
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", soh: 10, store_name: "Store A", cost_ex: null },
+    ]);
+    // Call 2: rou_data — SKU1 at Store B so a match is produced
+    mock.mockResolvedValueOnce([
+      { sku: "SKU1", description: "Item 1", rou: 5, soh: 0, is_ranged: false, store_name: "Store B" },
+    ]);
+
+    const res = await app.request(
+      "/api/match",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monthsCoverTarget: 3 }),
+      },
+      TEST_ENV,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      results: Array<{ cost: number }>;
+      warnings: unknown[];
+    };
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].cost).toBe(0);
+  });
 });

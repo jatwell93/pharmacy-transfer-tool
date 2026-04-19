@@ -86,13 +86,14 @@ matchRoute.post('/match', async (c) => {
         sku: string;
         description: string;
         soh: number;
+        cost_ex: number | null;
         store_name: string;
       }>
     >(
       dbUrl,
       orgId,
       (tx) => tx`
-        SELECT ds.sku, ds.description, ds.soh, s.name AS store_name
+        SELECT ds.sku, ds.description, ds.soh, ds.cost_ex, s.name AS store_name
         FROM dead_stock ds
         JOIN stores s ON s.id = ds.store_id
         WHERE ds.org_id = ${orgId}
@@ -136,8 +137,7 @@ matchRoute.post('/match', async (c) => {
     const storeDeadStock = new Map<string, DeadStockItem[]>();
     for (const row of deadStockRows.filter((r) => !storeFilter || storeFilter.includes(r.store_name))) {
       const items = storeDeadStock.get(row.store_name) || [];
-      // cost is 0 — dead_stock table has no cost column (display-only per ALGORITHM-SPEC Section 5)
-      items.push({ sku: row.sku, soh: row.soh, description: row.description, cost: 0 });
+      items.push({ sku: row.sku, soh: row.soh, description: row.description, cost: row.cost_ex ?? 0 });
       storeDeadStock.set(row.store_name, items);
     }
 
