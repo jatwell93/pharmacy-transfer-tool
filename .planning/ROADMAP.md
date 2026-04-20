@@ -392,13 +392,15 @@ Plans:
 
 **Goal:** Three pricing tiers (Free, Pro, Enterprise) are enforced server-side in the Worker, users can upgrade or downgrade via Stripe Checkout and the Customer Portal, and the billing page shows current plan, usage, and a side-by-side tier comparison.
 
-**Depends on:** Phase 11 (plan_tier column must exist before billing code reads it); Phases 12–14 can be in progress or complete
+**Depends on:** Phase 11 (plan_tier column must exist before billing code reads it); Phases 12-14 can be in progress or complete
 
 **Requirements:** BILLING-05, BILLING-06, BILLING-07, BILLING-08, BILLING-09, BILLING-10, BILLING-11, BILLING-12
 
-**Plans:**
-- [ ] 15-01-PLAN.md — Create lib/plans.ts with PLAN_LIMITS constant and PlanTier type; update types.ts Env interface to add STRIPE_PRICE_ID_PRO and STRIPE_PRICE_ID_ENTERPRISE; update match.ts to use tier-aware run limit and store-count gate; update billing.ts GET /usage to return plan_tier and tier-aware limit; update billing.ts POST /billing/create-checkout to accept tier parameter and select correct price ID; update webhook.ts to write plan_tier from checkout session metadata and handle customer.subscription.updated event; add stripe_event_id idempotency guard
-- [ ] 15-02-PLAN.md — Update BillingPage.tsx to show 3 pricing cards (Free, Pro, Enterprise) with current plan highlighted; update useUsage hook to expose plan_tier; update MatchPage upgrade modal copy to reference tier names; add store-count and match-count usage display to BillingPage
+**Plans:** 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Create lib/plans.ts with PLAN_LIMITS constant and PlanTier type; update types.ts Env interface; rewrite match.ts tier-aware enforcement with store-count gate; update billing.ts GET /usage, create-checkout with tier param, create-portal-session; update webhook.ts with subscription.updated handler and stripe_event_id idempotency; add processed_webhook_events table to schema.sql
+- [ ] 15-02-PLAN.md — Redesign BillingPage with 3 pricing cards, usage row, checkout success flow (spinner + toast), portal link; update useUsage and useMatchRun hooks for 3-tier data; update MatchPage upgrade modal with tier-specific copy
 
 **UAT:**
 - Free org: first match run succeeds; second match run this calendar month returns 429 with an upgrade prompt
@@ -433,4 +435,4 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 | 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
 | 13. Charts | 2/2 | Complete    | 2026-04-18 |
 | 14. Cost Report UI | 0/1 | Planned     | - |
-| 15. 3-Tier Billing | 0/2 | Not started | - |
+| 15. 3-Tier Billing | 0/2 | Planned     | - |
