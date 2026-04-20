@@ -58,8 +58,8 @@ Four roles already established by existing pages (BillingPage, MatchPage). Phase
 |------|------|--------|-------------|------|-------|
 | Body | 13px | 400 (regular) | 1.5 | Inter | Limit descriptions inside pricing cards, usage stat values, "Manage subscription" link label |
 | Label | 12px | 400 (regular) | 1.4 | Inter | Card subtext, "Current plan" badge text, toast dismiss label |
-| Heading (section) | 16px | 600 (semibold) | 1.2 | Space Grotesk | "Billing" page H1 title (existing), section headings |
-| Display (card plan name) | 20px | 600 (semibold) | 1.2 | Space Grotesk | Plan name inside each pricing card (Free / Pro / Enterprise), price display (e.g. "$10 /mo AUD") |
+| Heading (section) | 16px | 600 (semibold) | 1.2 | Space Grotesk | Section headings |
+| Display (card plan name) | 20px | 600 (semibold) | 1.2 | Space Grotesk | "Billing" page H1 title, plan name inside each pricing card (Free / Pro / Enterprise), price display (e.g. "$10 /mo AUD") |
 
 Source: Directly measured from existing BillingPage.tsx and MatchPage.tsx patterns. No new sizes introduced — use only these four.
 
@@ -117,7 +117,7 @@ Modified components:
 ```
 ┌─────────────────────────────────────────────────────┐
 │ h1: "Billing"                                       │
-│ (Space Grotesk 24px semibold, mb-6)                 │
+│ (Space Grotesk 20px semibold, mb-6)                 │
 ├─────────────────────────────────────────────────────┤
 │ USAGE ROW (compact, always visible)                 │
 │ "Match runs: 3/10 this month  •  Stores: 7/10"      │
