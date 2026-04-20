@@ -59,7 +59,7 @@ Four roles already established by existing pages (BillingPage, MatchPage). Phase
 | Body | 13px | 400 (regular) | 1.5 | Inter | Limit descriptions inside pricing cards, usage stat values, "Manage subscription" link label |
 | Label | 12px | 400 (regular) | 1.4 | Inter | Card subtext, "Current plan" badge text, toast dismiss label |
 | Heading (section) | 16px | 600 (semibold) | 1.2 | Space Grotesk | "Billing" page H1 title (existing), section headings |
-| Display (card plan name) | 20px | 600 (semibold) | 1.2 | Space Grotesk | Plan name inside each pricing card (Free / Pro / Enterprise) |
+| Display (card plan name) | 20px | 600 (semibold) | 1.2 | Space Grotesk | Plan name inside each pricing card (Free / Pro / Enterprise), price display (e.g. "$10 /mo AUD") |
 
 Source: Directly measured from existing BillingPage.tsx and MatchPage.tsx patterns. No new sizes introduced — use only these four.
 
@@ -148,7 +148,7 @@ Modified components:
 - Current plan card: `border-[#0F766E]`; other cards: `border-[var(--color-border-light)]`
 - "Current plan" badge (current card only): `inline-flex items-center rounded-full bg-[#0F766E] text-white text-[12px] font-semibold px-3 py-1 mb-2`
 - Plan name: 20px Space Grotesk semibold, `--color-text-primary`
-- Price: `text-[28px] font-semibold text-[var(--color-text-primary)]` + `text-[13px] font-normal text-[var(--color-text-secondary)]` for "/mo AUD" suffix
+- Price: `text-[20px] font-semibold text-[var(--color-text-primary)]` + `text-[13px] font-normal text-[var(--color-text-secondary)]` for "/mo AUD" suffix
 - Limits block: two rows, 13px Inter regular, `--color-text-secondary`, `gap-1`
 - CTA button: `w-full min-h-[44px] rounded-md text-[13px] font-semibold` — teal fill for upgrade CTAs, disabled/label-only for current tier card
 
@@ -176,7 +176,7 @@ Existing modal structure preserved. Copy changes per `upgrade_to` value:
 |---|---|---|---|
 | `'pro'` | "Upgrade to Pro" | "Get 10 match runs/month and up to 10 stores for $10/mo AUD." | "Upgrade to Pro" |
 | `'enterprise'` | "Upgrade to Enterprise" | "Unlimited match runs and stores for $100/mo AUD." | "Upgrade to Enterprise" |
-| `undefined` (fallback) | "You've used your free run for this month" | "Upgrade to PharmIQ Pro for unlimited match runs." | "Upgrade Now" |
+| `undefined` (fallback) | "You've used your free run for this month" | "Upgrade to PharmIQ Pro for unlimited match runs." | "Upgrade to Pro" |
 
 Modal overlay: `rgba(15, 23, 42, 0.5)` — existing convention from MatchPage.
 Modal container: `rounded-xl p-8 max-w-sm` — existing convention.
@@ -220,8 +220,9 @@ Modal container: `rounded-xl p-8 max-w-sm` — existing convention.
 | Upgrade modal — enterprise title | "Upgrade to Enterprise" | D-08 |
 | Upgrade modal — enterprise body | "Unlimited match runs and stores for $100/mo AUD." | D-08 |
 | Upgrade modal — enterprise CTA | "Upgrade to Enterprise" | D-08 |
+| Upgrade modal — fallback CTA | "Upgrade to Pro" | Revised default (was "Upgrade Now") |
 | Upgrade modal — dismiss | "Maybe later" | Existing MatchPage convention |
-| Error state — usage load fail | "Could not load billing info." | Existing BillingPage convention |
+| Error state — usage load fail | "Could not load billing info. Refresh the page to try again." | Existing BillingPage convention; refresh instruction added |
 | Loading state — usage | "Loading billing info..." | Existing BillingPage convention |
 
 Empty state: BillingPage has no true empty state — usage data is always present for authenticated users. The loading state ("Loading billing info...") covers the pre-data render.
@@ -270,6 +271,7 @@ All elements follow the existing app accessibility conventions established in Ap
 - Touch targets: min-height 44px on all interactive elements (button, link)
 - Focus rings: `focus-visible:outline-2 focus-visible:outline-offset-2` on all interactive elements
 - Toast: `role="status" aria-live="polite"` — screen readers announce upgrade confirmation
+- Toast dismiss button: `aria-label="Dismiss notification"` on the X button
 - Upgrade modal: existing `role="dialog" aria-modal="true" aria-labelledby` pattern preserved
 - Pricing cards: plan name `<h2>` inside each card; card container is not a button — only the CTA button inside is interactive
 - "Current plan" badge: visually distinguished AND uses screen-reader-visible text "Current plan" (not just a border color change)
