@@ -4,6 +4,13 @@
 //               and ROU data for the org from NEON, runs matchTransfers() once per
 //               dead-stock store, merges results and deduplicates warnings, and returns
 //               a single combined JSON response: { results, warnings }.
+//
+// Usage metering (3-tier billing):
+//   - Reads plan_tier from subscriptions table (not legacy status field)
+//   - Backward compat: 'paid' status maps to 'pro' tier
+//   - Enterprise org bypasses all limit checks (Infinity limits)
+//   - Non-enterprise: atomic counter UPDATE ... WHERE count < limit
+//   - Store count gate: COUNT(DISTINCT store_id) at match time (not upload time, per D-15)
 
 import { Hono } from 'hono';
 import { neon } from '@neondatabase/serverless';
@@ -11,6 +18,7 @@ import type { Env, Variables } from '../types';
 import { withOrgContext } from '../db/client';
 import { matchTransfers } from '../matcher';
 import type { DeadStockItem, RouItem, MatchResult, DataQualityWarning } from '../matcher';
+import { PLAN_LIMITS, type PlanTier } from '../lib/plans';
 
 const matchRoute = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -44,21 +52,24 @@ matchRoute.post('/match', async (c) => {
     const orgId = c.get('orgId');
     const dbUrl = c.env.DATABASE_URL;
 
-    // --- Usage metering (D-01, D-05) ---
-    // Step 1: Check org plan from subscriptions table using direct neon sql.transaction()
-    // (withOrgContext not used here — multi-statement upsert+increment needs direct transaction control)
+    // --- Usage metering (3-tier billing: D-01, D-05, BILLING-06, BILLING-07) ---
+    // Step 1: Read plan_tier (not legacy status) from subscriptions table.
+    // Direct neon sql.transaction() used here — multi-statement upsert+increment
+    // needs direct transaction control (withOrgContext wraps in its own transaction).
     const sql = neon(dbUrl);
     const claims = JSON.stringify({ org_id: orgId });
 
     const planResults = await sql.transaction((tx) => [
       tx`SELECT set_config('request.jwt.claims', ${claims}, true)`,
-      tx`SELECT status FROM subscriptions WHERE org_id = ${orgId} LIMIT 1`,
+      tx`SELECT plan_tier FROM subscriptions WHERE org_id = ${orgId} LIMIT 1`,
     ]);
-    const planStatus = (planResults[1] as Array<{ status: string }>)[0]?.status ?? 'free';
+    const rawTier = (planResults[1] as Array<{ plan_tier: string }>)[0]?.plan_tier ?? 'free';
+    // Backward compat: map 'paid' (legacy v1 value written by old webhook handler) to 'pro'
+    const planTier: PlanTier = rawTier === 'paid' ? 'pro' : (rawTier as PlanTier);
+    const limits = PLAN_LIMITS[planTier] ?? PLAN_LIMITS.free;
 
-    // Step 2: For free-tier orgs, enforce usage limit atomically (T-5-01, T-5-03)
-    if (planStatus !== 'paid') {
-      const freeLimit = 1;
+    // Step 2: For non-enterprise orgs, enforce match run limit atomically (T-15-02)
+    if (limits.matchRuns !== Infinity) {
       const yearMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
       const usageResults = await sql.transaction((tx) => [
         tx`SELECT set_config('request.jwt.claims', ${claims}, true)`,
@@ -69,13 +80,38 @@ matchRoute.post('/match', async (c) => {
            SET count = count + 1
            WHERE org_id = ${orgId}
              AND year_month = ${yearMonth}
-             AND count < ${freeLimit}
+             AND count < ${limits.matchRuns}
            RETURNING count`,
       ]);
       const updateRows = usageResults[2] as Array<{ count: number }>;
       if (updateRows.length === 0) {
         // UPDATE returned 0 rows — count was already at or above the limit
-        return c.json({ error: 'Monthly match run limit reached. Upgrade to continue.' }, 429);
+        const upgradeTo = planTier === 'free' ? 'pro' : 'enterprise';
+        return c.json(
+          { error: 'Monthly match run limit reached. Upgrade to continue.', upgrade_to: upgradeTo },
+          429,
+        );
+      }
+    }
+
+    // Step 3: For non-enterprise orgs, gate on distinct store count at match time (BILLING-06, BILLING-07)
+    // Store count is checked against rou_data (the data set used for matching), per D-15.
+    if (limits.stores !== Infinity) {
+      const storeCountResults = await withOrgContext<Array<{ cnt: number }>>(
+        dbUrl,
+        orgId,
+        (tx) => tx`SELECT COUNT(DISTINCT store_id)::int AS cnt FROM rou_data WHERE org_id = ${orgId}`,
+      );
+      const storeCount = storeCountResults[0]?.cnt ?? 0;
+      if (storeCount > limits.stores) {
+        const upgradeTo = planTier === 'free' ? 'pro' : 'enterprise';
+        return c.json(
+          {
+            error: `Your plan allows up to ${limits.stores} stores. You have ${storeCount}. Upgrade to add more.`,
+            upgrade_to: upgradeTo,
+          },
+          403,
+        );
       }
     }
     // --- End usage metering ---
