@@ -68,6 +68,14 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS processed_webhook_events (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  stripe_event_id   TEXT NOT NULL UNIQUE,
+  processed_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_processed_webhook_events_event ON processed_webhook_events(stripe_event_id);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_stores_org ON stores(org_id);
 CREATE INDEX IF NOT EXISTS idx_rou_data_org ON rou_data(org_id);
@@ -91,6 +99,8 @@ ALTER TABLE usage_meters ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_meters FORCE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions FORCE ROW LEVEL SECURITY;
+ALTER TABLE processed_webhook_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE processed_webhook_events FORCE ROW LEVEL SECURITY;
 
 -- RLS policies: restrict all access to the authenticated org
 -- The org_id is sourced from request.jwt.claims set via withOrgContext() in db/client.ts.
@@ -101,7 +111,10 @@ CREATE POLICY org_isolation ON rou_data FOR ALL USING (org_id = (current_setting
 CREATE POLICY org_isolation ON dead_stock FOR ALL USING (org_id = (current_setting('request.jwt.claims', true)::json->>'org_id'));
 CREATE POLICY org_isolation ON usage_meters FOR ALL USING (org_id = (current_setting('request.jwt.claims', true)::json->>'org_id'));
 CREATE POLICY org_isolation ON subscriptions FOR ALL USING (org_id = (current_setting('request.jwt.claims', true)::json->>'org_id'));
+-- Webhook handler uses neon() directly (no set_config/RLS context) — permissive policy so INSERT works
+CREATE POLICY webhook_all ON processed_webhook_events FOR ALL USING (true);
 
 -- Grant permissions to app role (no BYPASSRLS)
 -- Verify: SELECT rolbypassrls FROM pg_roles WHERE rolname = 'pharmiq_app'; -- must return 'f'
 GRANT SELECT, INSERT, UPDATE, DELETE ON orgs, stores, rou_data, dead_stock, usage_meters, subscriptions TO pharmiq_app;
+GRANT SELECT, INSERT ON processed_webhook_events TO pharmiq_app;
