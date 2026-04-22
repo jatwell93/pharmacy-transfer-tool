@@ -36,6 +36,7 @@ interface UseMatchRunReturn {
   error: string | null;
   hasRun: boolean;
   runMatch: (monthsCoverTarget: number, storeFilter: string[]) => Promise<void>;
+  upgradeTo: string | null;
 }
 
 export function useMatchRun(): UseMatchRunReturn {
@@ -45,6 +46,7 @@ export function useMatchRun(): UseMatchRunReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasRun, setHasRun] = useState(false);
+  const [upgradeTo, setUpgradeTo] = useState<string | null>(null);
 
   const runMatch = useCallback(async (monthsCoverTarget: number, storeFilter: string[]) => {
     setLoading(true);
@@ -56,13 +58,15 @@ export function useMatchRun(): UseMatchRunReturn {
         body: JSON.stringify({ monthsCoverTarget, storeFilter }),
       });
       if (!res.ok) {
-        const body = await res.json() as { error?: string };
+        const body = await res.json() as { error?: string; upgrade_to?: string };
+        setUpgradeTo(body.upgrade_to ?? null);
         throw new Error(body.error || `Match run failed (${res.status})`);
       }
       const body = await res.json() as { results: MatchResult[]; warnings: DataQualityWarning[] };
       setResults(body.results);
       setWarnings(body.warnings);
       setHasRun(true);
+      setUpgradeTo(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Match run failed');
       setResults([]);
@@ -72,5 +76,5 @@ export function useMatchRun(): UseMatchRunReturn {
     }
   }, [fetchApi]);
 
-  return { results, warnings, loading, error, hasRun, runMatch };
+  return { results, warnings, loading, error, hasRun, runMatch, upgradeTo };
 }

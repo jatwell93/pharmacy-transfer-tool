@@ -4,7 +4,8 @@ import { useFetch } from './useFetch';
 export interface UsageData {
   count: number;
   limit: number;
-  plan: 'free' | 'paid';
+  plan_tier: 'free' | 'pro' | 'enterprise';
+  store_count: number;
 }
 
 export function useUsage() {
