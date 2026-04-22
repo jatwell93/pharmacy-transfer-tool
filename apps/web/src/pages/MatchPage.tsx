@@ -26,7 +26,7 @@ type FlatItem =
 // --- MatchPage component ---
 
 export default function MatchPage() {
-  const { results, warnings, loading, error, hasRun, runMatch } = useMatchRun();
+  const { results, warnings, loading, error, hasRun, runMatch, upgradeTo } = useMatchRun();
   const { stores, loading: storesLoading } = useStores();
   const { usage, loading: usageLoading, refresh: refreshUsage } = useUsage();
   const { summary, loading: summaryLoading } = useDeadStockSummary();
@@ -42,8 +42,8 @@ export default function MatchPage() {
   const [warningsExpanded, setWarningsExpanded] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  // Derived: true when free-plan org is at their monthly run limit
-  const isAtLimit = usage?.plan === 'free' && usage.count >= usage.limit;
+  // Derived: true when org is at their monthly run limit (works for Free and Pro; enterprise limit=-1 never at limit)
+  const isAtLimit = usage != null && usage.limit !== -1 && usage.count >= usage.limit;
 
   // Initialise store selection to all stores once loaded
   useEffect(() => {
@@ -55,12 +55,12 @@ export default function MatchPage() {
     }
   }, [stores]);
 
-  // Show upgrade modal when error contains the 429 limit message (D-04)
+  // Show upgrade modal when upgradeTo is set (covers both 429 run-limit and 403 store-limit errors)
   useEffect(() => {
-    if (error && error.includes('Monthly match run limit reached')) {
+    if (upgradeTo) {
       setShowUpgradeModal(true);
     }
-  }, [error]);
+  }, [upgradeTo]);
 
   // Scroll container ref for virtualization
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +84,12 @@ export default function MatchPage() {
 
   const handleUpgrade = useCallback(async () => {
     try {
-      const res = await fetchApi('/api/billing/create-checkout', { method: 'POST' });
+      const tier = upgradeTo === 'enterprise' ? 'enterprise' : 'pro';
+      const res = await fetchApi('/api/billing/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier }),
+      });
       if (res.ok) {
         const { url } = (await res.json()) as { url: string };
         window.location.href = url;
@@ -92,7 +97,7 @@ export default function MatchPage() {
     } catch {
       // Silently fail — user can retry
     }
-  }, [fetchApi]);
+  }, [fetchApi, upgradeTo]);
 
   const handleExportPdf = useCallback(async () => {
     if (results.length === 0 || pdfLoading) return;
@@ -305,10 +310,10 @@ export default function MatchPage() {
 
         {/* Right: Usage counter + Run Match button */}
         <div className="flex items-center gap-3">
-          {/* Usage counter — only for free-plan orgs (D-07, D-08) */}
-          {usage && usage.plan === 'free' && (
+          {/* Usage counter — for free and pro users (not enterprise which has unlimited) */}
+          {usage && usage.plan_tier !== 'enterprise' && (
             <span className="text-[13px] text-[var(--color-text-secondary)]">
-              {usage.count} of {usage.limit} free run{usage.limit !== 1 ? 's' : ''} used this month
+              {usage.count} of {usage.limit} run{usage.limit !== 1 ? 's' : ''} used this month
             </span>
           )}
 
@@ -618,7 +623,7 @@ export default function MatchPage() {
         )}
       </section>
 
-      {/* Upgrade modal overlay (D-04) */}
+      {/* Upgrade modal overlay (D-04, D-07, D-08) — tier-specific copy based on upgradeTo */}
       {showUpgradeModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -637,17 +642,27 @@ export default function MatchPage() {
               className="text-lg font-semibold text-[var(--color-text-primary)] mb-2"
               style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
             >
-              You've used your free run for this month
+              {upgradeTo === 'enterprise'
+                ? 'Upgrade to Enterprise'
+                : upgradeTo === 'pro'
+                ? 'Upgrade to Pro'
+                : "You've used your free run for this month"}
             </h2>
             <p className="text-[13px] text-[var(--color-text-secondary)] mb-6">
-              Upgrade to PharmIQ Pro for unlimited match runs.
+              {upgradeTo === 'enterprise'
+                ? 'Unlimited match runs and stores for $100/mo AUD.'
+                : upgradeTo === 'pro'
+                ? 'Get 10 match runs/month and up to 10 stores for $10/mo AUD.'
+                : 'Upgrade to PharmIQ Pro for unlimited match runs.'}
             </p>
             <button
               onClick={handleUpgrade}
               className="w-full bg-[#D97706] text-white font-semibold rounded-md px-4 py-3 hover:bg-[#B45309] transition-colors"
               style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
-              Upgrade Now
+              {upgradeTo === 'enterprise'
+                ? 'Upgrade to Enterprise'
+                : 'Upgrade to Pro'}
             </button>
             <button
               onClick={() => setShowUpgradeModal(false)}
