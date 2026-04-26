@@ -271,7 +271,7 @@ Add both to Worker secrets (`wrangler secret put`) and to `.dev.vars`.
 - [x] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary (completed 2026-04-16)
 - [x] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage (completed 2026-04-17)
 - [ ] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI
-- [ ] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage
+- [x] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage (completed 2026-04-26)
 
 **v1.1 Execution Order:**
 Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 each depend on Phase 12 (or Phase 11 for 15) and can proceed in parallel once prerequisites are met.
@@ -396,11 +396,11 @@ Plans:
 
 **Requirements:** BILLING-05, BILLING-06, BILLING-07, BILLING-08, BILLING-09, BILLING-10, BILLING-11, BILLING-12
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 15-01-PLAN.md — Create lib/plans.ts with PLAN_LIMITS constant and PlanTier type; update types.ts Env interface; rewrite match.ts tier-aware enforcement with store-count gate; update billing.ts GET /usage, create-checkout with tier param, create-portal-session; update webhook.ts with subscription.updated handler and stripe_event_id idempotency; add processed_webhook_events table to schema.sql
-- [ ] 15-02-PLAN.md — Redesign BillingPage with 3 pricing cards, usage row, checkout success flow (spinner + toast), portal link; update useUsage and useMatchRun hooks for 3-tier data; update MatchPage upgrade modal with tier-specific copy
+- [x] 15-01-PLAN.md — Create lib/plans.ts with PLAN_LIMITS constant and PlanTier type; update types.ts Env interface; rewrite match.ts tier-aware enforcement with store-count gate; update billing.ts GET /usage, create-checkout with tier param, create-portal-session; update webhook.ts with subscription.updated handler and stripe_event_id idempotency; add processed_webhook_events table to schema.sql
+- [x] 15-02-PLAN.md — Redesign BillingPage with 3 pricing cards, usage row, checkout success flow (spinner + toast), portal link; update useUsage and useMatchRun hooks for 3-tier data; update MatchPage upgrade modal with tier-specific copy
 
 **UAT:**
 - Free org: first match run succeeds; second match run this calendar month returns 429 with an upgrade prompt
@@ -435,4 +435,4 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 | 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
 | 13. Charts | 2/2 | Complete    | 2026-04-18 |
 | 14. Cost Report UI | 0/1 | Planned     | - |
-| 15. 3-Tier Billing | 0/2 | Planned     | - |
+| 15. 3-Tier Billing | 2/2 | Complete   | 2026-04-26 |
