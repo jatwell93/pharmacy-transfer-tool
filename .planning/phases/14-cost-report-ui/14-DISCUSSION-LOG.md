@@ -134,3 +134,33 @@
 ## Deferred Ideas
 
 None — discussion stayed within phase scope.
+
+---
+
+## Update Session — 2026-04-26
+
+*Post-build context refresh. Two new decisions captured.*
+
+### SOH Input Persistence
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Persist to localStorage (org-specific key) | `pharmiq_soh_[orgId]` — survives page reloads, per-org isolation | ✓ |
+| Keep as ephemeral state | Resets on reload — per original D-05 | |
+| You decide | Claude's discretion | |
+
+**User's choice:** Persist to localStorage with org-specific key `pharmiq_soh_[orgId]`
+**Notes:** OrgId from Clerk's `useOrganization()` hook. Confirmed org-specific (not global) when asked about key scope.
+
+---
+
+### Empty / No-Upload State
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Differentiate the two messages | No upload → "Upload a dead stock file..." \| Upload without cost → "Re-upload using FRED..." | ✓ |
+| Keep single message | Both states show FRED re-upload message | |
+| Hide section entirely when no upload | Don't render "Dead Stock Value" section until first upload | |
+
+**User's choice:** Differentiate the two messages
+**Notes:** Uses `totalUnits` field from StoreSummary to distinguish state. `stores.every(s => s.totalUnits === 0)` → first-upload state. Any `totalUnits > 0` but all `hasCostData === false` → cost-column-missing state. Supersedes original D-02.

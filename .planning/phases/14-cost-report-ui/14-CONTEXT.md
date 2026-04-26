@@ -1,7 +1,7 @@
 # Phase 14: Cost Report UI - Context
 
-**Gathered:** 2026-04-18
-**Status:** Ready for planning
+**Gathered:** 2026-04-26 (updated)
+**Status:** Implementation complete — context updated with post-build decisions
 
 <domain>
 ## Phase Boundary
@@ -15,16 +15,17 @@ Build `CostReport.tsx` — a panel on MatchPage that shows per-store dead stock 
 
 ### Panel Visibility & Placement
 - **D-01:** CostReport panel is **always visible** below `PostMatchChart` on MatchPage — renders regardless of whether a match has been run. Mirrors the UploadPage chart section pattern (always shown, with contextual content depending on data state).
-- **D-02:** When **no cost data** is present (`stores.every(s => !s.hasCostData)`), the panel renders with a section heading and an instructional message: "Re-upload dead stock using FRED Stock Valuation report format to see dollar values." Do NOT render zeros or an error state — use the instructional message only.
+- **D-02:** ~~Original~~ — superseded by D-14 (two distinct empty states). See D-14 below.
 
 ### Per-Store Breakdown Format
 - **D-03:** Per-store dead stock values are displayed as a **horizontal row of metric cards** — same visual pattern as `StoreCard` on UploadPage. One card per store.
 - **D-04:** Each card shows: **store name + dead stock dollar value only** (e.g. "$1,240"). No unit count, no per-store percentage. Clean and focused — the percentage comparison belongs at the org level driven by the SOH input.
 
 ### SOH Input & Percentage Display
-- **D-05:** The total SOH $ input is positioned **below the store cards, above the percentage summary**. It is a labelled numeric input field — client-side only, never persisted. The calculation updates immediately on input (no submit button).
+- **D-05:** The total SOH $ input is positioned **below the store cards, above the percentage summary**. It is a labelled numeric input field. The calculation updates immediately on input (no submit button).
 - **D-06:** The percentage indicator uses a **horizontal progress bar with threshold markers**: a bar from 0–100% with vertical marker lines at 10% (amber threshold) and 25% (red threshold). Bar fill colour changes based on the current percentage: teal below 10%, amber 10–25%, red above 25%.
 - **D-07:** When SOH input is empty or 0, the percentage bar is hidden and a placeholder is shown (e.g. "Enter total SOH value above"). The UI must never display `Infinity%` or `NaN%`.
+- **D-13:** SOH input value **persists to `localStorage`** using an org-specific key: `pharmiq_soh_[orgId]`. OrgId is retrieved from Clerk's `useOrganization()` hook (already used elsewhere in the codebase). Value is restored from localStorage on component mount; updated on every change. This ensures a pharmacy manager's SOH figure survives page reloads without any server round-trip.
 
 ### Recoverable Value KPI
 - **D-08:** The "Recoverable value" KPI card lives **inside CostReport**, shown at the top of the panel when `hasRun === true` AND cost data is present (at least one store with `hasCostData === true`). Keeps all cost/dollar information together in one panel.
@@ -34,6 +35,12 @@ Build `CostReport.tsx` — a panel on MatchPage that shows per-store dead stock 
 ### Edge Cases
 - **D-11:** When `cost_ex` is null for some SKUs (older uploads without cost data), those SKUs contribute `0` to the recoverable total (via `?? 0` — consistent with matcher's NaN fallback pattern). No error or warning needed for null cost in the UI calculation.
 - **D-12:** The Recoverable $ KPI is suppressed (not shown as $0) when all matched SKUs have `cost === 0`. Only render the KPI when the calculated value is > 0.
+
+### Empty States (post-build update)
+- **D-14:** Two distinct empty states distinguished by `totalUnits`:
+  - **No upload yet** (`stores.every(s => s.totalUnits === 0)` or `stores.length === 0`): show "Upload a dead stock file to see values here." — user hasn't uploaded anything yet, so "re-upload" framing is incorrect.
+  - **Uploaded without cost column** (any store has `totalUnits > 0` but all have `hasCostData === false`): show "Re-upload dead stock using FRED Stock Valuation report format to see dollar values." — user has data but it lacks cost_ex.
+  - This replaces the single message from original D-02.
 
 ### Claude's Discretion
 - Exact card layout dimensions and spacing (consistent with existing StoreCard style is the goal)
@@ -110,4 +117,4 @@ None — discussion stayed within phase scope.
 ---
 
 *Phase: 14-cost-report-ui*
-*Context gathered: 2026-04-18*
+*Context gathered: 2026-04-18 | Updated: 2026-04-26 — added D-13 (SOH localStorage), D-14 (two distinct empty states)*
