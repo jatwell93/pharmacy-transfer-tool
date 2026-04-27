@@ -99,6 +99,9 @@ webhookRoute.post('/stripe/webhook', async (c) => {
       orgId = rows[0]?.org_id;
     }
     if (orgId) {
+      if ((sub.items?.data?.length ?? 0) > 1) {
+        console.warn('[webhook] subscription.updated — multiple items found on subscription:', sub.id, 'using items[0]');
+      }
       const priceId = sub.items?.data?.[0]?.price?.id;
       let newTier = 'pro'; // default for paid subscriptions
       if (priceId === c.env.STRIPE_PRICE_ID_ENTERPRISE) {

@@ -54,12 +54,13 @@ const TEST_ENV = {
 describe("POST /api/match", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: paid plan — usage check runs plan query only (1 transaction call),
-    // then skips the upsert/increment entirely. This keeps all existing tests unaffected
-    // by the usage metering logic added to match.ts in Phase 5.
+    // Default: enterprise plan — Infinity limits bypass all metering/store-count gates
+    // (1 transaction call only). Phase 15 changed match.ts to read plan_tier (not status);
+    // 'enterprise' resolves to PLAN_LIMITS.enterprise with matchRuns=Infinity, skipping
+    // the second sql.transaction() call entirely and keeping all existing tests unaffected.
     mockMatchTransaction.mockResolvedValue([
       [], // set_config result
-      [{ status: "paid" }], // subscriptions query — paid = skip limit check
+      [{ plan_tier: "enterprise" }], // subscriptions query — enterprise = skip all limits
     ]);
   });
 

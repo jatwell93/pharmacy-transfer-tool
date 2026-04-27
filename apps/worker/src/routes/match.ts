@@ -43,10 +43,11 @@ matchRoute.post('/match', async (c) => {
       );
     }
 
-    // Optional store filter — if provided and non-empty, restrict both source and destination
+    // Optional store filter — if provided, must be a non-empty array of strings
+    const rawFilter = body.storeFilter;
     const storeFilter: string[] | null =
-      Array.isArray(body.storeFilter) && body.storeFilter.length > 0
-        ? (body.storeFilter as string[])
+      Array.isArray(rawFilter) && rawFilter.length > 0 && rawFilter.every((s) => typeof s === 'string')
+        ? (rawFilter as string[])
         : null;
 
     const orgId = c.get('orgId');
@@ -68,7 +69,28 @@ matchRoute.post('/match', async (c) => {
     const planTier: PlanTier = rawTier === 'paid' ? 'pro' : (rawTier as PlanTier);
     const limits = PLAN_LIMITS[planTier] ?? PLAN_LIMITS.free;
 
-    // Step 2: For non-enterprise orgs, enforce match run limit atomically (T-15-02)
+    // Step 2: For non-enterprise orgs, gate on distinct store count BEFORE incrementing usage.
+    // Checking stores first means a rejected request never burns a run. (BILLING-06, BILLING-07)
+    if (limits.stores !== Infinity) {
+      const storeCountResults = await withOrgContext<Array<{ cnt: number }>>(
+        dbUrl,
+        orgId,
+        (tx) => tx`SELECT COUNT(DISTINCT store_id)::int AS cnt FROM rou_data WHERE org_id = ${orgId}`,
+      );
+      const storeCount = storeCountResults[0]?.cnt ?? 0;
+      if (storeCount > limits.stores) {
+        const upgradeTo = planTier === 'free' ? 'pro' : 'enterprise';
+        return c.json(
+          {
+            error: `Your plan allows up to ${limits.stores} stores. You have ${storeCount}. Upgrade to add more.`,
+            upgrade_to: upgradeTo,
+          },
+          403,
+        );
+      }
+    }
+
+    // Step 3: For non-enterprise orgs, enforce match run limit atomically (T-15-02)
     if (limits.matchRuns !== Infinity) {
       const yearMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
       const usageResults = await sql.transaction((tx) => [
@@ -90,27 +112,6 @@ matchRoute.post('/match', async (c) => {
         return c.json(
           { error: 'Monthly match run limit reached. Upgrade to continue.', upgrade_to: upgradeTo },
           429,
-        );
-      }
-    }
-
-    // Step 3: For non-enterprise orgs, gate on distinct store count at match time (BILLING-06, BILLING-07)
-    // Store count is checked against rou_data (the data set used for matching), per D-15.
-    if (limits.stores !== Infinity) {
-      const storeCountResults = await withOrgContext<Array<{ cnt: number }>>(
-        dbUrl,
-        orgId,
-        (tx) => tx`SELECT COUNT(DISTINCT store_id)::int AS cnt FROM rou_data WHERE org_id = ${orgId}`,
-      );
-      const storeCount = storeCountResults[0]?.cnt ?? 0;
-      if (storeCount > limits.stores) {
-        const upgradeTo = planTier === 'free' ? 'pro' : 'enterprise';
-        return c.json(
-          {
-            error: `Your plan allows up to ${limits.stores} stores. You have ${storeCount}. Upgrade to add more.`,
-            upgrade_to: upgradeTo,
-          },
-          403,
         );
       }
     }

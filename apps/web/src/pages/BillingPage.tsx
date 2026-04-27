@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Loader2, X, ArrowRight } from 'lucide-react';
 import AppShell from '../components/AppShell';
 import { useUsage } from '../hooks/useUsage';
@@ -52,9 +52,7 @@ export default function BillingPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [checkoutConfirming, setCheckoutConfirming] = useState(false);
   const [checkoutError, setCheckoutError] = useState(false);
-
-  // Capture plan_tier before checkout so we can detect actual change if needed as a fallback safety net
-  const tierBeforeCheckout = useRef<string | null>(null);
+  const [upgradeError, setUpgradeError] = useState(false); // create-checkout or portal failure
 
   // Effect: On checkout=success, call the synchronous session confirm endpoint (BILLING-09)
   useEffect(() => {
@@ -67,8 +65,6 @@ export default function BillingPage() {
       return;
     }
 
-    // Capture current tier before checkout for change detection
-    tierBeforeCheckout.current = usage?.plan_tier ?? 'free';
     setCheckoutConfirming(true);
     let cancelled = false;
 
@@ -106,6 +102,7 @@ export default function BillingPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // handleUpgrade — calls create-checkout with tier param (D-04, D-17)
+  // Returns { url } for new subscribers (Checkout redirect) or { plan_tier } for in-place upgrades.
   const handleUpgrade = useCallback(async (tier: 'pro' | 'enterprise') => {
     setCheckoutLoading(tier);
     try {
@@ -115,15 +112,25 @@ export default function BillingPage() {
         body: JSON.stringify({ tier }),
       });
       if (res.ok) {
-        const { url } = (await res.json()) as { url: string };
-        window.location.href = url;
+        const data = (await res.json()) as { url?: string; plan_tier?: string };
+        if (data.url) {
+          window.location.href = data.url;
+        } else if (data.plan_tier) {
+          // In-place upgrade (existing subscriber) — refresh usage and show toast
+          await refresh();
+          const tierName = data.plan_tier === 'enterprise' ? 'PharmIQ Enterprise' : 'PharmIQ Pro';
+          setToastMessage(`You're now on ${tierName}`);
+          setTimeout(() => setToastMessage(null), 3000);
+        }
+      } else {
+        setUpgradeError(true);
       }
     } catch {
-      // Silently fail — user can retry
+      setUpgradeError(true);
     } finally {
       setCheckoutLoading(null);
     }
-  }, [fetchApi]);
+  }, [fetchApi, refresh]);
 
   // handleManageSubscription — opens Stripe Customer Portal (D-05, D-06)
   const handleManageSubscription = useCallback(async () => {
@@ -133,9 +140,11 @@ export default function BillingPage() {
       if (res.ok) {
         const { url } = (await res.json()) as { url: string };
         window.location.href = url;
+      } else {
+        setUpgradeError(true);
       }
     } catch {
-      // Silently fail — user can retry
+      setUpgradeError(true);
     } finally {
       setPortalLoading(false);
     }
@@ -159,6 +168,23 @@ export default function BillingPage() {
             aria-label="Dismiss notification"
           >
             <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Upgrade/portal error banner */}
+      {upgradeError && (
+        <div
+          className="mb-4 rounded-md flex items-center justify-between gap-3 px-4 py-3"
+          style={{ borderLeft: '4px solid #EF4444', background: '#FEF2F2', fontFamily: "'Inter', system-ui, sans-serif" }}
+        >
+          <p className="text-[13px] text-[#991B1B]">Something went wrong. Please try again or refresh the page.</p>
+          <button
+            onClick={() => setUpgradeError(false)}
+            className="text-[#EF4444] hover:text-[#B91C1C]"
+            aria-label="Dismiss"
+          >
+            <X size={14} />
           </button>
         </div>
       )}

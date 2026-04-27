@@ -8,6 +8,7 @@ const {
   mockSessionsCreate,
   mockSessionsRetrieve,
   mockSubRetrieve,
+  mockSubsUpdate,
   mockPortalCreate,
 } = vi.hoisted(() => ({
   mockSessionsCreate: vi.fn().mockResolvedValue({
@@ -16,6 +17,7 @@ const {
   }),
   mockSessionsRetrieve: vi.fn(),
   mockSubRetrieve: vi.fn(),
+  mockSubsUpdate: vi.fn(),
   mockPortalCreate: vi.fn().mockResolvedValue({
     url: "https://billing.stripe.com/session/bps_test",
   }),
@@ -31,6 +33,7 @@ vi.mock("stripe", () => {
       },
       subscriptions: {
         retrieve: mockSubRetrieve,
+        update: mockSubsUpdate,
       },
       billingPortal: {
         sessions: {
@@ -163,6 +166,10 @@ describe("POST /api/match — usage metering", () => {
       [], // UPDATE returns 0 rows — count already at limit
     ]);
 
+    const mock = vi.mocked(withOrgContext);
+    // Step 2 (store count) now runs before Step 3 (usage increment): 1 store <= 3 limit, passes
+    mock.mockResolvedValueOnce([{ cnt: 1 }]);
+
     const res = await app.request(
       "/api/match",
       {
@@ -177,8 +184,8 @@ describe("POST /api/match — usage metering", () => {
     const body = (await res.json()) as { error: string; upgrade_to: string };
     expect(body.error).toContain("Monthly match run limit reached");
     expect(body.upgrade_to).toBe("pro");
-    // withOrgContext (data queries) must NOT be called — no matchTransfers execution
-    expect(vi.mocked(withOrgContext)).not.toHaveBeenCalled();
+    // withOrgContext called once for store count check only (no data queries on rejection)
+    expect(vi.mocked(withOrgContext)).toHaveBeenCalledTimes(1);
   });
 
   it("returns 429 with upgrade_to='enterprise' for pro-tier org at limit (count >= 10)", async () => {
@@ -196,6 +203,10 @@ describe("POST /api/match — usage metering", () => {
       [], // UPDATE returns 0 rows — count at 10
     ]);
 
+    const mock = vi.mocked(withOrgContext);
+    // Step 2 (store count) now runs before Step 3 (usage increment): 2 stores <= 10 limit, passes
+    mock.mockResolvedValueOnce([{ cnt: 2 }]);
+
     const res = await app.request(
       "/api/match",
       {
@@ -210,7 +221,8 @@ describe("POST /api/match — usage metering", () => {
     const body = (await res.json()) as { error: string; upgrade_to: string };
     expect(body.error).toContain("Monthly match run limit reached");
     expect(body.upgrade_to).toBe("enterprise");
-    expect(vi.mocked(withOrgContext)).not.toHaveBeenCalled();
+    // withOrgContext called once for store count check only (no data queries on rejection)
+    expect(vi.mocked(withOrgContext)).toHaveBeenCalledTimes(1);
   });
 
   it("returns 403 with upgrade_to='pro' for free-tier org with >3 stores in rou_data", async () => {
@@ -221,12 +233,7 @@ describe("POST /api/match — usage metering", () => {
       [],
       [],
     ]);
-    // sql.transaction call 2: upsert + increment — succeeds
-    mockTransaction.mockResolvedValueOnce([
-      [],
-      [],
-      [{ count: 1 }],
-    ]);
+    // No usage increment mock — store count gate fires before usage increment (Critical 3 fix)
 
     const mock = vi.mocked(withOrgContext);
     // Store count check: free limit is 3, but org has 4 stores → gate fires
@@ -256,12 +263,7 @@ describe("POST /api/match — usage metering", () => {
       [],
       [{ plan_tier: "pro" }],
     ]);
-    // sql.transaction call 2: upsert + increment — succeeds (pro limit is 10)
-    mockTransaction.mockResolvedValueOnce([
-      [],
-      [],
-      [{ count: 5 }],
-    ]);
+    // No usage increment mock — store count gate fires before usage increment (Critical 3 fix)
 
     const mock = vi.mocked(withOrgContext);
     // Store count check: pro limit is 10, but org has 11 stores → gate fires
@@ -562,31 +564,27 @@ describe("POST /api/billing/create-checkout", () => {
     );
   });
 
-  it("BILLING-08: Pro->Enterprise upgrade uses existing customer and does not create duplicate subscription", async () => {
+  it("BILLING-08: Pro->Enterprise upgrade calls subscriptions.update and returns plan_tier directly (no duplicate subscription)", async () => {
     const app = buildBillingApp();
 
-    // Mock existing pro subscription
     const mock = vi.mocked(withOrgContext);
+    // Call 1: check existing subscription — returns existing pro subscription
     mock.mockResolvedValueOnce([
       {
         stripe_subscription_id: "sub_existing_pro",
         stripe_customer_id: "cus_existing",
       },
     ]);
+    // Call 2: DB write — update plan_tier in subscriptions table
+    mock.mockResolvedValueOnce([]);
 
     // Mock stripe.subscriptions.retrieve returning current subscription with item ID
     mockSubRetrieve.mockResolvedValueOnce({
       items: { data: [{ id: "si_item_123", price: { id: "price_pro_test" } }] },
     });
 
-    // Mock session create for upgrade — returns customer
-    mockSessionsCreate.mockResolvedValueOnce({
-      url: "https://checkout.stripe.com/c/upgrade_session",
-      customer: "cus_existing",
-    });
-
-    // Mock the stripe_customer_id store call
-    mock.mockResolvedValueOnce([]); // upsert stripe_customer_id
+    // Mock stripe.subscriptions.update — in-place upgrade succeeds
+    mockSubsUpdate.mockResolvedValueOnce({});
 
     const res = await app.request(
       "/api/billing/create-checkout",
@@ -599,19 +597,23 @@ describe("POST /api/billing/create-checkout", () => {
     );
 
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { url: string };
-    expect(body.url).toBe("https://checkout.stripe.com/c/upgrade_session");
+    const body = (await res.json()) as { plan_tier: string };
+    expect(body.plan_tier).toBe("enterprise");
 
-    // Must have looked up existing subscription
+    // Must have looked up existing subscription to get item ID
     expect(mockSubRetrieve).toHaveBeenCalledWith("sub_existing_pro");
 
-    // Must have created session with existing customer (not creating a new subscription from scratch)
-    expect(mockSessionsCreate).toHaveBeenCalledWith(
+    // Must have called subscriptions.update (NOT sessions.create — no duplicate sub)
+    expect(mockSubsUpdate).toHaveBeenCalledWith(
+      "sub_existing_pro",
       expect.objectContaining({
-        customer: "cus_existing",
-        line_items: [{ price: "price_ent_test", quantity: 1 }],
+        items: [{ id: "si_item_123", price: "price_ent_test" }],
+        proration_behavior: "always_invoice",
       }),
     );
+
+    // Must NOT have created a new checkout session
+    expect(mockSessionsCreate).not.toHaveBeenCalled();
   });
 
   it("stores stripe_customer_id in subscriptions before returning URL", async () => {

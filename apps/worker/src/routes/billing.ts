@@ -89,38 +89,43 @@ billingRoute.post('/billing/create-checkout', async (c) => {
     );
     const existingSub = existingRows[0];
 
-    let session;
     if (existingSub?.stripe_subscription_id) {
-      // Existing subscription found (e.g., Pro->Enterprise upgrade).
-      // Retrieve the subscription to get the current item ID.
-      await stripe.subscriptions.retrieve(existingSub.stripe_subscription_id);
+      // Existing paid subscription — update in-place to avoid creating a duplicate subscription.
+      // Retrieve the existing subscription to get the current item ID for the update.
+      const existingSubscription = await stripe.subscriptions.retrieve(existingSub.stripe_subscription_id);
+      const itemId = existingSubscription.items.data[0]?.id;
 
-      // Use Stripe Checkout with the existing customer to upgrade.
-      // Including customer prevents creating a duplicate subscription.
-      session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        customer: existingSub.stripe_customer_id ?? undefined,
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${c.env.ALLOWED_ORIGIN}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${c.env.ALLOWED_ORIGIN}/billing`,
+      await stripe.subscriptions.update(existingSub.stripe_subscription_id, {
+        items: [{ id: itemId, price: priceId }],
+        proration_behavior: 'always_invoice',
         metadata: { org_id: orgId, plan_tier: tier },
-        subscription_data: {
-          metadata: { org_id: orgId, plan_tier: tier },
-        },
       });
-    } else {
-      // No existing subscription — standard new checkout (Free->Pro or Free->Enterprise)
-      session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${c.env.ALLOWED_ORIGIN}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${c.env.ALLOWED_ORIGIN}/billing`,
-        metadata: { org_id: orgId, plan_tier: tier },
-        subscription_data: {
-          metadata: { org_id: orgId, plan_tier: tier },
-        },
-      });
+
+      // Write new tier to DB immediately — no Checkout redirect needed for in-place upgrades
+      await withOrgContext(
+        dbUrl,
+        orgId,
+        (tx) => tx`
+          UPDATE subscriptions
+          SET plan_tier = ${tier}, status = 'paid', updated_at = NOW()
+          WHERE org_id = ${orgId}
+        `,
+      );
+
+      return c.json({ plan_tier: tier });
     }
+
+    // No existing subscription — standard new checkout (Free->Pro or Free->Enterprise)
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${c.env.ALLOWED_ORIGIN}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${c.env.ALLOWED_ORIGIN}/billing`,
+      metadata: { org_id: orgId, plan_tier: tier },
+      subscription_data: {
+        metadata: { org_id: orgId, plan_tier: tier },
+      },
+    });
 
     // Store stripe_customer_id NOW (before redirect) so portal and upgrade flows can use it
     if (session.customer) {
@@ -162,6 +167,11 @@ billingRoute.get('/billing/checkout-session/:sessionId', async (c) => {
 
     if (session.payment_status !== 'paid') {
       return c.json({ error: 'Payment not confirmed' }, 402);
+    }
+
+    // Verify the session belongs to the authenticated org — prevents cross-org session replay
+    if (session.metadata?.org_id !== orgId) {
+      return c.json({ error: 'Session does not belong to this organisation' }, 403);
     }
 
     const tier = session.metadata?.plan_tier || 'pro';

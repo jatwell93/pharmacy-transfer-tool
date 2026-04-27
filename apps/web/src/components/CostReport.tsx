@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useOrganization } from '@clerk/react';
 import type { StoreSummary } from '../hooks/useDeadStockSummary';
 import type { MatchResult } from '../hooks/useMatchRun';
 
@@ -18,7 +19,26 @@ function formatAUD(value: number): string {
 }
 
 export function CostReport({ stores, results, hasRun }: CostReportProps) {
+  const { organization } = useOrganization();
+  const storageKey = organization?.id ? `pharmiq_soh_${organization.id}` : null;
+
   const [sohInput, setSohInput] = useState('');
+
+  // D-13: restore persisted SOH value for this org on mount
+  useEffect(() => {
+    if (!storageKey) return;
+    const saved = localStorage.getItem(storageKey);
+    if (saved) setSohInput(saved);
+  }, [storageKey]);
+
+  // --- D-14: no upload yet (all stores have zero units) ---
+  if (stores.every(s => s.totalUnits === 0)) {
+    return (
+      <p className="text-[13px] text-[var(--color-text-muted)]">
+        Upload a dead stock file to see values here.
+      </p>
+    );
+  }
 
   // --- Derived values ---
   const hasCostData = stores.some(s => s.hasCostData);
@@ -42,7 +62,7 @@ export function CostReport({ stores, results, hasRun }: CostReportProps) {
   // D-08: show KPI when hasRun AND at least one store has cost data AND recoverableValue > 0 (D-12)
   const showRecoverable = hasRun && hasCostData && recoverableValue > 0;
 
-  // --- No cost data state (D-02) ---
+  // --- D-02: data uploaded but no Cost Ex column present ---
   if (!hasCostData) {
     return (
       <p className="text-[13px] text-[var(--color-text-muted)]">
@@ -121,7 +141,10 @@ export function CostReport({ stores, results, hasRun }: CostReportProps) {
           min={0}
           step={0.01}
           value={sohInput}
-          onChange={e => setSohInput(e.target.value)}
+          onChange={e => {
+            setSohInput(e.target.value);
+            if (storageKey) localStorage.setItem(storageKey, e.target.value);
+          }}
           placeholder="e.g. 500000"
           className="w-48 rounded-md border border-[var(--color-border-light)] px-3 py-1.5 text-[13px] text-[var(--color-text-primary)] bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)]"
           aria-label="Enter total stock on hand dollar value"
