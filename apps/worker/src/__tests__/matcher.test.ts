@@ -61,7 +61,7 @@ describe("matchTransfers", () => {
 
   describe("basic matching", () => {
     it("returns a result when dead stock SKU exists in another store ROU data", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Paracetamol 500mg", cost: 5.00 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Paracetamol 500mg", cost: 5.00, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: true }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(1);
@@ -70,14 +70,14 @@ describe("matchTransfers", () => {
     });
 
     it("returns empty results when no SKU matches exist", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU999", store: "DestStore", rou: 20, isRanged: true }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(0);
     });
 
     it("excludes origin store from destinations (case-insensitive)", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [
         { sku: "SKU001", store: "originstore", rou: 20, isRanged: true }, // same store, different case
         { sku: "SKU001", store: "OtherStore", rou: 15, isRanged: false },
@@ -89,7 +89,7 @@ describe("matchTransfers", () => {
     });
 
     it("excludes ROU items with rou <= 0", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 0, isRanged: true }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(0);
@@ -99,7 +99,7 @@ describe("matchTransfers", () => {
   describe("sell-through filter (MATCH-02)", () => {
     it("excludes destination where rou < soh / 12", () => {
       // soh=120, rou=5, minRou=10, 5 < 10 = excluded
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 5, isRanged: false }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(0);
@@ -107,7 +107,7 @@ describe("matchTransfers", () => {
 
     it("includes destination at boundary where rou == soh / 12", () => {
       // soh=120, rou=10, minRou=10, 10 >= 10 = included
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 10, isRanged: false }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(1);
@@ -115,7 +115,7 @@ describe("matchTransfers", () => {
 
     it("includes destination where rou > soh / 12", () => {
       // soh=120, rou=15, minRou=10, 15 > 10 = included
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 15, isRanged: false }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(1);
@@ -125,7 +125,7 @@ describe("matchTransfers", () => {
   describe("months-cover cap (MATCH-03, MATCH-04)", () => {
     it("caps transfer qty to max(0, target*rou - destSOH)", () => {
       // target=3, rou=20, destSOH=10, maxQty=50, originSOH=240, transfer=50
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: false, soh: 10 }];
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 3 });
       expect(results[0].bestMatch.qtyToTransfer).toBe(50);
@@ -133,7 +133,7 @@ describe("matchTransfers", () => {
 
     it("excludes store when destSOH >= target*rou", () => {
       // target=3, rou=20, destSOH=65, maxQty=0, excluded
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: false, soh: 65 }];
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 3 });
       expect(results).toHaveLength(0);
@@ -141,7 +141,7 @@ describe("matchTransfers", () => {
 
     it("defaults destSOH to 0 when soh field absent on RouItem", () => {
       // target=3, rou=20, destSOH absent=0, maxQty=60, originSOH=240, transfer=60
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 240, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: false }]; // no soh
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 3 });
       expect(results[0].bestMatch.qtyToTransfer).toBe(60);
@@ -149,7 +149,7 @@ describe("matchTransfers", () => {
 
     it("transfer qty cannot exceed originSOH", () => {
       // target=6, rou=100, destSOH=0, maxQty=600, originSOH=50, transfer=50
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 50, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 50, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 100, isRanged: false, soh: 0 }];
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 6 });
       expect(results[0].bestMatch.qtyToTransfer).toBe(50);
@@ -158,7 +158,7 @@ describe("matchTransfers", () => {
     it("NP-1: excludes store when near-zero float qty would display as 0.0 (3 * 0.3 = 0.8999... in JS)", () => {
       // destROU=0.3, target=3 → 3*0.3=0.8999... in float
       // destSOH=0.89 → maxTransferQty≈0.01, qtyToTransfer≈0.01 → must be excluded (shows as 0.0)
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 5, description: "Item", cost: 2 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 5, description: "Item", cost: 2, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 0.3, isRanged: false, soh: 0.89 }];
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 3 });
       expect(results).toHaveLength(0);
@@ -167,7 +167,7 @@ describe("matchTransfers", () => {
 
   describe("sort order (MATCH-05)", () => {
     it("sorts ranged items before non-ranged", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [
         { sku: "SKU001", store: "StoreA", rou: 30, isRanged: false },
         { sku: "SKU001", store: "StoreB", rou: 10, isRanged: true },
@@ -178,7 +178,7 @@ describe("matchTransfers", () => {
     });
 
     it("sorts by ROU descending within ranged group", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [
         { sku: "SKU001", store: "StoreA", rou: 10, isRanged: true },
         { sku: "SKU001", store: "StoreB", rou: 25, isRanged: true },
@@ -189,7 +189,7 @@ describe("matchTransfers", () => {
     });
 
     it("sorts by ROU descending within non-ranged group", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 10, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [
         { sku: "SKU001", store: "StoreA", rou: 5, isRanged: false },
         { sku: "SKU001", store: "StoreB", rou: 15, isRanged: false },
@@ -202,7 +202,7 @@ describe("matchTransfers", () => {
 
   describe("NaN/missing values (MATCH-07)", () => {
     it("excludes RouItem with NaN rou and emits warning", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: NaN, isRanged: false }];
       const { results, warnings } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(0);
@@ -210,7 +210,7 @@ describe("matchTransfers", () => {
     });
 
     it("excludes DeadStockItem with NaN soh and emits warning", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: NaN, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: NaN, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: false }];
       const { results, warnings } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(0);
@@ -218,7 +218,7 @@ describe("matchTransfers", () => {
     });
 
     it("includes DeadStockItem with NaN cost (cost=0 in result) and emits warning", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: NaN }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 100, description: "Item", cost: NaN, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 20, isRanged: false }];
       const { results, warnings } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results).toHaveLength(1);
@@ -229,7 +229,7 @@ describe("matchTransfers", () => {
 
   describe("sellThrough calculation", () => {
     it("computes sellThrough as originSOH / destROU", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 120, description: "Item", cost: 10, isRanged: false, department: "" }];
       const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 10, isRanged: false }];
       const { results } = matchTransfers(deadStock, rouData, defaultOpts);
       expect(results[0].bestMatch.sellThrough).toBe(12);
@@ -238,7 +238,7 @@ describe("matchTransfers", () => {
 
   describe("multiple destination matches", () => {
     it("populates allMatches with all qualifying stores and bestMatch with first sorted", () => {
-      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 24, description: "Item", cost: 5 }];
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 24, description: "Item", cost: 5, isRanged: false, department: "" }];
       const rouData: RouItem[] = [
         { sku: "SKU001", store: "StoreA", rou: 5, isRanged: false },
         { sku: "SKU001", store: "StoreB", rou: 10, isRanged: true },

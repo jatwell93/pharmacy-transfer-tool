@@ -124,13 +124,16 @@ matchRoute.post('/match', async (c) => {
         description: string;
         soh: number;
         cost_ex: number | null;
+        is_ranged: boolean;        // read from dead_stock.is_ranged (Phase 7 column)
+        department: string | null; // nullable — pre-migration rows return NULL
         store_name: string;
       }>
     >(
       dbUrl,
       orgId,
       (tx) => tx`
-        SELECT ds.sku, ds.description, ds.soh, ds.cost_ex, s.name AS store_name
+        SELECT ds.sku, ds.description, ds.soh, ds.cost_ex,
+               ds.is_ranged, ds.department, s.name AS store_name
         FROM dead_stock ds
         JOIN stores s ON s.id = ds.store_id
         WHERE ds.org_id = ${orgId}
@@ -174,7 +177,14 @@ matchRoute.post('/match', async (c) => {
     const storeDeadStock = new Map<string, DeadStockItem[]>();
     for (const row of deadStockRows.filter((r) => !storeFilter || storeFilter.includes(r.store_name))) {
       const items = storeDeadStock.get(row.store_name) || [];
-      items.push({ sku: row.sku, soh: row.soh, description: row.description, cost: row.cost_ex ?? 0 });
+      items.push({
+        sku: row.sku,
+        soh: row.soh,
+        description: row.description,
+        cost: row.cost_ex ?? 0,
+        isRanged: row.is_ranged,          // NEW — read from dead_stock.is_ranged (Phase 7 column)
+        department: row.department ?? "",  // NEW — null (pre-migration rows) → "" per D-03
+      });
       storeDeadStock.set(row.store_name, items);
     }
 

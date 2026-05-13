@@ -10,6 +10,8 @@ export interface DeadStockItem {
   soh: number;
   description: string;
   cost: number;
+  isRanged: boolean;   // NEW — from dead_stock.is_ranged
+  department: string;  // NEW — from dead_stock.department; "" when column absent (D-02)
 }
 
 export interface RouItem {
@@ -41,6 +43,8 @@ export interface MatchResult {
   soh: number;              // origin store's dead stock SOH
   cost: number;             // origin store's item cost
   sourceStore: string;      // origin store name
+  isRanged: boolean;        // NEW — from DeadStockItem (dead stock source item)
+  department: string;       // NEW — from DeadStockItem; "" when column absent
   bestMatch: DestinationMatch;
   allMatches: DestinationMatch[];
 }
@@ -213,6 +217,8 @@ export function matchTransfers(
       soh: item.soh,
       cost: item.cost,
       sourceStore: opts.originStore,
+      isRanged: item.isRanged,      // NEW — propagate from DeadStockItem
+      department: item.department,  // NEW — propagate from DeadStockItem
       bestMatch: destinationMatches[0],
       allMatches: destinationMatches,
     });
