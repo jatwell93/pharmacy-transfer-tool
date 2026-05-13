@@ -1,10 +1,11 @@
 ---
 phase: 16
 slug: department-ranged-column-parsing
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-13
+reviewed_at: 2026-05-13
 ---
 
 # Phase 16 — UI Design Contract
