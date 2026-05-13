@@ -120,7 +120,7 @@ Recent decisions affecting current work:
 - [Phase 10]: schema.sql stores table gains store_number TEXT (nullable) — no migration needed as this is the canonical DDL
 - [Phase 16]: Department HEADER_ALIASES uses exact-match strings: ["Department", "Dept", "Dept.", "Drug Dept", "Product Department"] — case-sensitive
 - [Phase 16]: department TEXT column on dead_stock is nullable (no DEFAULT) — null from pre-migration rows coerced to "" in match route
-- [Phase 16]: MIGRATION REQUIRED before deploy: ALTER TABLE dead_stock ADD COLUMN IF NOT EXISTS department TEXT; (run as neondb_owner)
+- [Phase 16]: MIGRATION APPLIED 2026-05-13: ALTER TABLE dead_stock ADD COLUMN IF NOT EXISTS department TEXT; (run as neondb_owner)
 
 ### Roadmap Evolution
 
