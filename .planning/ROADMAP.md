@@ -267,10 +267,10 @@ Before Phase 15 code runs, create two Stripe products in the Stripe dashboard (b
 Add both to Worker secrets (`wrangler secret put`) and to `.dev.vars`.
 
 **v1.1 Phase Checklist:**
-- [ ] **Phase 11: Schema Migration** - Add cost_ex column to dead_stock and plan_tier column to subscriptions; migrate existing paid rows to pro
+- [x] **Phase 11: Schema Migration** - Add cost_ex column to dead_stock and plan_tier column to subscriptions; migrate existing paid rows to pro (completed 2026-04-15)
 - [x] **Phase 12: Cost Column Parser + Summary Endpoint** - Extend parser to extract Cost Ex; write cost_ex to DB; build GET /api/dead-stock-summary (completed 2026-04-16)
 - [x] **Phase 13: Charts** - Install recharts 3.8.1; build DeadStockChart (pie) and PostMatchChart (grouped bar); mount on UploadPage and MatchPage (completed 2026-04-17)
-- [ ] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI
+- [x] **Phase 14: Cost Report UI** - Build CostReport component with SOH $ input, dead stock % display, benchmark indicators, and recoverable value KPI (completed 2026-04-19)
 - [x] **Phase 15: 3-Tier Billing** - plans.ts constants, tier-aware match enforcement, multi-price checkout, webhook tier write, 3-tier BillingPage (completed 2026-04-26)
 
 **v1.1 Execution Order:**
@@ -287,7 +287,7 @@ Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 eac
 **Requirements:** (schema prerequisite — no v1.1 REQ-ID maps here; all downstream phases depend on this)
 
 **Plans:**
-- [ ] 11-01-PLAN.md — Run migration SQL in NEON (cost_ex column, plan_tier column, UPDATE paid→pro), update schema.sql, update .dev.vars.example with STRIPE_PRICE_ID_PRO and STRIPE_PRICE_ID_ENTERPRISE, verify with \d queries
+- [x] 11-01-PLAN.md — Run migration SQL in NEON (cost_ex column, plan_tier column, UPDATE paid→pro), update schema.sql, update .dev.vars.example with STRIPE_PRICE_ID_PRO and STRIPE_PRICE_ID_ENTERPRISE, verify with \d queries
 
 **UAT:**
 - `\d dead_stock` in NEON shows `cost_ex DOUBLE PRECISION` column (nullable, no default)
@@ -370,7 +370,7 @@ Phase 11 must run first. Phase 12 depends on Phase 11. Phases 13, 14, and 15 eac
 **Plans:** 1 plan
 
 Plans:
-- [ ] 14-01-PLAN.md — match.ts cost_ex fix (2-line SQL patch + 2 unit tests) + CostReport.tsx panel (per-store cards, SOH input, progress bar, recoverable KPI)
+- [x] 14-01-PLAN.md — match.ts cost_ex fix (2-line SQL patch + 2 unit tests) + CostReport.tsx panel (per-store cards, SOH input, progress bar, recoverable KPI)
 
 **UAT:**
 - Upload a dead stock file with Cost Ex column; run a match; MatchPage shows a CostReport panel with dead stock dollar value per store
@@ -431,8 +431,8 @@ Phase 11 → Phase 12 → Phases 13, 14, 15 (parallel once Phase 12 is complete;
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Schema Migration | 0/1 | Not started | - |
-| 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete    | 2026-04-17 |
-| 13. Charts | 2/2 | Complete    | 2026-04-18 |
-| 14. Cost Report UI | 0/1 | Planned     | - |
-| 15. 3-Tier Billing | 2/2 | Complete   | 2026-04-26 |
+| 11. Schema Migration | 1/1 | Complete | 2026-04-15 |
+| 12. Cost Column Parser + Summary Endpoint | 2/2 | Complete | 2026-04-17 |
+| 13. Charts | 2/2 | Complete | 2026-04-18 |
+| 14. Cost Report UI | 1/1 | Complete | 2026-04-19 |
+| 15. 3-Tier Billing | 2/2 | Complete (UAT ✓ 2026-05-13) | 2026-04-26 |

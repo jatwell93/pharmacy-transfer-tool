@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Phases — Reporting & Tiered Billing
-status: executing
-stopped_at: Phase 14 context updated — D-13 SOH localStorage, D-14 empty state
-last_updated: "2026-04-26T02:14:02.938Z"
-last_activity: 2026-04-26 -- Phase 15 planning complete
+status: milestone_complete
+stopped_at: Phase 15 UAT complete — 9/9 tests passed — v1.1 milestone complete
+last_updated: "2026-05-13T00:00:00Z"
+last_activity: 2026-05-13 -- Phase 15 UAT complete, v1.1 milestone verified
 progress:
   total_phases: 15
-  completed_phases: 5
+  completed_phases: 15
   total_plans: 8
   completed_plans: 8
   percent: 100
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 15 — 3-tier-billing
+**Current focus:** v1.1 milestone complete — ready for `/gsd-complete-milestone`
 
 ## Current Position
 
-Phase: 15 (3-tier-billing) — EXECUTING
-Plan: 1 of 2
-Status: Ready to execute
-Last activity: 2026-04-26 -- Phase 15 planning complete
+Phase: 15 (3-tier-billing) — COMPLETE (UAT 9/9 ✓ 2026-05-13)
+Plan: 2 of 2
+Status: Milestone complete — all 5 v1.1 phases verified
+Last activity: 2026-05-13 — Phase 15 UAT complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -116,7 +116,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- NP-1 (major): Match results show rows with Qty to Transfer = 0 — Phase 4 sell-through filter not excluding destinations where destSOH ≥ monthsCover × destROU. Observed: Dest ROU=0.3, Sell-Through=8.6mo, months cover=3 → qtyToTransfer=0 row appears.
+- NP-2 (cosmetic): "Dead-Stock Optimizer" appears in both app UI and Clerk sign-in UI. Suggest broader PharmIQ tagline on Clerk sign-in page.
 
 ### Blockers/Concerns
 
@@ -131,5 +132,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-13
-Stopped at: Phase 14 re-verification complete — all gaps resolved, 129/129 tests pass
-Resume file: .planning/phases/15-3-tier-billing/15-01-SUMMARY.md
+Stopped at: Phase 15 UAT complete (9/9 passed) — v1.1 milestone complete. Ready for /gsd-complete-milestone
+Resume file: None

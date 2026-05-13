@@ -8,9 +8,10 @@ A dead-stock matching tool for Australian pharmacy groups. Pharmacy managers upl
 
 A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
 
-## Current Milestone: v1.1 Reporting & Tiered Billing
+## Current Milestone: v1.1 Complete ✓
 
 **Goal:** Give pharmacy managers visual insight into their dead stock position and unlock revenue growth with 3 pricing tiers.
+**Status:** All 5 phases complete. UAT passed 2026-05-13.
 
 **Target features:**
 - Dead stock visualisation — pie chart of units per store (pre-match) and projected change chart (post-match, assuming all transfers completed)
@@ -43,8 +44,8 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
 - [x] **Dead stock visualisation**: pie chart showing dead stock units per store before match; projected change chart after match (assuming all transfers completed) — Validated in Phase 13: charts
 - [x] **Cost Ex column parsing**: optional Cost Ex column captured from FRED Stock Valuation uploads; per-unit cost stored in dead_stock.cost_ex; GET /api/dead-stock-summary endpoint returns per-store unit totals and dollar values with hasCostData signal — Validated in Phase 12: cost-column-parser-summary-endpoint
-- [ ] **SOH vs Dead Stock dollar report**: optional Cost Ex column in dead stock upload; dead stock value $ calculated per store; user inputs total SOH $ to see dead stock as % of total inventory value
-- [ ] **3-tier billing**: Free (1 match/mo), Pro ($10/mo, 10 matches/mo, max 10 stores), Enterprise ($100/mo, unlimited matches and stores); Stripe products for both paid tiers
+- [x] **SOH vs Dead Stock dollar report**: per-store dead stock $ cards, SOH $ input with org-specific localStorage persistence, dead stock % progress bar with amber/red thresholds, recoverable value KPI post-match — Validated in Phase 14: cost-report-ui
+- [x] **3-tier billing**: Free (1 match/mo), Pro ($10/mo, 10 matches/mo, max 10 stores), Enterprise ($100/mo, unlimited); Stripe Checkout (new subs) + in-place update (upgrades); synchronous checkout confirmation (BILLING-09); webhook idempotency; 3-tier BillingPage — Validated in Phase 15: 3-tier-billing (UAT 9/9 ✓ 2026-05-13)
 
 ### Out of Scope
 
@@ -85,14 +86,15 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Rebuild on Cloudflare/NEON/Clerk instead of migrating Django | Same stack as companion app; Django has no auth, SQLite can't scale, no deployment config | — Pending |
-| Net months-cover allocation (subtract existing SOH) | Prevents receiving store overstocking; aligns with how buyers think | — Pending |
-| Separate product (not embedded in companion app) | Freemium lead-gen; distinct brand page; cross-markets both products | — Pending |
-| 1 match run/month free tier | Low enough to drive upgrade; high enough to demonstrate value | — Pending |
-| Preserve FRED export format support | Users already know how to export; no workflow change needed | — Pending |
+| Rebuild on Cloudflare/NEON/Clerk instead of migrating Django | Same stack as companion app; Django has no auth, SQLite can't scale, no deployment config | Confirmed — v1.0 complete |
+| Net months-cover allocation (subtract existing SOH) | Prevents receiving store overstocking; aligns with how buyers think | Confirmed — Phase 04 |
+| Separate product (not embedded in companion app) | Freemium lead-gen; distinct brand page; cross-markets both products | Confirmed — deployed |
+| 3-tier pricing: Free / Pro $10 / Enterprise $100 AUD | Replaces binary free/paid — Pro adds 10 matches+10 stores, Enterprise is unlimited | Confirmed — Phase 15 (UAT ✓) |
+| In-place subscription update for tier upgrades (no duplicate subs) | Stripe subscription update avoids double-billing; synchronous confirmation avoids webhook race | Confirmed — Phase 15 (BILLING-08/09) |
+| Preserve FRED export format support | Users already know how to export; no workflow change needed | Confirmed — v1.0 complete |
 
 ---
-*Last updated: 2026-04-18 — Phase 13 complete: recharts pie chart (UploadPage) + grouped bar chart + KPI card (MatchPage) with PharmIQ brand colours*
+*Last updated: 2026-05-13 — v1.1 milestone complete: Phase 14 (Cost Report UI) + Phase 15 (3-Tier Billing) verified. All 15 phases done across v1.0 and v1.1.*
 
 ## Evolution
 
