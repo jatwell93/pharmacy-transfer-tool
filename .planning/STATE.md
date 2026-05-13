@@ -116,8 +116,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- NP-1 (major): Match results show rows with Qty to Transfer = 0 — Phase 4 sell-through filter not excluding destinations where destSOH ≥ monthsCover × destROU. Observed: Dest ROU=0.3, Sell-Through=8.6mo, months cover=3 → qtyToTransfer=0 row appears.
-- NP-2 (cosmetic): "Dead-Stock Optimizer" appears in both app UI and Clerk sign-in UI. Suggest broader PharmIQ tagline on Clerk sign-in page.
+- (none — NP-1 and NP-2 resolved 2026-05-13)
 
 ### Blockers/Concerns
 
