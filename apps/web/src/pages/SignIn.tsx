@@ -14,7 +14,7 @@ export default function SignIn() {
           className="text-base text-[var(--color-text-secondary)] mb-6"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          Dead-Stock Optimizer
+          Smart Ops. Better Margins.
         </p>
         <ClerkSignIn
           routing="path"

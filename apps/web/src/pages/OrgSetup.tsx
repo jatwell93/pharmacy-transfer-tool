@@ -14,7 +14,7 @@ export default function OrgSetup() {
           className="text-base text-[var(--color-text-secondary)] mb-6"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          You need a pharmacy group to use Dead-Stock Optimizer.
+          You need a pharmacy group to use PharmIQ.
         </p>
         <CreateOrganization />
       </div>
