@@ -5,9 +5,9 @@ milestone_name: Insights & Listings
 status: planning
 stopped_at: ""
 last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 — Milestone v1.2 started
+last_activity: 2026-05-13 — Roadmap created for v1.2 (Phases 16–19)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** v1.1 archived — planning next milestone with `/gsd-new-milestone`
+**Current focus:** v1.2 roadmap defined — ready to plan Phase 16
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 16 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-13 — Milestone v1.2 started
+Status: Roadmap defined, ready to plan
+Last activity: 2026-05-13 — Roadmap created for v1.2 (Phases 16–19)
 
 Progress: [----------] 0% — v1.2 planning
+
+## v1.2 Phases
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 16 | Department + Ranged Column Parsing | TABLE-01, TABLE-02 | Not started |
+| 17 | Table Filters + Responsive Layout | TABLE-03..07 | Not started |
+| 18 | Ethical Exchange Export | EE-01..04 | Not started |
+| 19 | Dead Stock Scorecard | SCORE-01..04 | Not started |
 
 ## Performance Metrics
 
@@ -113,6 +122,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 10 added: fix schema.sql + .dev.vars.example + webhook.test.ts failure + subscriptions.status DEFAULT naming
+- v1.2 Phases 16–19 added: department/ranged parsing, table filters, EE export, scorecard
 
 ### Pending Todos
 
@@ -131,5 +141,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-05-13
-Stopped at: Phase 15 UAT complete (9/9 passed) — v1.1 milestone complete. Ready for /gsd-complete-milestone
+Stopped at: v1.2 roadmap created — Phases 16–19 defined, ready for /gsd-plan-phase 16
 Resume file: None

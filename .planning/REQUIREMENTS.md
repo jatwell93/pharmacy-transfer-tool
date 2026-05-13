@@ -56,8 +56,18 @@
 
 | REQ-ID | Phase | Plans | Status |
 |--------|-------|-------|--------|
-| TABLE-01..07 | TBD | TBD | Pending |
-| EE-01..04 | TBD | TBD | Pending |
-| SCORE-01..04 | TBD | TBD | Pending |
-
-*Filled by roadmapper*
+| TABLE-01 | Phase 16 | TBD | Pending |
+| TABLE-02 | Phase 16 | TBD | Pending |
+| TABLE-03 | Phase 17 | TBD | Pending |
+| TABLE-04 | Phase 17 | TBD | Pending |
+| TABLE-05 | Phase 17 | TBD | Pending |
+| TABLE-06 | Phase 17 | TBD | Pending |
+| TABLE-07 | Phase 17 | TBD | Pending |
+| EE-01 | Phase 18 | TBD | Pending |
+| EE-02 | Phase 18 | TBD | Pending |
+| EE-03 | Phase 18 | TBD | Pending |
+| EE-04 | Phase 18 | TBD | Pending |
+| SCORE-01 | Phase 19 | TBD | Pending |
+| SCORE-02 | Phase 19 | TBD | Pending |
+| SCORE-03 | Phase 19 | TBD | Pending |
+| SCORE-04 | Phase 19 | TBD | Pending |
