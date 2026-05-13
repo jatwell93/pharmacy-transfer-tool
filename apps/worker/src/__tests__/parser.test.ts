@@ -306,3 +306,67 @@ describe("parseDeadStockFile cost_ex extraction", () => {
     expect(result[0].costEx).toBe(4.5);
   });
 });
+
+// --- parseDeadStockFile department extraction (D-01, D-02, D-03) ---
+
+describe("parseDeadStockFile department extraction", () => {
+  it("recognises canonical 'Department' header and extracts value per row", () => {
+    const csv = "Item Code,SOH,Department\nSKU001,10,Pharmacy\nSKU002,5,Cosmetics\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("Pharmacy");
+    expect(rows[1].department).toBe("Cosmetics");
+  });
+
+  it("recognises alias 'Dept' and extracts value", () => {
+    const csv = "Item Code,SOH,Dept\nSKU001,10,Pharmacy\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("Pharmacy");
+  });
+
+  it("recognises alias 'Dept.' (with period) and extracts value", () => {
+    const csv = "Item Code,SOH,Dept.\nSKU001,10,General\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("General");
+  });
+
+  it("recognises alias 'Drug Dept' and extracts value", () => {
+    const csv = "Item Code,SOH,Drug Dept\nSKU001,10,PBS\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("PBS");
+  });
+
+  it("recognises alias 'Product Department' and extracts value", () => {
+    const csv = "Item Code,SOH,Product Department\nSKU001,10,OTC\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("OTC");
+  });
+
+  it("defaults department to '' when Department column is absent — no error thrown", () => {
+    const csv = "Item Code,SOH\nSKU001,10\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("");
+  });
+
+  it("returns empty string for blank department cells", () => {
+    const csv = "Item Code,SOH,Department\nSKU001,10,\nSKU002,5,Pharmacy\n";
+    const buf = csvToBuffer(csv);
+    const rows = parseDeadStockFile(buf, "dead.csv");
+    expect(rows[0].department).toBe("");
+    expect(rows[1].department).toBe("Pharmacy");
+  });
+
+  it("Test 7 extended: FRED full-column CSV now populates department: 'GEN'", () => {
+    const csv =
+      "Item Code,Department,Category,Item Description,Cost Ex,Retail,SOH,SOH $,Alias\n" +
+      "ABC,GEN,CAT,Test,4.50,9,10,45,X\n";
+    const buf = csvToBuffer(csv);
+    const result = parseDeadStockFile(buf, "test.csv");
+    expect(result[0].department).toBe("GEN");
+  });
+});

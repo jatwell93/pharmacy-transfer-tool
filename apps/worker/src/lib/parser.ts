@@ -22,6 +22,7 @@ export interface DeadStockRow {
   soh: number; // NaN if non-numeric
   isRanged: boolean;
   costEx: number; // NaN when Cost Ex column absent OR cell non-numeric
+  department: string; // "" when Department column absent (D-02)
 }
 
 // --- HEADER_ALIASES — ported from stock_transfer_project/api/views.py ---
@@ -38,6 +39,7 @@ export const HEADER_ALIASES: Record<string, string[]> = {
   SOH: ["SOH", "Stock on Hand", "Quantity", "Qty", "Quantity on Hand"],
   Ranged: ["Ranged", "Is Ranged", "Ranged Item", "Range Flag"],
   "Cost Ex": ["Cost Ex", "Cost", "Unit Cost", "Price", "Cost Excl"],
+  "Department": ["Department", "Dept", "Dept.", "Drug Dept", "Product Department"],
 };
 
 // Truthy values for isRanged field (case-insensitive)
@@ -312,7 +314,11 @@ export function parseDeadStockFile(
       ? parseFloat(row[colMap["Cost Ex"]] ?? "")
       : NaN;
 
-    result.push({ sku, description, soh, isRanged, costEx });
+    // Department extraction — optional column; defaults to "" when absent (D-02)
+    const deptCol = colMap["Department"];
+    const department = deptCol !== undefined ? (row[deptCol]?.trim() ?? "") : "";
+
+    result.push({ sku, description, soh, isRanged, costEx, department });
   }
 
   return result;
