@@ -8,7 +8,16 @@ A dead-stock matching tool for Australian pharmacy groups. Pharmacy managers upl
 
 A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
 
-## Current State: v1.1 SHIPPED ✅
+## Current Milestone: v1.2 — Insights & Listings
+
+**Goal:** Give pharmacy managers richer visibility into their dead stock position and a path to recover value externally.
+
+**Target features:**
+- Table enhancements: department + ranged columns from FRED export, responsive layout, 4-way filters (ranged, department, store, min transfer value)
+- Ethical Exchange export (Pro only): unmatched dead stock → printable PDF listing for ethicalexchange.com.au
+- Dead stock scorecard: top 5 items, top 5 departments, all-time trend derived from existing upload data
+
+## Previous State: v1.1 SHIPPED ✅
 
 **Shipped:** 2026-05-13
 **Stack:** Cloudflare Workers (Node/TypeScript) + Pages (React/Vite) + NEON Postgres + Clerk auth + Stripe billing
@@ -42,11 +51,27 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - ✓ COST-01..05: Cost Ex column parsing, per-store dollar values, SOH % report with benchmarks, recoverable value KPI — v1.1
 - ✓ BILLING-05..12: 3-tier billing (Free/Pro/Enterprise), server-side enforcement, Stripe multi-price checkout, synchronous confirmation, webhook idempotency, BillingPage — v1.1
 
-### Active (v1.2 candidates)
+### Active (v1.2)
+
+- [ ] TABLE-01: Department column parsed from FRED export and shown in match results
+- [ ] TABLE-02: Ranged column shown in match results table
+- [ ] TABLE-03: Responsive/tablet layout for match results table
+- [ ] TABLE-04: Ranged/non-ranged filter toggle (refine existing)
+- [ ] TABLE-05: Department multi-select filter
+- [ ] TABLE-06: Store filter (from/to)
+- [ ] TABLE-07: Min transfer value ($) filter
+- [ ] EE-01: Unmatched dead stock items auto-selected as Ethical Exchange candidates (Pro only)
+- [ ] EE-02: User reviews and confirms EE candidate selection (Pro only)
+- [ ] EE-03: Printable PDF listing generated with FRED-known fields (Pro only)
+- [ ] SCORE-01: Top 5 dead stock items by value shown in scorecard panel
+- [ ] SCORE-02: Top 5 departments by dead stock value shown in scorecard panel
+- [ ] SCORE-03: All-time trend chart derived from dead_stock upload timestamps
+- [ ] SCORE-04: Month-over-month dead stock value comparison
+
+### Deferred (post v1.2)
 
 - [ ] Role-based access within org (owner vs staff) — AUTH scope
 - [ ] CSV/XLSX export of match results — RESULTS scope
-- [ ] Responsive/tablet layout — UI scope
 - [ ] Usage / audit history (upload log, match run log) — AUDIT scope
 - [ ] Multi-store comparison view (SKU across all stores) — RESULTS scope
 - [ ] Custom sell-through threshold (instead of hard-coded 12 months) — MATCH scope

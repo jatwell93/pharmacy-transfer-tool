@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.2
-milestone_name: (planning)
-status: milestone_archived
-stopped_at: v1.1 milestone archived 2026-05-13 — ready for /gsd-new-milestone
+milestone_name: Insights & Listings
+status: planning
+stopped_at: ""
 last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 -- v1.1 milestone archived, git tag v1.1 created
+last_activity: 2026-05-13 — Milestone v1.2 started
 progress:
-  total_phases: 15
-  completed_phases: 15
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,11 +25,12 @@ See: .planning/PROJECT.md (updated 2026-05-13)
 
 ## Current Position
 
-Phase: v1.1 archived
-Status: Both v1.0 and v1.1 milestones complete and archived
-Last activity: 2026-05-13 — v1.1 milestone archived, git tag v1.1
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-13 — Milestone v1.2 started
 
-Progress: [██████████] 100% — v1.1 complete
+Progress: [----------] 0% — v1.2 planning
 
 ## Performance Metrics
 
