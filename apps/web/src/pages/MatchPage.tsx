@@ -237,7 +237,18 @@ export default function MatchPage() {
   const visibleItems = flatItems.slice(startIndex, endIndex + 1);
 
   // --- Column headers ---
-  const columnHeaders = ['SKU', 'Description', 'Source Store', 'Destination Store', 'Qty to Transfer', 'Dest ROU', 'Months Cover', 'Sell-Through Time'];
+  const columnHeaders = [
+    'SKU',
+    'Description',
+    'Department',
+    'Ranged',
+    'Source Store',
+    'Destination Store',
+    'Qty to Transfer',
+    'Dest ROU',
+    'Months Cover',
+    'Sell-Through Time',
+  ];
 
   // --- Render ---
 
@@ -476,7 +487,7 @@ export default function MatchPage() {
         <div className="border border-[var(--color-border-light)] rounded-lg overflow-hidden">
           {/* Sticky header row */}
           <div className="bg-[var(--color-surface-gray)] border-b border-[var(--color-border-light)]">
-            <div className="grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center">
+            <div className="grid grid-cols-[36px_1fr_1.2fr_1fr_60px_1fr_1fr_100px_80px_100px_100px] items-center">
               {/* Expand chevron column */}
               <div className="h-10" />
               {columnHeaders.map(header => (
@@ -510,7 +521,7 @@ export default function MatchPage() {
                       key={rowKey}
                       onClick={() => hasMultiple && handleToggleRow(rowKey)}
                       style={{ position: 'absolute', top: item.top, height: item.height, width: '100%' }}
-                      className={`grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] hover:bg-[var(--color-surface-gray)] transition-colors ${hasMultiple ? 'cursor-pointer' : ''}`}
+                      className={`grid grid-cols-[36px_1fr_1.2fr_1fr_60px_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] hover:bg-[var(--color-surface-gray)] transition-colors ${hasMultiple ? 'cursor-pointer' : ''}`}
                     >
                       {/* Expand/collapse chevron */}
                       <div className="flex items-center justify-center">
@@ -525,6 +536,14 @@ export default function MatchPage() {
                       <div className="px-3 text-[13px] font-medium text-[var(--color-text-primary)] truncate">{result.sku}</div>
                       {/* Description */}
                       <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{result.description}</div>
+                      {/* Department */}
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">
+                        {result.department}
+                      </div>
+                      {/* Ranged */}
+                      <div className="px-3 text-[13px] text-[var(--color-text-secondary)]">
+                        {result.isRanged ? '\u2713' : '\u2014'}
+                      </div>
                       {/* Source Store */}
                       <div className="px-3 text-[13px] text-[var(--color-text-secondary)] truncate">{result.sourceStore}</div>
                       {/* Destination Store */}
@@ -549,7 +568,7 @@ export default function MatchPage() {
                   <div
                     key={subKey}
                     style={{ position: 'absolute', top: item.top, height: item.height, width: '100%' }}
-                    className="grid grid-cols-[36px_1fr_1.2fr_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-gray)] transition-colors"
+                    className="grid grid-cols-[36px_1fr_1.2fr_1fr_60px_1fr_1fr_100px_80px_100px_100px] items-center border-b border-[var(--color-border-light)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-gray)] transition-colors"
                   >
                     {/* Indent chevron placeholder */}
                     <div className="flex items-center justify-center pl-4">
@@ -560,6 +579,10 @@ export default function MatchPage() {
                     <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentSku}</div>
                     {/* Description — greyed out */}
                     <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentDescription}</div>
+                    {/* Department — empty on sub-rows per D-07 */}
+                    <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate" />
+                    {/* Ranged — empty on sub-rows per D-07 */}
+                    <div className="px-3 text-[13px] text-[var(--color-text-secondary)]" />
                     {/* Source Store — greyed out */}
                     <div className="px-3 text-[13px] text-[var(--color-text-muted)] truncate">{item.parentSourceStore}</div>
                     {/* Destination Store */}

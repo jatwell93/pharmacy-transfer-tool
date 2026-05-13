@@ -19,6 +19,8 @@ export interface MatchResult {
   soh: number;
   cost: number;
   sourceStore: string;
+  isRanged: boolean;   // from dead stock item (Plan 01 backend changes)
+  department: string;  // "" when Department column absent from upload
   bestMatch: DestinationMatch;
   allMatches: DestinationMatch[];
 }
