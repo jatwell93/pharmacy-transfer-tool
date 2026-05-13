@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS dead_stock (
   soh         DOUBLE PRECISION,
   cost_ex     DOUBLE PRECISION,
   is_ranged   BOOLEAN NOT NULL DEFAULT false,
+  department  TEXT,
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

@@ -9,6 +9,9 @@
 //
 // MIGRATION REQUIRED (Phase 7): ALTER TABLE rou_data ADD COLUMN IF NOT EXISTS is_ranged BOOLEAN NOT NULL DEFAULT false;
 // Run via NEON SQL editor as neondb_owner before deploying. Do NOT use DATABASE_URL (pharmiq_app has no DDL rights).
+//
+// MIGRATION REQUIRED (Phase 16): ALTER TABLE dead_stock ADD COLUMN IF NOT EXISTS department TEXT;
+// Run via NEON SQL editor as neondb_owner before deploying. Do NOT use DATABASE_URL (pharmiq_app has no DDL rights).
 
 import { Hono } from 'hono';
 import type { Env, Variables } from '../types';
@@ -188,18 +191,20 @@ uploadRoute.post('/upload', async (c) => {
           if (r.costEx < 0) return null;
           return r.costEx;
         });
+        const departments = rows.map((r) => r.department);
 
         await withOrgContext<void>(
           dbUrl,
           orgId,
           (tx) => tx`
-            INSERT INTO dead_stock (org_id, store_id, sku, description, soh, is_ranged, cost_ex, uploaded_at)
+            INSERT INTO dead_stock (org_id, store_id, sku, description, soh, is_ranged, cost_ex, department, uploaded_at)
             SELECT ${orgId}, ${storeId}::uuid,
                    unnest(${skus}::text[]),
                    unnest(${descriptions}::text[]),
                    unnest(${sohs}::float8[]),
                    unnest(${ranged}::boolean[]),
                    unnest(${costs}::float8[]),
+                   unnest(${departments}::text[]),
                    NOW()
           `,
         );
