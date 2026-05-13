@@ -2,76 +2,76 @@
 
 ## What This Is
 
-A dead-stock matching tool for Australian pharmacy groups. Pharmacy managers upload ROU (Rate of Usage) and dead-stock reports exported from FRED Office for each store. The system identifies which stores hold dead stock that other stores in the network can sell, and recommends transfers capped at a user-defined months-cover limit to prevent receiving stores from becoming overstocked. Part of the PharmIQ platform ("Smart Ops. Better Margins.").
+A dead-stock matching tool for Australian pharmacy groups. Pharmacy managers upload ROU (Rate of Usage) and dead-stock reports exported from FRED Office for each store. The system identifies which stores hold dead stock that other stores in the network can sell, recommends transfers capped at a user-defined months-cover limit to prevent receiving stores from becoming overstocked, and shows managers their dead stock dollar exposure with benchmark indicators and recoverable value estimates. Part of the PharmIQ platform ("Smart Ops. Better Margins.").
 
 ## Core Value
 
 A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
 
-## Current Milestone: v1.1 Complete ✓
+## Current State: v1.1 SHIPPED ✅
 
-**Goal:** Give pharmacy managers visual insight into their dead stock position and unlock revenue growth with 3 pricing tiers.
-**Status:** All 5 phases complete. UAT passed 2026-05-13.
+**Shipped:** 2026-05-13
+**Stack:** Cloudflare Workers (Node/TypeScript) + Pages (React/Vite) + NEON Postgres + Clerk auth + Stripe billing
+**Test coverage:** 109+ Worker tests passing; web Vitest suite (9 tests) for billing/modal components
 
-**Target features:**
-- Dead stock visualisation — pie chart of units per store (pre-match) and projected change chart (post-match, assuming all transfers completed)
-- SOH vs Dead Stock dollar report — optional Cost Ex column in dead stock upload; user types total SOH $ to see dead stock $ as % of total inventory value
-- 3-tier billing: Free (1 match/mo), Pro ($10/mo, 10 matches/mo + max 10 stores), Enterprise ($100/mo, unlimited)
+**What's live:**
+- Multi-store FRED CSV/XLSX upload (ROU + dead stock) with SheetJS parsing and NEON persistence
+- Dead stock matching algorithm with months-cover cap, sell-through filter, ranged-first sort
+- Virtualized results table with PDF export (@react-pdf/renderer)
+- Dead stock charts: pie chart per store (pre-match) + projected change bar chart + Net Units Recovered KPI (post-match)
+- Cost Report panel: per-store dead stock $ cards, SOH $ input, dead stock % with amber/red benchmarks, recoverable value KPI
+- 3-tier billing: Free (1 match/mo, 3 stores), Pro ($10/mo AUD, 10 matches/mo, 10 stores), Enterprise ($100/mo AUD, unlimited)
+- Stripe Checkout + in-place upgrade + Customer Portal + synchronous checkout confirmation + webhook idempotency
+- PharmIQ brand (teal #0F766E / amber #D97706 / navy #0F172A, Space Grotesk + Inter) with dark mode
 
 ## Requirements
 
-### Validated
+### Validated — v1.0
 
-✓ File upload: accepts FRED ROU export (Item Code, Item Description, ROU, SOH) — existing
-✓ File upload: accepts FRED dead stock export (Item Code, Item Description, SOH) — existing
-✓ Matching logic: identifies dead-stock SKUs that other stores have positive ROU for — existing
-✓ Sell-through filter: matches only stores where ROU >= SOH / 12 — existing
-✓ Results view: virtualized table of matched transfers with store, SKU, ROU, sell-through — existing
-✓ PDF export of match results — existing
-✓ Dark mode toggle — existing
+- ✓ AUTH-01..03: Clerk auth + org-scoped data isolation — v1.0
+- ✓ UPLOAD-01..06: FRED ROU + dead stock upload (CSV/XLSX), NEON persistence, store card grid — v1.0
+- ✓ MATCH-01..07: Matching algorithm with months-cover cap, sell-through filter, ranged sort, is_ranged parsing, NaN handling — v1.0
+- ✓ RESULTS-01..02: Virtualized results table + PDF export — v1.0
+- ✓ BILLING-01..04: Free tier (1 match/mo), Stripe paid plan, atomic usage counter — v1.0
+- ✓ BRAND-01..02: PharmIQ brand guide, dark mode — v1.0
+- ✓ AUDIT-01..02: Django algorithm audit + TypeScript port with full unit test coverage — v1.0
 
-### Active
+### Validated — v1.1
 
-- [x] **Months cover cap**: user sets cover target (e.g. 3 months); max transfer = (cover × ROU) − receiving store's existing SOH; uses net allocation to prevent overstocking — Validated in Phase 04: Matching Algorithm
-- [x] **Rebuilt on Cloudflare/NEON/Clerk stack**: Workers (Node), Pages (React), NEON Postgres, Clerk auth — replaces Django+SQLite — Validated in v1.0
-- [x] **Persistent data**: uploaded ROU and dead-stock data stored per organisation in NEON; re-upload per store as needed without re-uploading everything — Validated in Phase 03: File Upload Pipeline
-- [x] **Freemium model**: 1 match run per month on free tier; unlimited on paid — Validated in Phase 05: freemium-and-billing
-- [x] **Dynamic store list**: derived from uploaded data, not hard-coded in source — Validated in Phase 03: File Upload Pipeline
-- [x] **PharmIQ brand**: teal/amber/navy palette, Space Grotesk typography, brand guide compliance — Validated in Phase 01: Foundation
-- [x] **Logic audit**: verify matching algorithm correctness — months cover, sell-through filter, ranged status ranking, is_ranged parsing, NaN/ROU edge cases — Validated in Phase 02: logic-audit
-- [x] **Multi-store upload UX**: clear workflow for uploading N stores before running match — Validated in Phase 03: File Upload Pipeline
-- [x] **Results export**: PDF export implemented — Validated in Phase 06: pdf-export
-- [x] **Auth & tenancy**: Clerk auth, per-org data scoping (no cross-org data leakage) — Validated in Phase 01: Foundation
-- [x] **Dead stock visualisation**: pie chart showing dead stock units per store before match; projected change chart after match (assuming all transfers completed) — Validated in Phase 13: charts
-- [x] **Cost Ex column parsing**: optional Cost Ex column captured from FRED Stock Valuation uploads; per-unit cost stored in dead_stock.cost_ex; GET /api/dead-stock-summary endpoint returns per-store unit totals and dollar values with hasCostData signal — Validated in Phase 12: cost-column-parser-summary-endpoint
-- [x] **SOH vs Dead Stock dollar report**: per-store dead stock $ cards, SOH $ input with org-specific localStorage persistence, dead stock % progress bar with amber/red thresholds, recoverable value KPI post-match — Validated in Phase 14: cost-report-ui
-- [x] **3-tier billing**: Free (1 match/mo), Pro ($10/mo, 10 matches/mo, max 10 stores), Enterprise ($100/mo, unlimited); Stripe Checkout (new subs) + in-place update (upgrades); synchronous checkout confirmation (BILLING-09); webhook idempotency; 3-tier BillingPage — Validated in Phase 15: 3-tier-billing (UAT 9/9 ✓ 2026-05-13)
+- ✓ VIZ-01..03: Dead stock pie chart, post-match grouped bar chart, Net Units Recovered KPI — v1.1
+- ✓ COST-01..05: Cost Ex column parsing, per-store dollar values, SOH % report with benchmarks, recoverable value KPI — v1.1
+- ✓ BILLING-05..12: 3-tier billing (Free/Pro/Enterprise), server-side enforcement, Stripe multi-price checkout, synchronous confirmation, webhook idempotency, BillingPage — v1.1
+
+### Active (v1.2 candidates)
+
+- [ ] Role-based access within org (owner vs staff) — AUTH scope
+- [ ] CSV/XLSX export of match results — RESULTS scope
+- [ ] Responsive/tablet layout — UI scope
+- [ ] Usage / audit history (upload log, match run log) — AUDIT scope
+- [ ] Multi-store comparison view (SKU across all stores) — RESULTS scope
+- [ ] Custom sell-through threshold (instead of hard-coded 12 months) — MATCH scope
 
 ### Out of Scope
 
-- Django/Python backend — replacing with Node/Cloudflare Workers
-- SQLite — replacing with NEON Postgres
-- Real-time collaboration / multi-user simultaneous editing — not needed for v1
-- Mobile app — web responsive is sufficient
-- Direct FRED API integration — manual CSV/XLSX export remains the upload mechanism
-- Audit/history trail — deferred to v2
-- Multi-store comparison visualisation — deferred to v2
+- Django/Python backend — replaced entirely by Cloudflare Workers (Node/TypeScript)
+- SQLite — replaced by NEON Postgres
+- Direct FRED Office API integration — manual CSV/XLSX export remains the upload mechanism
+- Real-time collaboration / simultaneous multi-user editing — not needed
+- Mobile native app — web responsive is sufficient
+- Demand forecasting or predictive analytics
+- Custom RBAC / permission systems in v1
 
 ## Context
 
-**Existing codebase** (`dead-stock-tranfer-app/` + `stock_transfer_project/`): A working React + Django app with proven matching logic that needs to be audited, then rebuilt on the new stack. Key concerns from codebase audit:
-- Matching algorithm works but `is_ranged` parsing is brittle (only accepts `"checked"`, not `"yes"/"true"/"1"`)
-- NaN/ROU masking with `or 0.0` pattern silently hides data quality issues
-- No months-cover cap exists yet (core new feature)
-- Store list is hard-coded in frontend (must be made dynamic)
-- Zero test coverage on business logic
-- No auth, no tenancy — must be addressed before any hosted deployment
+**FRED Office reports** are the data source — standard pharmacy POS system used widely in Australian pharmacies. Export format is CSV or XLSX with flexible column naming (header aliasing implemented in parser.ts).
 
-**FRED Office reports** are the data source — standard pharmacy POS system used widely in Australian pharmacies. Export format is CSV or XLSX with flexible column naming (header aliasing already implemented in existing code).
+**Brand identity**: PharmIQ brand guide at `brand-identity-pharma-apps/brand-identity/brand-guidelines.md`. Primary teal `#0F766E`, accent amber `#D97706`, dark base navy `#0F172A`. Font: Space Grotesk / Inter. Aligned with companion use-by dates app.
 
-**Brand identity**: PharmIQ brand guide at `brand-identity-pharma-apps/brand-identity/brand-guidelines.md`. Primary teal `#0F766E`, accent amber `#D97706`, dark base navy `#0F172A`. Font: Space Grotesk (platform) / Inter (body). Must align with the companion use-by dates app on the same platform.
+**Related product**: A companion app (use-by dates tracker) already deployed on Cloudflare Pages + Workers + NEON + Clerk. Stock transfer tool shares the same design system and auth provider.
 
-**Related product**: A companion app (use-by dates tracker) already deployed on Cloudflare Pages + Workers + NEON + Clerk. Stock transfer tool should feel like a product family member — same design system, same auth, potentially unified dashboard in the future.
+**Known issues / tech debt from v1.1:**
+- Phase 11 and Phase 15 VERIFICATION.md files missing (documentation artifacts; UAT and SUMMARY provide evidence)
+- All 5 v1.1 VALIDATION.md files in `status: draft` (Nyquist task-level marking not done; no functional impact)
 
 ## Constraints
 
@@ -79,22 +79,24 @@ A pharmacy manager uploads all store reports and instantly sees exactly which st
 - **Auth**: Clerk — already integrated in companion app, users will be the same
 - **Data**: NEON Postgres — replaces SQLite; must support multi-tenant (per-org) data scoping
 - **Deployment**: Cloudflare Pages/Workers — no traditional server, no Python
-- **Business model**: 3 tiers — Free (1 match/mo), Pro ($10/mo, 10 matches/mo + max 10 stores), Enterprise ($100/mo, unlimited); enforced in backend via atomic counters and store-count gating
+- **Business model**: 3 tiers — Free (1 match/mo, 3 stores), Pro ($10/mo AUD, 10 matches/mo, 10 stores), Enterprise ($100/mo AUD, unlimited); enforced in backend via atomic counters and store-count gating
 - **Market**: Australian pharmacies — FRED Office export formats are the integration surface
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Rebuild on Cloudflare/NEON/Clerk instead of migrating Django | Same stack as companion app; Django has no auth, SQLite can't scale, no deployment config | Confirmed — v1.0 complete |
-| Net months-cover allocation (subtract existing SOH) | Prevents receiving store overstocking; aligns with how buyers think | Confirmed — Phase 04 |
-| Separate product (not embedded in companion app) | Freemium lead-gen; distinct brand page; cross-markets both products | Confirmed — deployed |
-| 3-tier pricing: Free / Pro $10 / Enterprise $100 AUD | Replaces binary free/paid — Pro adds 10 matches+10 stores, Enterprise is unlimited | Confirmed — Phase 15 (UAT ✓) |
-| In-place subscription update for tier upgrades (no duplicate subs) | Stripe subscription update avoids double-billing; synchronous confirmation avoids webhook race | Confirmed — Phase 15 (BILLING-08/09) |
-| Preserve FRED export format support | Users already know how to export; no workflow change needed | Confirmed — v1.0 complete |
+| Rebuild on Cloudflare/NEON/Clerk instead of migrating Django | Same stack as companion app; Django has no auth, SQLite can't scale, no deployment config | ✓ v1.0 complete |
+| Net months-cover allocation (subtract existing SOH) | Prevents receiving store overstocking; aligns with how buyers think | ✓ Phase 04 |
+| Separate product (not embedded in companion app) | Freemium lead-gen; distinct brand page; cross-markets both products | ✓ Deployed |
+| 3-tier pricing: Free / Pro $10 / Enterprise $100 AUD | Replaces binary free/paid — Pro adds 10 matches+10 stores, Enterprise is unlimited | ✓ Phase 15 (UAT ✓) |
+| In-place subscription update for tier upgrades | Stripe subscription update avoids double-billing; synchronous confirmation avoids webhook race (BILLING-08/09) | ✓ Phase 15 |
+| Preserve FRED export format support | Users already know how to export; no workflow change needed | ✓ v1.0 |
+| `hasCostData` as explicit COST-04 signal (not `totalValue === 0`) | Store can have `totalValue === 0` with zero-cost items; `hasCostData` is unambiguous | ✓ Phase 12 |
+| Synchronous checkout confirmation (`GET /billing/checkout-session/:sessionId`) | Webhook arrives 1–5s after redirect; synchronous fetch prevents race condition on upgrade | ✓ Phase 15 |
 
 ---
-*Last updated: 2026-05-13 — v1.1 milestone complete: Phase 14 (Cost Report UI) + Phase 15 (3-Tier Billing) verified. All 15 phases done across v1.0 and v1.1.*
+*Last updated: 2026-05-13 — v1.1 milestone archived. All 42 requirements across v1.0 and v1.1 complete.*
 
 ## Evolution
 

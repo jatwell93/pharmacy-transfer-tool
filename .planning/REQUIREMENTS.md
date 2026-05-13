@@ -67,20 +67,20 @@
 
 - [x] **COST-01**: Dead stock upload accepts an optional "Cost Ex" column (unit cost excl. GST from FRED Stock Valuation report); absence detected at header level; does not cause upload errors
 - [x] **COST-02**: When cost data is present, dead stock dollar value is displayed per store (`SUM(Cost Ex × SOH)` per store's dead stock SKUs)
-- [ ] **COST-03**: User can enter a single org-level total SOH $ value; app displays dead stock as a % of total SOH with amber (10–25%) / red (>25%) benchmark indicator
+- [x] **COST-03**: User can enter a single org-level total SOH $ value; app displays dead stock as a % of total SOH with amber (10–25%) / red (>25%) benchmark indicator
 - [x] **COST-04**: When cost column is absent from the upload, cost report panel shows an instructional message to re-upload using FRED Stock Valuation report format
-- [ ] **COST-05**: When cost data is present after a match run, app shows a "Recoverable value" KPI: dollar value of dead stock matched for transfer
+- [x] **COST-05**: When cost data is present after a match run, app shows a "Recoverable value" KPI: dollar value of dead stock matched for transfer
 
 ### Billing
 
-- [ ] **BILLING-05**: Plan limits — Free: 1 match/mo, 3 stores; Pro ($10/mo AUD): 10 matches/mo, 10 stores; Enterprise ($100/mo AUD): unlimited matches and stores
-- [ ] **BILLING-06**: All limits enforced server-side in the Worker: atomic match counter + distinct-store count query against rou_data at match time; client-side gates are UX only
-- [ ] **BILLING-07**: Existing Free-tier users with >3 stores already uploaded are not retroactively blocked at launch — the store cap applies to new match runs only (grace period)
-- [ ] **BILLING-08**: Stripe Checkout supports both Pro and Enterprise price IDs; user can upgrade Free→Pro, Free→Enterprise, or Pro→Enterprise (existing subscription item ID passed for correct proration)
-- [ ] **BILLING-09**: After Stripe Checkout redirect, app synchronously fetches checkout session status and writes plan_tier before rendering — does not rely on async webhook for the immediate upgrade experience
-- [ ] **BILLING-10**: `customer.subscription.updated` webhook handler writes plan_tier to subscriptions table; idempotent via stripe_event_id deduplication
-- [ ] **BILLING-11**: User can manage subscription (upgrade, downgrade, cancel) via Stripe Customer Portal
-- [ ] **BILLING-12**: Billing page shows current plan, match runs used this month, stores used vs limit, and side-by-side pricing comparison for all 3 tiers
+- [x] **BILLING-05**: Plan limits — Free: 1 match/mo, 3 stores; Pro ($10/mo AUD): 10 matches/mo, 10 stores; Enterprise ($100/mo AUD): unlimited matches and stores
+- [x] **BILLING-06**: All limits enforced server-side in the Worker: atomic match counter + distinct-store count query against rou_data at match time; client-side gates are UX only
+- [x] **BILLING-07**: Existing Free-tier users with >3 stores already uploaded are not retroactively blocked at launch — the store cap applies to new match runs only (grace period)
+- [x] **BILLING-08**: Stripe Checkout supports both Pro and Enterprise price IDs; user can upgrade Free→Pro, Free→Enterprise, or Pro→Enterprise (existing subscription item ID passed for correct proration)
+- [x] **BILLING-09**: After Stripe Checkout redirect, app synchronously fetches checkout session status and writes plan_tier before rendering — does not rely on async webhook for the immediate upgrade experience
+- [x] **BILLING-10**: `customer.subscription.updated` webhook handler writes plan_tier to subscriptions table; idempotent via stripe_event_id deduplication
+- [x] **BILLING-11**: User can manage subscription (upgrade, downgrade, cancel) via Stripe Customer Portal
+- [x] **BILLING-12**: Billing page shows current plan, match runs used this month, stores used vs limit, and side-by-side pricing comparison for all 3 tiers
 
 ---
 
@@ -145,18 +145,18 @@
 | VIZ-03 | Phase 13 — Charts | Complete |
 | COST-01 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
 | COST-02 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
-| COST-03 | Phase 14 — Cost Report UI | Pending |
+| COST-03 | Phase 14 — Cost Report UI | Complete |
 | COST-04 | Phase 12 — Cost Column Parser + Summary Endpoint | Complete |
-| COST-05 | Phase 14 — Cost Report UI | Pending |
-| BILLING-05 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-06 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-07 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-08 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-09 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-10 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-11 | Phase 15 — 3-Tier Billing | Pending |
-| BILLING-12 | Phase 15 — 3-Tier Billing | Pending |
+| COST-05 | Phase 14 — Cost Report UI | Complete |
+| BILLING-05 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-06 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-07 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-08 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-09 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-10 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-11 | Phase 15 — 3-Tier Billing | Complete |
+| BILLING-12 | Phase 15 — 3-Tier Billing | Complete |
 
 ---
 
-*Updated: 2026-04-16 | 26 v1 requirements (all Complete) + 13 v1.1 requirements across 3 categories*
+*Updated: 2026-05-13 | 26 v1 requirements (all Complete) + 16 v1.1 requirements (all Complete) across 3 categories*

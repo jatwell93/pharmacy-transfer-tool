@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Phases — Reporting & Tiered Billing
-status: milestone_complete
-stopped_at: Phase 15 UAT complete — 9/9 tests passed — v1.1 milestone complete
+milestone: v1.2
+milestone_name: (planning)
+status: milestone_archived
+stopped_at: v1.1 milestone archived 2026-05-13 — ready for /gsd-new-milestone
 last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 -- Phase 15 UAT complete, v1.1 milestone verified
+last_activity: 2026-05-13 -- v1.1 milestone archived, git tag v1.1 created
 progress:
   total_phases: 15
   completed_phases: 15
@@ -18,19 +18,18 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28)
+See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** v1.1 milestone complete — ready for `/gsd-complete-milestone`
+**Current focus:** v1.1 archived — planning next milestone with `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 15 (3-tier-billing) — COMPLETE (UAT 9/9 ✓ 2026-05-13)
-Plan: 2 of 2
-Status: Milestone complete — all 5 v1.1 phases verified
-Last activity: 2026-05-13 — Phase 15 UAT complete
+Phase: v1.1 archived
+Status: Both v1.0 and v1.1 milestones complete and archived
+Last activity: 2026-05-13 — v1.1 milestone archived, git tag v1.1
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% — v1.1 complete
 
 ## Performance Metrics
 
