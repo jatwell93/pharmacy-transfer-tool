@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
-status: planning
-stopped_at: "Phase 16 context gathered"
+status: executing
+stopped_at: "Phase 16 complete"
 last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 — Phase 16 context captured (dept aliases, ranged display, column placement, schema migration)
+last_activity: 2026-05-13 — Phase 16 executed (dept + ranged backend stack + frontend table columns + parser tests)
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 16 context ready — ready to plan Phase 16
+**Current focus:** Phase 16 complete — ready for Phase 17 (Table Filters + Responsive Layout)
 
 ## Current Position
 
-Phase: 16 (not started)
-Plan: —
-Status: Roadmap defined, ready to plan
-Last activity: 2026-05-13 — Roadmap created for v1.2 (Phases 16–19)
+Phase: 16 (complete)
+Plan: 16-02
+Status: Phase 16 executed — 2/2 plans complete
+Last activity: 2026-05-13 — Phase 16 complete: department + ranged fields through full stack
 
-Progress: [----------] 0% — v1.2 planning
+Progress: [##--------] 25% — v1.2 executing
 
 ## v1.2 Phases
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 16 | Department + Ranged Column Parsing | TABLE-01, TABLE-02 | Not started |
+| 16 | Department + Ranged Column Parsing | TABLE-01, TABLE-02 | Complete |
 | 17 | Table Filters + Responsive Layout | TABLE-03..07 | Not started |
 | 18 | Ethical Exchange Export | EE-01..04 | Not started |
 | 19 | Dead Stock Scorecard | SCORE-01..04 | Not started |
@@ -118,6 +118,9 @@ Recent decisions affecting current work:
 - [Phase 07-is-ranged-schema-fix]: Ranged-first sort test uses soh:10 (not soh:100) — soh:100 yields minRequiredRou>8, excluding both destination stores via sell-through filter
 - [Phase 10]: subscriptions.status DEFAULT changed from 'inactive' to 'free' — aligns with orgs.plan='free' default and billing route logic
 - [Phase 10]: schema.sql stores table gains store_number TEXT (nullable) — no migration needed as this is the canonical DDL
+- [Phase 16]: Department HEADER_ALIASES uses exact-match strings: ["Department", "Dept", "Dept.", "Drug Dept", "Product Department"] — case-sensitive
+- [Phase 16]: department TEXT column on dead_stock is nullable (no DEFAULT) — null from pre-migration rows coerced to "" in match route
+- [Phase 16]: MIGRATION REQUIRED before deploy: ALTER TABLE dead_stock ADD COLUMN IF NOT EXISTS department TEXT; (run as neondb_owner)
 
 ### Roadmap Evolution
 
@@ -141,5 +144,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-05-13
-Stopped at: v1.2 roadmap created — Phases 16–19 defined, ready for /gsd-plan-phase 16
+Stopped at: Phase 16 complete — ready for Phase 17 (Table Filters + Responsive Layout)
 Resume file: None
