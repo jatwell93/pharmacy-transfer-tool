@@ -154,6 +154,15 @@ describe("matchTransfers", () => {
       const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 6 });
       expect(results[0].bestMatch.qtyToTransfer).toBe(50);
     });
+
+    it("NP-1: excludes store when near-zero float qty would display as 0.0 (3 * 0.3 = 0.8999... in JS)", () => {
+      // destROU=0.3, target=3 → 3*0.3=0.8999... in float
+      // destSOH=0.89 → maxTransferQty≈0.01, qtyToTransfer≈0.01 → must be excluded (shows as 0.0)
+      const deadStock: DeadStockItem[] = [{ sku: "SKU001", soh: 5, description: "Item", cost: 2 }];
+      const rouData: RouItem[] = [{ sku: "SKU001", store: "DestStore", rou: 0.3, isRanged: false, soh: 0.89 }];
+      const { results } = matchTransfers(deadStock, rouData, { originStore: "Origin", monthsCoverTarget: 3 });
+      expect(results).toHaveLength(0);
+    });
   });
 
   describe("sort order (MATCH-05)", () => {

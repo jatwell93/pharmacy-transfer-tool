@@ -179,9 +179,12 @@ export function matchTransfers(
       // Months-cover cap (Section 2): exclude if destination already at/over cap
       const destSoh = dest.soh ?? 0;
       const maxTransferQty = Math.max(0, opts.monthsCoverTarget * dest.rou - destSoh);
-      if (maxTransferQty === 0) continue;
 
       const qtyToTransfer = Math.min(item.soh, maxTransferQty);
+      // NP-1: float-safe guard — JS float arithmetic (e.g. 3 * 0.3 = 0.8999...)
+      // can produce near-zero maxTransferQty that passes === 0 but rounds to 0.0 on display.
+      // Exclude any destination whose effective transfer qty would show as 0.0 (toFixed(1)).
+      if (qtyToTransfer < 0.05) continue;
       const sellThrough = item.soh / dest.rou;
 
       destinationMatches.push({
