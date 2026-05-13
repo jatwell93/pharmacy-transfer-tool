@@ -55,7 +55,10 @@
   2. After a dead stock upload, each match result row shows a Ranged column reflecting the parsed is_ranged value from the FRED export
   3. Uploads that lack a Department column do not fail — the department field is blank/null rather than erroring
   4. Existing parser unit tests continue to pass and new tests cover department header aliasing
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 16-01-PLAN.md — Backend stack: parser.ts + schema.sql + upload.ts + matcher.ts + match.ts
+- [ ] 16-02-PLAN.md — Frontend table: useMatchRun.ts + MatchPage.tsx + parser.test.ts new tests
 **UI hint**: yes
 
 ### Phase 17: Table Filters + Responsive Layout
@@ -114,7 +117,7 @@
 | 13. Charts | v1.1 | 2/2 | Complete | 2026-04-18 |
 | 14. Cost Report UI | v1.1 | 1/1 | Complete | 2026-04-19 |
 | 15. 3-Tier Billing | v1.1 | 2/2 | Complete | 2026-04-26 |
-| 16. Department + Ranged Column Parsing | v1.2 | 0/? | Not started | - |
+| 16. Department + Ranged Column Parsing | v1.2 | 0/2 | In progress | - |
 | 17. Table Filters + Responsive Layout | v1.2 | 0/? | Not started | - |
 | 18. Ethical Exchange Export | v1.2 | 0/? | Not started | - |
 | 19. Dead Stock Scorecard | v1.2 | 0/? | Not started | - |
