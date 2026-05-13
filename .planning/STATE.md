@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
 status: planning
-stopped_at: ""
+stopped_at: "Phase 16 context gathered"
 last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 — Roadmap created for v1.2 (Phases 16–19)
+last_activity: 2026-05-13 — Phase 16 context captured (dept aliases, ranged display, column placement, schema migration)
 progress:
   total_phases: 4
   completed_phases: 0
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** v1.2 roadmap defined — ready to plan Phase 16
+**Current focus:** Phase 16 context ready — ready to plan Phase 16
 
 ## Current Position
 
