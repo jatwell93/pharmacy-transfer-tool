@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
-status: executing
-stopped_at: "Phase 17 context gathered"
-last_updated: "2026-05-13T00:00:00Z"
-last_activity: 2026-05-13 — Phase 16 executed (dept + ranged backend stack + frontend table columns + parser tests)
+status: ready_to_execute
+stopped_at: Phase 17 planned — 2 plans ready
+last_updated: "2026-05-14T14:00:00.000Z"
+last_activity: "2026-05-14 — Phase 17 planned: filter strip + responsive table (2 plans)"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
+  total_plans: 4
   completed_plans: 2
-  percent: 25
+  percent: 50
 ---
 
 # Project State
@@ -143,6 +143,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-13
-Stopped at: Phase 16 complete — ready for Phase 17 (Table Filters + Responsive Layout)
-Resume file: None
+Last session: 2026-05-14T13:16:34.497Z
+Stopped at: Phase 17 UI-SPEC approved
+Resume file: .planning/phases/17-table-filters-responsive-layout/17-UI-SPEC.md
