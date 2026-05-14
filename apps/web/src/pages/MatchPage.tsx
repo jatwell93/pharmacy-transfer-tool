@@ -42,6 +42,13 @@ export default function MatchPage() {
   const [warningsExpanded, setWarningsExpanded] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  // --- Filter state (Phase 17) ---
+  const [rangedFilter, setRangedFilter] = useState<'all' | 'ranged' | 'non-ranged'>('all');
+  const [selectedDepts, setSelectedDepts] = useState<Set<string>>(new Set());
+  const [deptDropdownOpen, setDeptDropdownOpen] = useState(false);
+  const [storeFilter, setStoreFilter] = useState('');
+  const [minUnits, setMinUnits] = useState(0);
+
   // Derived: true when org is at their monthly run limit (works for Free and Pro; enterprise limit=-1 never at limit)
   const isAtLimit = usage != null && usage.limit !== -1 && usage.count >= usage.limit;
 
@@ -61,6 +68,19 @@ export default function MatchPage() {
       setShowUpgradeModal(true);
     }
   }, [upgradeTo]);
+
+  // Close department dropdown on outside click
+  const deptDropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!deptDropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (deptDropdownRef.current && !deptDropdownRef.current.contains(e.target as Node)) {
+        setDeptDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [deptDropdownOpen]);
 
   // Scroll container ref for virtualization
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -169,13 +189,62 @@ export default function MatchPage() {
     }
   }, []);
 
+  const handleClearFilters = useCallback(() => {
+    setRangedFilter('all');
+    setSelectedDepts(new Set());
+    setDeptDropdownOpen(false);
+    setStoreFilter('');
+    setMinUnits(0);
+  }, []);
+
+  const handleMinUnitsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseInt(e.target.value, 10);
+    if (!isNaN(v) && v >= 0) setMinUnits(v);
+    else if (e.target.value === '') setMinUnits(0);
+  }, []);
+
+  const handleDeptToggle = useCallback((dept: string) => {
+    setSelectedDepts(prev => {
+      const next = new Set(prev);
+      next.has(dept) ? next.delete(dept) : next.add(dept);
+      return next;
+    });
+  }, []);
+
+  // --- Filter-derived data ---
+
+  const filteredResults = useMemo(() => {
+    return results.filter(result => {
+      if (rangedFilter === 'ranged' && !result.isRanged) return false;
+      if (rangedFilter === 'non-ranged' && result.isRanged) return false;
+      if (selectedDepts.size > 0 && !selectedDepts.has(result.department)) return false;
+      if (storeFilter !== '' && result.sourceStore !== storeFilter && result.bestMatch.store !== storeFilter) return false;
+      if (minUnits > 0 && result.bestMatch.qtyToTransfer < minUnits) return false;
+      return true;
+    });
+  }, [results, rangedFilter, selectedDepts, storeFilter, minUnits]);
+
+  const uniqueDepartments = useMemo(() => {
+    return Array.from(new Set(results.map(r => r.department).filter(Boolean))).sort();
+  }, [results]);
+
+  const uniqueStores = useMemo(() => {
+    const all = [
+      ...results.map(r => r.sourceStore),
+      ...results.map(r => r.bestMatch.store),
+    ];
+    return Array.from(new Set(all)).sort();
+  }, [results]);
+
+  const anyFilterActive = rangedFilter !== 'all' || selectedDepts.size > 0 || storeFilter !== '' || minUnits > 0;
+
   // --- Flat list for virtualization ---
 
   const flatItems = useMemo<Array<FlatItem & { top: number; height: number }>>(() => {
     const items: Array<FlatItem & { top: number; height: number }> = [];
     let offset = 0;
 
-    for (const result of results) {
+    for (const result of filteredResults) {
       const rowKey = `${result.sku}::${result.sourceStore}`;
       items.push({ type: 'result', data: result, top: offset, height: ROW_HEIGHT });
       offset += ROW_HEIGHT;
@@ -199,7 +268,7 @@ export default function MatchPage() {
     }
 
     return items;
-  }, [results, expandedRows]);
+  }, [filteredResults, expandedRows]);
 
   const totalHeight = flatItems.length > 0
     ? flatItems[flatItems.length - 1].top + flatItems[flatItems.length - 1].height
@@ -402,6 +471,126 @@ export default function MatchPage() {
         )}
       </div>
 
+      {/* Filter strip — only rendered when hasRun && results.length > 0 (D-05, D-06) */}
+      {hasRun && results.length > 0 && (
+        <div
+          className="flex flex-wrap items-center gap-4 mb-4 p-3 bg-[var(--color-surface-gray)] rounded-lg border border-[var(--color-border-light)]"
+          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+        >
+          {/* Ranged filter (D-10, TABLE-04) */}
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="filter-ranged"
+              className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
+            >
+              Ranged
+            </label>
+            <select
+              id="filter-ranged"
+              value={rangedFilter}
+              onChange={e => setRangedFilter(e.target.value as 'all' | 'ranged' | 'non-ranged')}
+              className="rounded-md border border-[var(--color-border-light)] px-2 py-1 min-h-[36px] text-[13px] text-[var(--color-text-primary)] bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)]"
+            >
+              <option value="all">All</option>
+              <option value="ranged">Ranged only</option>
+              <option value="non-ranged">Non-ranged only</option>
+            </select>
+          </div>
+
+          {/* Department filter (D-11, TABLE-05) */}
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold text-[var(--color-text-secondary)]">Department</span>
+            <div className="relative" ref={deptDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setDeptDropdownOpen(prev => !prev)}
+                className="flex items-center gap-1 rounded-md border border-[var(--color-border-light)] px-2 py-1 min-h-[36px] text-[13px] text-[var(--color-text-secondary)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-gray)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)] transition-colors"
+              >
+                {selectedDepts.size === 0 ? 'Department' : `Dept (${selectedDepts.size})`}
+                <ChevronDown size={12} aria-hidden="true" />
+              </button>
+              {deptDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 z-10 bg-[var(--color-surface)] border border-[var(--color-border-light)] rounded-md shadow-sm min-w-[160px] max-h-[200px] overflow-y-auto py-1">
+                  {uniqueDepartments.map(dept => (
+                    <label
+                      key={dept}
+                      className="flex items-center gap-2 px-3 py-1.5 text-[13px] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-gray)] cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedDepts.has(dept)}
+                        onChange={() => handleDeptToggle(dept)}
+                        className="accent-[var(--color-teal)]"
+                      />
+                      {dept}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Store filter (D-12, TABLE-06) */}
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="filter-store"
+              className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
+            >
+              Store
+            </label>
+            <select
+              id="filter-store"
+              value={storeFilter}
+              onChange={e => setStoreFilter(e.target.value)}
+              className="rounded-md border border-[var(--color-border-light)] px-2 py-1 min-h-[36px] text-[13px] text-[var(--color-text-primary)] bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)]"
+            >
+              <option value="">All stores</option>
+              {uniqueStores.map(store => (
+                <option key={store} value={store}>{store}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Min units filter (D-14, D-15, D-16, TABLE-07) — "Min units" not "Min $" */}
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="filter-min-units"
+              className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
+            >
+              Min units
+            </label>
+            <input
+              id="filter-min-units"
+              type="number"
+              min={0}
+              step={1}
+              value={minUnits}
+              onChange={handleMinUnitsChange}
+              className="w-16 rounded-md border border-[var(--color-border-light)] px-2 py-1 text-[13px] text-center text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-teal)]"
+              aria-label="Minimum units to transfer"
+            />
+          </div>
+
+          {/* Result counter + Clear all (D-07, D-08) — pushed to right */}
+          <div className="ml-auto flex items-center gap-3">
+            {anyFilterActive && filteredResults.length !== results.length && (
+              <span className="text-[13px] text-[var(--color-text-muted)]">
+                Showing {filteredResults.length} of {results.length} results
+              </span>
+            )}
+            {anyFilterActive && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="text-[13px] text-[var(--color-teal)] hover:underline"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Data quality banners — only shown after first run (D-13) */}
       {hasRun && (
         <>
@@ -483,7 +672,15 @@ export default function MatchPage() {
         </div>
       )}
 
-      {results.length > 0 && (
+      {hasRun && results.length > 0 && filteredResults.length === 0 && (
+        <div className="flex justify-center items-center py-16">
+          <p className="text-[var(--color-text-muted)] text-[13px] text-center max-w-sm">
+            No results match the current filters. Try adjusting or clearing the filters.
+          </p>
+        </div>
+      )}
+
+      {filteredResults.length > 0 && (
         <div className="border border-[var(--color-border-light)] rounded-lg overflow-hidden">
           {/* Sticky header row */}
           <div className="bg-[var(--color-surface-gray)] border-b border-[var(--color-border-light)]">
