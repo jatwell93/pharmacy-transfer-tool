@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
-status: ready_to_execute
-stopped_at: Phase 17 planned — 2 plans ready
-last_updated: "2026-05-14T14:00:00.000Z"
-last_activity: "2026-05-14 — Phase 17 planned: filter strip + responsive table (2 plans)"
+status: completed
+stopped_at: Phase 17 Plan 01 complete — filter strip + filteredResults
+last_updated: "2026-05-14T13:42:00.000Z"
+last_activity: "2026-05-14 — Phase 17 Plan 01 complete: filter strip UI and filteredResults wired to virtualized table"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 4
+  percent: 87
 ---
 
 # Project State
@@ -25,19 +25,19 @@ See: .planning/PROJECT.md (updated 2026-05-13)
 
 ## Current Position
 
-Phase: 16 (complete)
-Plan: 16-02
-Status: Phase 16 executed — 2/2 plans complete
-Last activity: 2026-05-13 — Phase 16 complete: department + ranged fields through full stack
+Phase: 17 (in progress)
+Plan: 17-01 (complete)
+Status: Phase 17 Plan 01 executed — filter strip and filteredResults complete; Plan 02 (responsive table layout) pending
+Last activity: 2026-05-14 — Phase 17 Plan 01 complete: filter strip UI and filteredResults wired to virtualized table
 
-Progress: [##--------] 25% — v1.2 executing
+Progress: [###-------] 37% — v1.2 executing
 
 ## v1.2 Phases
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 16 | Department + Ranged Column Parsing | TABLE-01, TABLE-02 | Complete |
-| 17 | Table Filters + Responsive Layout | TABLE-03..07 | Not started |
+| 17 | Table Filters + Responsive Layout | TABLE-03..07 | In progress (1/2 plans complete) |
 | 18 | Ethical Exchange Export | EE-01..04 | Not started |
 | 19 | Dead Stock Scorecard | SCORE-01..04 | Not started |
 
@@ -121,6 +121,9 @@ Recent decisions affecting current work:
 - [Phase 16]: Department HEADER_ALIASES uses exact-match strings: ["Department", "Dept", "Dept.", "Drug Dept", "Product Department"] — case-sensitive
 - [Phase 16]: department TEXT column on dead_stock is nullable (no DEFAULT) — null from pre-migration rows coerced to "" in match route
 - [Phase 16]: MIGRATION APPLIED 2026-05-13: ALTER TABLE dead_stock ADD COLUMN IF NOT EXISTS department TEXT; (run as neondb_owner)
+- [Phase 17-01]: filteredResults feeds flatItems (virtualization) but not PostMatchChart or CostReport — charts/cost use unfiltered results
+- [Phase 17-01]: storeFilter matches either sourceStore or bestMatch.store (inclusive OR) — one filter catches both ends of a transfer
+- [Phase 17-01]: minUnits filters on bestMatch.qtyToTransfer only (primary match); sub-rows inherit parent visibility
 
 ### Roadmap Evolution
 
@@ -143,6 +146,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-14T13:16:34.497Z
-Stopped at: Phase 17 UI-SPEC approved
-Resume file: .planning/phases/17-table-filters-responsive-layout/17-UI-SPEC.md
+Last session: 2026-05-14T13:42:00.000Z
+Stopped at: Completed Phase 17 Plan 01 — filter strip + filteredResults
+Resume file: .planning/phases/17-table-filters-responsive-layout/17-02-PLAN.md
