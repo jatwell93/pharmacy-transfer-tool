@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
 status: executing
-stopped_at: "Phase 16 complete"
+stopped_at: "Phase 17 context gathered"
 last_updated: "2026-05-13T00:00:00Z"
 last_activity: 2026-05-13 — Phase 16 executed (dept + ranged backend stack + frontend table columns + parser tests)
 progress:
