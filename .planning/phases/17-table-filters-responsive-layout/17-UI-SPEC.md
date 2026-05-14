@@ -51,7 +51,7 @@ Declared values (must be multiples of 4):
 
 **Responsive scroll:** `overflow-x: auto` on the outermost table container (`div.border.border-[var(--color-border-light)].rounded-lg`). Minimum column widths are enforced via the existing fixed/fr grid template; no additional min-width CSS needed beyond what the grid provides.
 
-Exceptions: none beyond Phase 16 establishments.
+**Spacing exceptions:** Values 12px (`p-3`, `gap-3`, `px-3`), 36px (`min-h-[36px]`), and 44px (`min-h-[44px]`) are Phase 16 carryovers and accessibility minimums — retained as-is, not on the standard 8-point scale.
 
 ---
 
@@ -68,7 +68,7 @@ Fully pre-established by Phase 16 UI-SPEC and MatchPage.tsx. No new type styles 
 
 **Filter strip typography:**
 
-- Filter labels (e.g. "Ranged", "Department", "Store", "Min units"): `text-[13px] font-medium text-[var(--color-text-secondary)]` — matches "Months Cover" label in control bar.
+- Filter labels (e.g. "Ranged", "Department", "Store", "Min units"): `text-[13px] font-semibold text-[var(--color-text-secondary)]` — matches "Months Cover" label in control bar.
 - Native `<select>` text: `text-[13px] text-[var(--color-text-primary)]` — matches existing number input.
 - Department dropdown button label: `text-[13px] text-[var(--color-text-secondary)]` when no selection; `text-[13px] text-[var(--color-text-primary)]` when N items selected.
 - "Showing X of Y results" counter: `text-[13px] text-[var(--color-text-muted)]`.
@@ -129,7 +129,7 @@ Control type: native `<select>`.
 <div className="flex items-center gap-2">
   <label
     htmlFor="filter-ranged"
-    className="text-[13px] font-medium text-[var(--color-text-secondary)]"
+    className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
   >
     Ranged
   </label>
@@ -226,7 +226,7 @@ Control type: native `<select>` with involves-store logic.
 <div className="flex items-center gap-2">
   <label
     htmlFor="filter-store"
-    className="text-[13px] font-medium text-[var(--color-text-secondary)]"
+    className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
   >
     Store
   </label>
@@ -260,7 +260,7 @@ Control type: number input. Label is "Min units" — no dollar sign anywhere (D-
 <div className="flex items-center gap-2">
   <label
     htmlFor="filter-min-units"
-    className="text-[13px] font-medium text-[var(--color-text-secondary)]"
+    className="text-[13px] font-semibold text-[var(--color-text-secondary)]"
   >
     Min units
   </label>
@@ -357,7 +357,7 @@ SKU (column 2) and Description (column 3) are sticky-left so they remain visible
 **Result row — SKU cell:**
 ```tsx
 <div
-  className="px-3 text-[13px] font-medium text-[var(--color-text-primary)] truncate"
+  className="px-3 text-[13px] font-semibold text-[var(--color-text-primary)] truncate"
   style={{ position: 'sticky', left: 36, zIndex: 1, background: 'var(--color-surface)' }}
 >
   {result.sku}
