@@ -71,7 +71,10 @@ Plans:
   3. User can select one or more departments from a multi-select control and the table updates to show only matching rows
   4. User can choose a source store or destination store from a filter and see only rows involving that store
   5. User can enter a minimum dollar transfer value and rows below that threshold are hidden from the results
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 17-01-PLAN.md — Filter state, derived memos, handlers, filter strip UI (TABLE-04, TABLE-05, TABLE-06, TABLE-07)
+- [ ] 17-02-PLAN.md — Responsive horizontal scroll and sticky SKU+Description columns (TABLE-03)
 **UI hint**: yes
 
 ### Phase 18: Ethical Exchange Export
