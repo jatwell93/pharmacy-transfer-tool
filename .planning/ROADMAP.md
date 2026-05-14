@@ -40,7 +40,7 @@
 **Milestone Goal:** Give pharmacy managers richer visibility into their dead stock position and a path to recover value externally.
 
 - [ ] **Phase 16: Department + Ranged Column Parsing** — Parse department and ranged columns from FRED upload; expose in match results
-- [ ] **Phase 17: Table Filters + Responsive Layout** — Four-way filter controls (ranged, department, store, min value) and tablet-responsive table
+- [x] **Phase 17: Table Filters + Responsive Layout** — Four-way filter controls (ranged, department, store, min value) and tablet-responsive table (completed 2026-05-14)
 - [ ] **Phase 18: Ethical Exchange Export** — Pro-gated unmatched-stock PDF listing with free-tier upgrade teaser
 - [ ] **Phase 19: Dead Stock Scorecard** — Top-5 items, top-5 departments, all-time trend, and month-over-month comparison panel
 
@@ -73,8 +73,8 @@ Plans:
   5. User can enter a minimum dollar transfer value and rows below that threshold are hidden from the results
 **Plans**: 2 plans
 Plans:
-- [ ] 17-01-PLAN.md — Filter state, derived memos, handlers, filter strip UI (TABLE-04, TABLE-05, TABLE-06, TABLE-07)
-- [ ] 17-02-PLAN.md — Responsive horizontal scroll and sticky SKU+Description columns (TABLE-03)
+- [x] 17-01-PLAN.md — Filter state, derived memos, handlers, filter strip UI (TABLE-04, TABLE-05, TABLE-06, TABLE-07)
+- [x] 17-02-PLAN.md — Responsive horizontal scroll and sticky SKU+Description columns (TABLE-03)
 **UI hint**: yes
 
 ### Phase 18: Ethical Exchange Export
@@ -121,6 +121,6 @@ Plans:
 | 14. Cost Report UI | v1.1 | 1/1 | Complete | 2026-04-19 |
 | 15. 3-Tier Billing | v1.1 | 2/2 | Complete | 2026-04-26 |
 | 16. Department + Ranged Column Parsing | v1.2 | 0/2 | In progress | - |
-| 17. Table Filters + Responsive Layout | v1.2 | 0/? | Not started | - |
+| 17. Table Filters + Responsive Layout | v1.2 | 2/2 | Complete   | 2026-05-14 |
 | 18. Ethical Exchange Export | v1.2 | 0/? | Not started | - |
 | 19. Dead Stock Scorecard | v1.2 | 0/? | Not started | - |
