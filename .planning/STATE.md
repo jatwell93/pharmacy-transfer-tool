@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Insights & Listings
 status: completed
-stopped_at: Completed Phase 17 Plan 01 — filter strip + filteredResults
-last_updated: "2026-05-14T13:45:50.287Z"
-last_activity: "2026-05-14 — Phase 17 Plan 01 complete: filter strip UI and filteredResults wired to virtualized table"
+stopped_at: Phase 17 shipped — UAT 11/11 passed, pushed to main
+last_updated: "2026-05-16T00:00:00.000Z"
+last_activity: "2026-05-16 — Phase 17 complete: UAT passed (11/11), pushed to origin/main"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-13)
 
 **Core value:** A pharmacy manager uploads all store reports and instantly sees exactly which stores should exchange dead stock — with a months-cover cap so receiving stores never become overstocked.
-**Current focus:** Phase 16 complete — ready for Phase 17 (Table Filters + Responsive Layout)
+**Current focus:** Phase 17 shipped — ready for Phase 18 (Ethical Exchange Export)
 
 ## Current Position
 
-Phase: 17 (in progress)
-Plan: 17-01 (complete)
-Status: Phase 17 Plan 01 executed — filter strip and filteredResults complete; Plan 02 (responsive table layout) pending
-Last activity: 2026-05-14 — Phase 17 Plan 01 complete: filter strip UI and filteredResults wired to virtualized table
+Phase: 17 (complete)
+Plan: 17-02 (complete)
+Status: Phase 17 shipped — all 11 UAT tests passed, pushed to main
+Last activity: 2026-05-16 — Phase 17 UAT 11/11 passed, pushed to origin/main
 
 Progress: [██████████] 100%
 
@@ -37,7 +37,7 @@ Progress: [██████████] 100%
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 16 | Department + Ranged Column Parsing | TABLE-01, TABLE-02 | Complete |
-| 17 | Table Filters + Responsive Layout | TABLE-03..07 | In progress (1/2 plans complete) |
+| 17 | Table Filters + Responsive Layout | TABLE-03..07 | Complete |
 | 18 | Ethical Exchange Export | EE-01..04 | Not started |
 | 19 | Dead Stock Scorecard | SCORE-01..04 | Not started |
 
